@@ -198,9 +198,29 @@ public class CommandLine {
 		try {
 		    switch (types[o]) {
 		    case 'b':
-			if (args[i].indexOf("=") >=0 ) 
-			    values[o] = new Boolean(args[i].substring(args[i].indexOf("=")+1));
-			else
+			if (args[i].indexOf("=") >=0 ) {
+			    String s = args[i].substring(args[i].indexOf("=")+1);
+			    if (s.equalsIgnoreCase("true"))
+				values[o] = Boolean.TRUE;
+			    else if (s.equalsIgnoreCase("yes"))
+				values[o] = Boolean.TRUE;
+			    else if (s.equalsIgnoreCase("on"))
+				values[o] = Boolean.TRUE;
+			    else if (s.equalsIgnoreCase("1"))
+				values[o] = Boolean.TRUE;
+			    else if (s.equalsIgnoreCase("false"))
+				values[o] = Boolean.FALSE;
+			    else if (s.equalsIgnoreCase("no"))
+				values[o] = Boolean.FALSE;
+			    else if (s.equalsIgnoreCase("off"))
+				values[o] = Boolean.FALSE;
+			    else if (s.equalsIgnoreCase("0"))
+				values[o] = Boolean.FALSE;
+			    else {
+				System.err.println("Unknown boolean option parameter '"+s+"'");
+				return null;
+			    }
+			} else
 			    values[o] = Boolean.TRUE;
 			break;
 		    case 'i':
