@@ -1,0 +1,932 @@
+$VAR1 = [
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '7e-74',
+                          'H_SEQ' => 'TACATATATATACATACACATATATGTTCATTTTTTTTTTTAGAAAAAAACCAAATCTACTATTGATCTTTTGCGTGTCATTAATATCCCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '143',
+                          'Q_END' => '300',
+                          'Q_START' => '158',
+                          'H_START' => '4047',
+                          'DIR' => 1,
+                          'H_END' => '4189'
+                        },
+                        {
+                          'EVALUE' => '3e-05',
+                          'H_SEQ' => 'TATATATATATATATATATTCATTTTTCTAGAAAAAAACCAAATCTACGCCTATTGACCTTTTGCGTGTCATTGATATACCCAAAGGAAATTATGATATACCTACATTGAAATCATCAAACATATACATTCCTTATGCCAGTTATCCATATA',
+                          'SCORE' => '28',
+                          'Q_END' => '218',
+                          'Q_START' => '167',
+                          'H_START' => '39101',
+                          'DIR' => 1,
+                          'H_END' => '39152'
+                        }
+                      ],
+            'ACCESSION' => 'AE014816.1',
+            'NAME' => 'gb|AE014816.1|',
+            'DESCR' => 'Plasmodium falciparum 3D7 chromosome 14 section 1 of 13 of the complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '7e-74',
+                          'H_SEQ' => 'TAAATATATACATACACATATATATGTTCATTTTTTTTTTTAGAAAAAAACCAAATCTACTATTGATCTTTTGCGTGTCATTAATATCCCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACTGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '143',
+                          'Q_END' => '300',
+                          'Q_START' => '158',
+                          'H_START' => '5906',
+                          'DIR' => 1,
+                          'H_END' => '6048'
+                        }
+                      ],
+            'ACCESSION' => 'AE001366.1',
+            'NAME' => 'gb|AE001366.1|',
+            'DESCR' => 'Plasmodium falciparum 3D7 chromosome 2 section 3 of 73 of the complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '7e-74',
+                          'H_SEQ' => 'AAAAAAACCAAATCTACTATTGATCTTTTGCGTGTCATTAATATCCCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '143',
+                          'Q_END' => '300',
+                          'Q_START' => '158',
+                          'H_START' => '8',
+                          'DIR' => 1,
+                          'H_END' => '150'
+                        }
+                      ],
+            'ACCESSION' => 'AF234187',
+            'NAME' => 'gb|AF234187.1|AF234187',
+            'DESCR' => 'Plasmodium falciparum erythrocyte membrane protein 1 mRNA, partial cds'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '7e-74',
+                          'H_SEQ' => 'AAATACATATATACATACACATATATGTTCATTTTTTTTTTAGAAAAAAACCAAATCTACTATTGATCTTTTGCGTGTCATTAATATCCCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '143',
+                          'Q_END' => '300',
+                          'Q_START' => '158',
+                          'H_START' => '236824',
+                          'DIR' => -1,
+                          'H_END' => '236966'
+                        }
+                      ],
+            'ACCESSION' => 'PFA929359',
+            'NAME' => 'emb|AL929359.1|PFA929359',
+            'DESCR' => 'Plasmodium falciparum strain 3D7, chromosome 9; segment 5/5'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '7e-74',
+                          'H_SEQ' => 'TACATATATATACATACACATATATGTTCATTTTTTTTTTTAGAAAAAAACCAAATCTACTATTGATCTTTTGCGTGTCATTAATATCCCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '143',
+                          'Q_END' => '300',
+                          'Q_START' => '158',
+                          'H_START' => '26534',
+                          'DIR' => 1,
+                          'H_END' => '26676'
+                        }
+                      ],
+            'ACCESSION' => 'PFA929355',
+            'NAME' => 'emb|AL929355.1|PFA929355',
+            'DESCR' => 'Plasmodium falciparum strain 3D7, chromosome 9; segment 1/5'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '7e-74',
+                          'H_SEQ' => 'TACATATATACATACACATATATATGTTCATTTTTTTTTTTAGAAAAAAACCAAATCTACTATTGATCTTTTGCGTGTCATTAATATCCCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACTGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '143',
+                          'Q_END' => '300',
+                          'Q_START' => '158',
+                          'H_START' => '42764',
+                          'DIR' => 1,
+                          'H_END' => '42906'
+                        },
+                        {
+                          'EVALUE' => '3e-51',
+                          'H_SEQ' => 'AGAAAAAAACCAAAGCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACTGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '105',
+                          'Q_END' => '300',
+                          'Q_START' => '196',
+                          'H_START' => '45450',
+                          'DIR' => 1,
+                          'H_END' => '45554'
+                        }
+                      ],
+            'ACCESSION' => 'PFMAL4P1',
+            'NAME' => 'emb|AL034557.8|PFMAL4P1',
+            'DESCR' => 'Plasmodium falciparum MAL4P1'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '7e-74',
+                          'H_SEQ' => 'ATACATATATATACATACACATATATATTCATTTTTTTTTTAGAAAAAAACCAAATCTACTATTGATCTTTTGCGTGTCATTAATATCCCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '143',
+                          'Q_END' => '300',
+                          'Q_START' => '158',
+                          'H_START' => '188',
+                          'DIR' => 1,
+                          'H_END' => '330'
+                        }
+                      ],
+            'ACCESSION' => 'PFADD2E',
+            'NAME' => 'gb|L40604.1|PFADD2E',
+            'DESCR' => 'Plasmodium falciparum (strain Dd2, clone LT147) variant antigen PfEMP1-related gene'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '2e-71',
+                          'H_SEQ' => 'ATACATATATATACATACACATATATGTTCATTTTTTTTTTAGAAAAAAACCAAATCTACTATTGATCTTTTGCGTGTCATTAATATCCCCAAAAGTGATTATGATATACCGACAAAACGTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '139',
+                          'Q_END' => '300',
+                          'Q_START' => '158',
+                          'H_START' => '136281',
+                          'DIR' => -1,
+                          'H_END' => '136423'
+                        }
+                      ],
+            'ACCESSION' => 'AE014835.1',
+            'NAME' => 'gb|AE014835.1|',
+            'DESCR' => 'Plasmodium falciparum 3D7 chromosome 10 section 7 of 7 of the complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '2e-71',
+                          'H_SEQ' => 'TACATATATATACATACACATATATGTTCATTTTTTTTTTTAGAAAAAAACCAAATCTACTATTGATCTTTTGCGTGTTATTAATATCCCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACTGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '139',
+                          'Q_END' => '300',
+                          'Q_START' => '158',
+                          'H_START' => '27222',
+                          'DIR' => 1,
+                          'H_END' => '27364'
+                        }
+                      ],
+            'ACCESSION' => 'PFA929351',
+            'NAME' => 'emb|AL929351.1|PFA929351',
+            'DESCR' => 'Plasmodium falciparum strain 3D7, chromosome 5, segment 1/4'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '2e-71',
+                          'H_SEQ' => 'ATATATATATATATATATATATATATTATATACATAATGAAAGAAAAAAACCAAATCTACTATTGATCTTTTGCGTGTCATTAATATCCCCAAAAGTGATTATAATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATAACTTCATC',
+                          'SCORE' => '139',
+                          'Q_END' => '300',
+                          'Q_START' => '158',
+                          'H_START' => '277',
+                          'DIR' => 1,
+                          'H_END' => '419'
+                        }
+                      ],
+            'ACCESSION' => 'PFADD2D',
+            'NAME' => 'gb|L40603.1|PFADD2D',
+            'DESCR' => 'Plasmodium falciparum (strain Dd2, clone LT145) variant antigen PfEMP1-related gene'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '4e-69',
+                          'H_SEQ' => 'ATACAAACCTACATATACATACATACCTCTTTTATTATTTTAGAAAAAAACCAAATCTACTATTGATCTTTTGCGTGTCATTAATATCCCCAAAAGTGATTATGGTATGCCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '135',
+                          'Q_END' => '300',
+                          'Q_START' => '158',
+                          'H_START' => '39855',
+                          'DIR' => 1,
+                          'H_END' => '39997'
+                        }
+                      ],
+            'ACCESSION' => 'PFMAL3P8',
+            'NAME' => 'emb|AL034560.3|PFMAL3P8',
+            'DESCR' => 'Plasmodium falciparum MAL3P8, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '1e-62',
+                          'H_SEQ' => 'ATACATATATATACATACACATATATGTTCATTTTTTTTTTAGAAAAAAACCAAATCTACTATTGATCTTTTGCTGTCATTAATACCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACTGATAGTGGTTACACCGATCATTATAGTGATATTACTTCTTC',
+                          'SCORE' => '124',
+                          'Q_END' => '300',
+                          'Q_START' => '158',
+                          'H_START' => '7894',
+                          'DIR' => 1,
+                          'H_END' => '8033'
+                        }
+                      ],
+            'ACCESSION' => 'PFU67959',
+            'NAME' => 'gb|U67959.1|PFU67959',
+            'DESCR' => 'Plasmodium falciparum FCR3-varT11-1 gene, partial cds'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '3e-57',
+                          'H_SEQ' => 'ACCTCTTTTATTATTTTAGAAAAAAACTAAACACCCTGTCGACCTTTTCAGTGTTATTAATATCCCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACTGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '115',
+                          'Q_END' => '300',
+                          'Q_START' => '182',
+                          'H_START' => '5314',
+                          'DIR' => -1,
+                          'H_END' => '5432'
+                        }
+                      ],
+            'ACCESSION' => 'AE001434.1',
+            'NAME' => 'gb|AE001434.1|',
+            'DESCR' => 'Plasmodium falciparum 3D7 chromosome 2 section 71 of 73 of the complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '3e-57',
+                          'H_SEQ' => 'ACCTCTTTTATTATTTTAGAAAAAAACTAAACACCCTGTCGACCTTTTCAGTGTTATTAATATCCCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACTGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '115',
+                          'Q_END' => '300',
+                          'Q_START' => '182',
+                          'H_START' => '231449',
+                          'DIR' => -1,
+                          'H_END' => '231567'
+                        }
+                      ],
+            'ACCESSION' => 'AE014852.1',
+            'NAME' => 'gb|AE014852.1|',
+            'DESCR' => 'Plasmodium falciparum 3D7 chromosome 12 section 9 of 9 of the complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '3e-57',
+                          'H_SEQ' => 'TGTTCATTTTTTTTTTTAGAAAAAAACTAAAAGCCCTGTGGACCTTTTCAGTGTTATTAATATCCCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACTGATAGTGGTTACACTGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '115',
+                          'Q_END' => '300',
+                          'Q_START' => '182',
+                          'H_START' => '221844',
+                          'DIR' => -1,
+                          'H_END' => '221962'
+                        }
+                      ],
+            'ACCESSION' => 'PFMAL3P7',
+            'NAME' => 'emb|AL034559.4|PFMAL3P7',
+            'DESCR' => 'Plasmodium falciparum MAL3P7, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '2e-52',
+                          'H_SEQ' => 'ATGTTCATTTTTTTTTTAGAAAAAAACTAAACACCCTGTCGACCTTTTCAGTGTTATTAATATCCCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAACGGTACATTTACCTTGAAGGAGATAGTGGGAACTGATAGTGGTTACACCGATCATTATAGTGATATTACTTCAT',
+                          'SCORE' => '107',
+                          'Q_END' => '300',
+                          'Q_START' => '182',
+                          'H_START' => '10019',
+                          'DIR' => 1,
+                          'H_END' => '10136'
+                        }
+                      ],
+            'ACCESSION' => 'PFAVAR',
+            'NAME' => 'gb|L42244.1|PFAVAR',
+            'DESCR' => 'Plasmodium falciparum clone A4 variant surface protein (var) gene, partial cds'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '2e-52',
+                          'H_SEQ' => 'ACCTCTTTTATTATTTTAGAAAAAAACACATGCTCCTCTCGACCTTTTCAGTGTTATTGATATACCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '107',
+                          'Q_END' => '300',
+                          'Q_START' => '182',
+                          'H_START' => '91303',
+                          'DIR' => -1,
+                          'H_END' => '91421'
+                        }
+                      ],
+            'ACCESSION' => 'PFMAL1P1',
+            'NAME' => 'emb|AL031744.8|PFMAL1P1',
+            'DESCR' => 'Plasmodium falciparum DNA from MAL1P1, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '8e-52',
+                          'H_SEQ' => 'ATTTTAGAAAAAAACCAAATCATCTGTTGGAAATTTATTCCAAATACTGCATATACCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '106',
+                          'Q_END' => '300',
+                          'Q_START' => '191',
+                          'H_START' => '8441',
+                          'DIR' => 1,
+                          'H_END' => '8550'
+                        }
+                      ],
+            'ACCESSION' => 'PFU27338',
+            'NAME' => 'gb|U27338.1|PFU27338',
+            'DESCR' => 'Plasmodium falciparum erythrocyte membrane protein 1, Malayan Camp variant 1 (MCvar-1 PfEMP1) gene, complete cds'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '3e-51',
+                          'H_SEQ' => 'AGAAAAAAACCAAAGCATCTGTTGGAAATTTATTCCAAATACTACAAATACCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACTGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '105',
+                          'Q_END' => '300',
+                          'Q_START' => '196',
+                          'H_START' => '30411',
+                          'DIR' => 1,
+                          'H_END' => '30515'
+                        }
+                      ],
+            'ACCESSION' => 'AE014836.1',
+            'NAME' => 'gb|AE014836.1|',
+            'DESCR' => 'Plasmodium falciparum 3D7 chromosome 11 section 1 of 8 of the complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '3e-51',
+                          'H_SEQ' => 'AGAAAAAAACCAAAGCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACTGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '105',
+                          'Q_END' => '300',
+                          'Q_START' => '196',
+                          'H_START' => '34891',
+                          'DIR' => 1,
+                          'H_END' => '34995'
+                        }
+                      ],
+            'ACCESSION' => 'AE014829.1',
+            'NAME' => 'gb|AE014829.1|',
+            'DESCR' => 'Plasmodium falciparum 3D7 chromosome 10 section 1 of 7 of the complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '3e-51',
+                          'H_SEQ' => 'AGAAAAAAACCAAATCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATTACTTCATC',
+                          'SCORE' => '105',
+                          'Q_END' => '300',
+                          'Q_START' => '196',
+                          'H_START' => '43184',
+                          'DIR' => -1,
+                          'H_END' => '43288'
+                        },
+                        {
+                          'EVALUE' => '5e-47',
+                          'H_SEQ' => 'AACCAAATCATCTGTTCGAAATTTATTCCAAATACTGCAAATACCTAAAGGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATAACTTCCTC',
+                          'SCORE' => '98',
+                          'Q_END' => '300',
+                          'Q_START' => '203',
+                          'H_START' => '32202',
+                          'DIR' => -1,
+                          'H_END' => '32299'
+                        },
+                        {
+                          'EVALUE' => '5e-47',
+                          'H_SEQ' => 'AACCAAATCATCTGTTCGAAATTTATTCCAAATACTGCAAATACCTAAAGGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATAACTTCCTC',
+                          'SCORE' => '98',
+                          'Q_END' => '300',
+                          'Q_START' => '203',
+                          'H_START' => '20304',
+                          'DIR' => -1,
+                          'H_END' => '20401'
+                        },
+                        {
+                          'EVALUE' => '3e-05',
+                          'H_SEQ' => 'CATACCTACATATATACCTATATATATATATTCATTTTTCTAGAAAAAATCCAAATCTACTATTGATCTCTTGCGTGTTATTGATATACCCAAAGGAGAGTATGGAATACCTACATCGAAATCAAAAAATAGGTACATACCGTA',
+                          'SCORE' => '28',
+                          'Q_END' => '201',
+                          'Q_START' => '158',
+                          'H_START' => '9310',
+                          'DIR' => -1,
+                          'H_END' => '9353'
+                        }
+                      ],
+            'ACCESSION' => 'PFMAL4P4',
+            'NAME' => 'emb|AL035477.6|PFMAL4P4',
+            'DESCR' => 'Plasmodium falciparum MAL4P4'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '3e-51',
+                          'H_SEQ' => 'AGAAAAAAACCAAATCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATAACTTCCTC',
+                          'SCORE' => '105',
+                          'Q_END' => '300',
+                          'Q_START' => '196',
+                          'H_START' => '303',
+                          'DIR' => 1,
+                          'H_END' => '407'
+                        }
+                      ],
+            'ACCESSION' => 'PFADD2G',
+            'NAME' => 'gb|L40606.1|PFADD2G',
+            'DESCR' => 'Plasmodium falciparum (strain Dd2, clone LT150) variant antigen PfEMP1-related gene'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '3e-51',
+                          'H_SEQ' => 'AGAAAAAAACCAAATCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATAACTTCCTC',
+                          'SCORE' => '105',
+                          'Q_END' => '300',
+                          'Q_START' => '196',
+                          'H_START' => '19386',
+                          'DIR' => 1,
+                          'H_END' => '19490'
+                        }
+                      ],
+            'ACCESSION' => 'PFAVAR23A',
+            'NAME' => 'gb|L40609.1|PFAVAR23A',
+            'DESCR' => 'Plasmodium falciparum (strain FCR3) variant-specific surface protein (var-2, var-3) genes, complete cds\'s'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '3e-51',
+                          'H_SEQ' => 'AGAAAAAAACCAAATCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAAGTGATTATGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACAGATAGTGGTTACACCGATCATTATAGTGATATAACTTCCTC',
+                          'SCORE' => '105',
+                          'Q_END' => '300',
+                          'Q_START' => '196',
+                          'H_START' => '16254',
+                          'DIR' => 1,
+                          'H_END' => '16358'
+                        }
+                      ],
+            'ACCESSION' => 'PFAVAR1A',
+            'NAME' => 'gb|L40608.1|PFAVAR1A',
+            'DESCR' => 'Plasmodium falciparum (strain Dd2) variant-specific surface protein (var-1) gene, complete cds'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '8e-49',
+                          'H_SEQ' => 'AGAAAAAATCCAAATCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAAGTGATTTTGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGGCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACTGATAGTGGTTACACCGATCATTATAGTGATATTACTTCCTC',
+                          'SCORE' => '101',
+                          'Q_END' => '300',
+                          'Q_START' => '196',
+                          'H_START' => '23085',
+                          'DIR' => 1,
+                          'H_END' => '23189'
+                        },
+                        {
+                          'EVALUE' => '7e-06',
+                          'H_SEQ' => 'ACTTCTTTTATTATTTTAGAAAAAAACACAAACTCCCGTGGACCTATTCAGTGTTATTAATATACCCAAAAGTGATTATGATATACCTACATTGAAATCCAAAAATAGGTACATACCATATAAAAGTGCTCAATATA',
+                          'SCORE' => '29',
+                          'Q_END' => '218',
+                          'Q_START' => '182',
+                          'H_START' => '40757',
+                          'DIR' => 1,
+                          'H_END' => '40793'
+                        }
+                      ],
+            'ACCESSION' => 'AE014844.1',
+            'NAME' => 'gb|AE014844.1|',
+            'DESCR' => 'Plasmodium falciparum 3D7 chromosome 12 section 1 of 9 of the complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '2e-46',
+                          'H_SEQ' => 'AGAAAAAATCCAAATCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAAGTGATTTTGATATACCGACAAAACTTTCACCCAATAGATATATACCTTATACTAGTGGTAAATACAGAGCCAAACGGTACATTTACCTTGAAGGAGATAGTGGAACTGATAGTGGTTACACCGATCATTATAGTGATATTACTTCCTC',
+                          'SCORE' => '97',
+                          'Q_END' => '300',
+                          'Q_START' => '196',
+                          'H_START' => '4723',
+                          'DIR' => 1,
+                          'H_END' => '4827'
+                        }
+                      ],
+            'ACCESSION' => 'PFU53324',
+            'NAME' => 'gb|U53324.1|PFU53324',
+            'DESCR' => 'Plasmodium falciparum 3D7var1 gene, partial cds'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '5e-16',
+                          'H_SEQ' => 'TGTAGGTATTGCTTTTGCTGCGTTGAGTTATTTTGTGCTAAAGAAAAAAACCAAATCTACTATTGATCTTTTGCGTGTCATTAATATCCCCAAAGGAGATTATGGAATACCTACAATGAAATCAAAAAATAGGTACATACCGTATGCCAGTGAT',
+                          'SCORE' => '46',
+                          'Q_END' => '211',
+                          'Q_START' => '158',
+                          'H_START' => '7358',
+                          'DIR' => 1,
+                          'H_END' => '7411'
+                        }
+                      ],
+            'ACCESSION' => 'AF366567',
+            'NAME' => 'gb|AF366567.1|AF366567',
+            'DESCR' => 'Plasmodium falciparum erythrocyte membrane protein 1 (var1) mRNA, partial cds'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '0.027',
+                          'H_SEQ' => 'AGAAAAAAACCAAATCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAAGTGATTATGATATACCTACCCCGAAATCATCAAATAGATATATCCCATATGTGAGTGATACATATA',
+                          'SCORE' => '23',
+                          'Q_END' => '218',
+                          'Q_START' => '196',
+                          'H_START' => '193109',
+                          'DIR' => 1,
+                          'H_END' => '193131'
+                        },
+                        {
+                          'EVALUE' => '6.5',
+                          'H_SEQ' => 'AGAAAAAAACCAAATCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAGGTGATTATGATATACCTACATTGAAATCAACCAATCGTTATATTCCTTATGCAAGTGATAGACATA',
+                          'SCORE' => '19',
+                          'Q_END' => '218',
+                          'Q_START' => '196',
+                          'H_START' => '217520',
+                          'DIR' => 1,
+                          'H_END' => '217542'
+                        }
+                      ],
+            'ACCESSION' => 'AE014850.1',
+            'NAME' => 'gb|AE014850.1|',
+            'DESCR' => 'Plasmodium falciparum 3D7 chromosome 12 section 7 of 9 of the complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '0.027',
+                          'H_SEQ' => 'AGAAAAAAACCAAAGCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAAGTGATTATGATATACCTACATTGAAATCCAAAAATAGGTACATACCATATAGAAGTGGTACATATA',
+                          'SCORE' => '23',
+                          'Q_END' => '218',
+                          'Q_START' => '196',
+                          'H_START' => '12871',
+                          'DIR' => -1,
+                          'H_END' => '12893'
+                        }
+                      ],
+            'ACCESSION' => 'AE014847.1',
+            'NAME' => 'gb|AE014847.1|',
+            'DESCR' => 'Plasmodium falciparum 3D7 chromosome 12 section 4 of 9 of the complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '0.027',
+                          'H_SEQ' => 'AGAAAAAAACCAAAGCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAAGTGATTATGATATACCTACATTGAAATCAAGTAATCGTTATATTCCTTATGTTAGTGATCGATATA',
+                          'SCORE' => '23',
+                          'Q_END' => '218',
+                          'Q_START' => '196',
+                          'H_START' => '5365',
+                          'DIR' => 1,
+                          'H_END' => '5387'
+                        }
+                      ],
+            'ACCESSION' => 'AF003473',
+            'NAME' => 'gb|AF003473.1|AF003473',
+            'DESCR' => 'Plasmodium falciparum erythrocyte membrane protein 1 (FCR3S1.2-var1) mRNA, complete cds'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '0.027',
+                          'H_SEQ' => 'AGAAAAAAACCAAAGCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAAGTGATTATGATATACCTACATTGAAATCAAGCAATCGTTATATCCCCTATGCAAGTGATCGATATA',
+                          'SCORE' => '23',
+                          'Q_END' => '218',
+                          'Q_START' => '196',
+                          'H_START' => '222246',
+                          'DIR' => -1,
+                          'H_END' => '222268'
+                        },
+                        {
+                          'EVALUE' => '0.11',
+                          'H_SEQ' => 'TTATGGAAATACCCCAAAACGATTATGGAATGCCGACCCTTAAATCAAAAAATAGATATGTTCCGTATTCTAGTGGTAAATATAGAGGCAAAACATACTTATATGTTGAAGGGGATAGTGGAACCGATAGTGGTTACACCGA',
+                          'SCORE' => '22',
+                          'Q_END' => '276',
+                          'Q_START' => '235',
+                          'H_START' => '206514',
+                          'DIR' => -1,
+                          'H_END' => '206555'
+                        }
+                      ],
+            'ACCESSION' => 'PFMAL4P2',
+            'NAME' => 'emb|AL035475.7|PFMAL4P2',
+            'DESCR' => 'Plasmodium falciparum MAL4P2'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '0.027',
+                          'H_SEQ' => 'AGAAAAAAACCAAATCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAAGTGATTATGATATACCTACATTGAAATCCAAAAATAGGTACATACCATATAGAAGTGGTACATATA',
+                          'SCORE' => '23',
+                          'Q_END' => '218',
+                          'Q_START' => '196',
+                          'H_START' => '220',
+                          'DIR' => 1,
+                          'H_END' => '242'
+                        }
+                      ],
+            'ACCESSION' => 'PFADD2C',
+            'NAME' => 'gb|L40602.1|PFADD2C',
+            'DESCR' => 'Plasmodium falciparum (strain Dd2, clone LT142) variant antigen PfEMP1-related gene'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '0.027',
+                          'H_SEQ' => 'AGAAAAAAACCAAATCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAAGTGATTATGATATACCTACATTGAAATCAAGCAATCGTTATATACCCTATGCAAGTGATAGACATA',
+                          'SCORE' => '23',
+                          'Q_END' => '218',
+                          'Q_START' => '196',
+                          'H_START' => '5770',
+                          'DIR' => 1,
+                          'H_END' => '5792'
+                        }
+                      ],
+            'ACCESSION' => 'PFAVAR7R',
+            'NAME' => 'gb|L42636.1|PFAVAR7R',
+            'DESCR' => 'Plasmodium falciparum variant-specific surface protein (var-7) mRNA, complete cds'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '0.42',
+                          'H_SEQ' => 'AAAAAAACTAAACACCCTGTCGACCTTTTCAGTGTTATTAATACACCCAAAGGTGATTATGATATACCTACATTGAAATCCAAAAATAGGTACATACCATATAGAAGTGGTTCATATA',
+                          'SCORE' => '21',
+                          'Q_END' => '218',
+                          'Q_START' => '182',
+                          'H_START' => '32',
+                          'DIR' => 1,
+                          'H_END' => '68'
+                        }
+                      ],
+            'ACCESSION' => 'PFR29V1E2',
+            'NAME' => 'emb|Y13403.1|PFR29V1E2',
+            'DESCR' => 'Plasmodium falciparum R29R+var1 gene, exon 2'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '0.42',
+                          'H_SEQ' => 'GACCTATTGAATCAGAATCTCGAGAGTGGAGCCCATCAAAGTGTTTCAAGCCCCAAAAGTGATTATGATATGCTAAAATGTGGGGCCCTCTGCCCAAACAGGGTAGGATGTGAGTTAAATT',
+                          'SCORE' => '21',
+                          'Q_END' => '215',
+                          'Q_START' => '195',
+                          'H_START' => '29049',
+                          'DIR' => 1,
+                          'H_END' => '29069'
+                        }
+                      ],
+            'ACCESSION' => 'AC004919',
+            'NAME' => 'gb|AC004919.1|AC004919',
+            'DESCR' => 'Homo sapiens PAC clone RP5-895B23 from UL, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '0.42',
+                          'H_SEQ' => 'GACCTATTGAATCAGAATCTCGAGAGTGGAGCCCATCAAAGTGTTTCAAGCCCCAAAAGTGATTATGATATGCTAAAATGTGGGGCCCTCTGCCCAAACAGGGTAGGATGTGAGTTAAATT',
+                          'SCORE' => '21',
+                          'Q_END' => '215',
+                          'Q_START' => '195',
+                          'H_START' => '52557',
+                          'DIR' => 1,
+                          'H_END' => '52577'
+                        }
+                      ],
+            'ACCESSION' => 'AL355538.13',
+            'NAME' => 'emb|AL355538.13|',
+            'DESCR' => 'Human DNA sequence from clone RP4-787H6 on chromosome 1, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '1.7',
+                          'H_SEQ' => 'TAGTAAAGCTTGAGGTCAGGGATGGTGATTCATTCCCAATAGTAGATTTTCAAATCTACTATTGATCTTTAGTAATGATGTCACTTGGTTTATTATTTTTCCTATCTAGAATTTGCATTG',
+                          'SCORE' => '20',
+                          'Q_END' => '178',
+                          'Q_START' => '159',
+                          'H_START' => '160417',
+                          'DIR' => 1,
+                          'H_END' => '160436'
+                        }
+                      ],
+            'ACCESSION' => 'AC124708.2',
+            'NAME' => 'gb|AC124708.2|',
+            'DESCR' => 'Mus musculus chromosome 6 clone RP24-79O16, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '1.7',
+                          'H_SEQ' => 'TCCCCCCTACCTCCAAAAAGAAGACTAAAAGTAGTGTTGGAGATTTATTTTCTACTATTGATCTTTTGCG',
+                          'SCORE' => '20',
+                          'Q_END' => '182',
+                          'Q_START' => '163',
+                          'H_START' => '8731',
+                          'DIR' => 1,
+                          'H_END' => '8750'
+                        }
+                      ],
+            'ACCESSION' => 'AY028643.1',
+            'NAME' => 'gb|AY028643.1|',
+            'DESCR' => 'Plasmodium falciparum erythrocyte membrane protein-1 (var) gene, partial cds'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '1.7',
+                          'H_SEQ' => 'TATCTAGGTTTATGATGTTTGAAACAAAGATTCTTCCCACACAGCATTTATATACTAGTGGTAAATACAGGCAATAAACTAATAAATATGTAATGAAATATCAAGTATTAATAATCACAG',
+                          'SCORE' => '20',
+                          'Q_END' => '269',
+                          'Q_START' => '250',
+                          'H_START' => '41223',
+                          'DIR' => 1,
+                          'H_END' => '41242'
+                        }
+                      ],
+            'ACCESSION' => 'AC098483.2',
+            'NAME' => 'gb|AC098483.2|',
+            'DESCR' => 'Homo sapiens chromosome 1 clone RP11-438F14, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '1.7',
+                          'H_SEQ' => 'TAGTAAAGCTTGAGGTCAGGGATGGTGATTCATTCCCAATAGTAGATTTTCAAATCTACTATTGATCTTTAGTAATGATGTCACTTGGTTTATTATTTTTCCTATCTAGAATTTGCATTG',
+                          'SCORE' => '20',
+                          'Q_END' => '178',
+                          'Q_START' => '159',
+                          'H_START' => '55790',
+                          'DIR' => -1,
+                          'H_END' => '55809'
+                        }
+                      ],
+            'ACCESSION' => 'AC090712.4',
+            'NAME' => 'gb|AC090712.4|',
+            'DESCR' => 'Mus musculus chromosome 6 clone RP23-230F22 strain C57BL6/J, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '1.7',
+                          'H_SEQ' => 'ACATATATATTCACACACAAACATATGTTTGTGTGTGCAAACATATAGTTTGTCATTAAGATCCCCAAAAGTGACTTTCACTGAGTGTAACTCCATTATTCATTGTTTCCTCACCCCATATCAT',
+                          'SCORE' => '20',
+                          'Q_END' => '206',
+                          'Q_START' => '183',
+                          'H_START' => '64277',
+                          'DIR' => 1,
+                          'H_END' => '64300'
+                        }
+                      ],
+            'ACCESSION' => 'AC016580',
+            'NAME' => 'gb|AC016580.7|AC016580',
+            'DESCR' => 'Homo sapiens chromosome 5 clone CTD-2509J24, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '1.7',
+                          'H_SEQ' => 'ACATATATATTCACACACAAACATATGTTTGTGTGTGCAAACATATAGTTTGTCATTAAGATCCCCAAAAGTGACTTTCACTGAGTGTAACTCCATTATTCATTGTTTCCTCACCCCATATCAT',
+                          'SCORE' => '20',
+                          'Q_END' => '206',
+                          'Q_START' => '183',
+                          'H_START' => '118072',
+                          'DIR' => 1,
+                          'H_END' => '118095'
+                        }
+                      ],
+            'ACCESSION' => 'AC034246',
+            'NAME' => 'gb|AC034246.4|AC034246',
+            'DESCR' => 'Homo sapiens chromosome 5 clone RP11-160F8, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '6.5',
+                          'H_SEQ' => 'AAGCTCCTATCACATCTACCTCTTCCTCTATGTGATAAGGTCTTCATTTTATATCCCCAAAAGTGATTAATAGCAGAATGGAGCTGAAAGCAATCAATAAACTCAATCAACCTTAATGA',
+                          'SCORE' => '19',
+                          'Q_END' => '209',
+                          'Q_START' => '191',
+                          'H_START' => '130374',
+                          'DIR' => 1,
+                          'H_END' => '130392'
+                        }
+                      ],
+            'ACCESSION' => 'AC093243.2',
+            'NAME' => 'gb|AC093243.2|',
+            'DESCR' => 'Homo sapiens chromosome 5 clone RP11-110H4, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '6.5',
+                          'H_SEQ' => 'TCATATTGGCACATCCTGCCTCTCTAGTTACTGATATATCATAGCAATTGATATCCCCTAAAGTGATTATGATCATATTCCTCCCATATTTTTGTTTTGGTCAATATAATGTTGAACAGGAGG',
+                          'SCORE' => '19',
+                          'Q_END' => '213',
+                          'Q_START' => '191',
+                          'H_START' => '21699',
+                          'DIR' => 1,
+                          'H_END' => '21721'
+                        }
+                      ],
+            'ACCESSION' => 'AC125402.3',
+            'NAME' => 'gb|AC125402.3|',
+            'DESCR' => 'Mus musculus chromosome 5 clone RP24-539G2, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '6.5',
+                          'H_SEQ' => 'AAGCTCCTATCACATCTACCTCTTCCTCTATGTGATAAGGTCTTCATTTTATATCCCCAAAAGTGATTAATAGCAGAATGGAGCTGAAAGCAATCAATAAACTCAATCAACCTTAATGA',
+                          'SCORE' => '19',
+                          'Q_END' => '209',
+                          'Q_START' => '191',
+                          'H_START' => '117907',
+                          'DIR' => 1,
+                          'H_END' => '117925'
+                        }
+                      ],
+            'ACCESSION' => 'AC132802.2',
+            'NAME' => 'gb|AC132802.2|',
+            'DESCR' => 'Homo sapiens chromosome 5 clone CTC-273M15, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '6.5',
+                          'H_SEQ' => 'AAGCTCCTATCACATCTACCTCTTCCTCTATGTGATAAGGTCTTCATTTTATATCCCCAAAAGTGATTAATAGCAGAATGGAGCTGAAAGCAATCAATAAACTCAATCAACCTTAATGA',
+                          'SCORE' => '19',
+                          'Q_END' => '209',
+                          'Q_START' => '191',
+                          'H_START' => '48799',
+                          'DIR' => -1,
+                          'H_END' => '48817'
+                        }
+                      ],
+            'ACCESSION' => 'AC093247.3',
+            'NAME' => 'gb|AC093247.3|',
+            'DESCR' => 'Homo sapiens chromosome 5 clone RP11-138M1, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '6.5',
+                          'H_SEQ' => 'TATAATATTGATTTAACCTCTCTAACAATAGTGTTTGGCCTTTCCTTGGTCCAAATCTACTTTTGATCTTTTGGCAAATTTAAAAATCGTCTTTATATTTTGTTCATTTTAATCTTATTCCTA',
+                          'SCORE' => '19',
+                          'Q_END' => '180',
+                          'Q_START' => '158',
+                          'H_START' => '67501',
+                          'DIR' => -1,
+                          'H_END' => '67523'
+                        }
+                      ],
+            'ACCESSION' => 'AC091972.2',
+            'NAME' => 'gb|AC091972.2|',
+            'DESCR' => 'Homo sapiens chromosome 5 clone RP11-511M9, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '6.5',
+                          'H_SEQ' => 'AAGCTCCTATCACATCTACCTCTTCCTCTATGTGATAAGGTCTTCATTTTATATCCCCAAAAGTGATTAATAGCAGAATGGAGCTGAAAGCAATCAATAAACTCAATCAACCTTAATGA',
+                          'SCORE' => '19',
+                          'Q_END' => '209',
+                          'Q_START' => '191',
+                          'H_START' => '6237',
+                          'DIR' => -1,
+                          'H_END' => '6255'
+                        }
+                      ],
+            'ACCESSION' => 'AC010237',
+            'NAME' => 'gb|AC010237.8|AC010237',
+            'DESCR' => 'Homo sapiens chromosome 5 clone CTC-348J20, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '6.5',
+                          'H_SEQ' => 'AAGCTCCTATCACATCTACCTCTTCCTCTATGTGATAAGGTCTTCATTTTATATCCCCAAAAGTGATTAATAGCAGAATGGAGCTGAAAGCAATCAATAAACTCAATCAACCTTAATGA',
+                          'SCORE' => '19',
+                          'Q_END' => '209',
+                          'Q_START' => '191',
+                          'H_START' => '73124',
+                          'DIR' => 1,
+                          'H_END' => '73142'
+                        }
+                      ],
+            'ACCESSION' => 'HS28I24',
+            'NAME' => 'emb|AL009030.15|HS28I24',
+            'DESCR' => 'Human DNA sequence from clone RP1-28I24 on chromosome 5 Contains the 5\' end of the spinal muscular dystrophy region gene (SMA3), two beta-glucuronidase pseudogenes and two novel pseudogenes containing four membrane protein-like protein repeats, one CpG islands, ESTs, GSSs and STSs, complete sequence'
+          },
+          {
+            'SEQS' => [
+                        {
+                          'EVALUE' => '6.5',
+                          'H_SEQ' => 'AAAAAAACCAAATCATCTGTTGGAAATTTATTCCAAATACTGCAAATACCCAAAGGTGATTATGATATACCTACATTGAAATCAAGCAATCGTTATATTCCTTATGCTAGTGATCGATATA',
+                          'SCORE' => '19',
+                          'Q_END' => '218',
+                          'Q_START' => '196',
+                          'H_START' => '49',
+                          'DIR' => 1,
+                          'H_END' => '71'
+                        }
+                      ],
+            'ACCESSION' => 'AF100792',
+            'NAME' => 'gb|AF100792.1|AF100792',
+            'DESCR' => 'Plasmodium falciparum variant-specific surface protein (VARC2) gene, exon 2 and partial cds'
+          }
+        ];
