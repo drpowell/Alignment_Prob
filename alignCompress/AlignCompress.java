@@ -500,7 +500,7 @@ class AlignCompress {
 	    }
 
 	    // Done we little change in alignment length
-	    if (iter>0 && lastAlignment-encAlignment < 0.05)
+	    if (iter>0 && lastAlignment-encAlignment < 0.5)
 		break;
 
 	    lastAlignment = encAlignment;
@@ -512,22 +512,30 @@ class AlignCompress {
 
     public static void main(String args[]) {
 	CommandLine cmdLine = new CommandLine();
-	cmdLine.addInt("markov", -1, "Order of Markov Model to use for sequence models.");
+	cmdLine.addInt("markov", 0, "Order of Markov Model to use for sequence models.");
 	cmdLine.addInt("maxIterations", -1, "Maximum number of iterations.");
 	cmdLine.addBoolean("linearCosts", true, "Use linear gap costs.");
-	cmdLine.addBoolean("sumAlignments", true, "Sum over all alignments.");
-	cmdLine.addBoolean("local", false, "Compute using local alignments.");
+	cmdLine.addBoolean("sumAlignments", false, "Sum over all alignments.");
+	cmdLine.addBoolean("local", true, "Compute using local alignments.");
 	cmdLine.addInt("verbose", 0, "Display verbose output (larger num means more verbosity).");
+	cmdLine.addBoolean("file", false, "Read sequences from file(s) on command line");
 	cmdLine.addString("params", "", "Params to pass to all classes (comma separated)");
 
 	args = cmdLine.parseLine(args);
 
 	AlignCompress a = new AlignCompress();
+	boolean readFile = cmdLine.getBooleanVal("file");
 
 	if (args==null || args.length > 2) {
 	    System.err.println("Usage: java AlignCompress [options]\n" + cmdLine.usage());
 	    System.err.println("       sequences can be provided on the commandline, or from stdin");
 	    System.exit(1);
+	} else if (readFile && args.length == 2) {
+	    // Two filenames on commandline
+	    DNA d = DNA.guess_format(args[0]);
+	    a.seqA = d.toString();
+	    d = DNA.guess_format(args[1]);
+	    a.seqB = d.toString();
 	} else if (args.length == 2) {
 	    // Two strings on commandline, assume they are sequences
 	    a.seqA = args[0];
@@ -556,6 +564,9 @@ class AlignCompress {
 	    System.err.println("Unable to read both sequences");
 	    System.exit(1);
 	}
+
+	a.seqA = a.seqA.toLowerCase();
+	a.seqB = a.seqB.toLowerCase();
 
 	a.markovOrder     = cmdLine.getIntVal("markov");
 	a.maxIterations   = cmdLine.getIntVal("maxIterations");
