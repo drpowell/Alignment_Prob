@@ -38,7 +38,8 @@ if (defined($ARGV[0])) {
   $toFile = 1;
   my $file = shift;
   die "$file doesn't have .eps extension" if (!($file =~ /\.eps$/));
-  $cmd .= "set terminal postscript eps color\n";
+#  $cmd .= "set terminal postscript eps color\n";
+  $cmd .= "set terminal postscript eps\n";
   $cmd .= "set output '$file'\n";
 }
 
@@ -70,7 +71,7 @@ if ($toFile) {
   print F $cmd;
   close(F);
 } else {
-  open(F, "| gnuplot -persist - 2>/dev/null") or (die "Can't run gnuplot");
+  open(F, "| gnuplot -persist -") or (die "Can't run gnuplot");
   { my $oldfh = select F; $|=1; select $oldfh; }
   print F $cmd;
   close(F);

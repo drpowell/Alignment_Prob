@@ -11,7 +11,6 @@ my(@entropy) = ("unknown");
 my(@Pchange) = ("unknown");
 my $pMM="unknown";
 my $uni0 = 0;
-my $haveSW = 0;
 
 open (F, "< $fname") or die "Unable to read $fname";
 while (<F>) {
@@ -29,9 +28,6 @@ while (<F>) {
     $uni0 = 1;
   }
 
-  if (/^AlignCompress \(SW\)/) {
-#    $haveSW = 1;
-  }
 }
 
 my $cmd = "";
@@ -42,7 +38,8 @@ if (defined($ARGV[0])) {
   $toFile = 1;
   my $file = shift;
   die "$file doesn't have .eps extension" if (!($file =~ /\.eps$/));
-  $cmd .= "set terminal postscript eps color\n";
+#  $cmd .= "set terminal postscript eps color\n";
+  $cmd .= "set terminal postscript eps\n";
   $cmd .= "set output '$file'\n";
 }
 
@@ -61,10 +58,9 @@ $cmd .= "set ylabel 'Errors'\n";
 
 
 $cmd .= "plot '< $myLoc/extractPopData.pl prss $fname' title 'PRSS p-value'";
-$cmd .= ",'< $myLoc/extractPopData.pl prss2 $fname' title 'PRSS raw-score'";
-$cmd .= ",'< $myLoc/extractPopData.pl al_one $fname' title 'Optimal Alignment -markov=$pMM'";
-$cmd .= ",'< $myLoc/extractPopData.pl al_all $fname' title 'Average Alignment -markov=$pMM'";
-$cmd .= ",'< $myLoc/extractPopData.pl al_sw $fname' title 'Optimal SW alignment'" if ($haveSW);
+$cmd .= ",'< $myLoc/extractPopData.pl prss2 $fname' title 'S-W raw score'";
+#$cmd .= ",'< $myLoc/extractPopData.pl al_one $fname' title 'Optimal Alignment -markov=$pMM'";
+$cmd .= ",'< $myLoc/extractPopData.pl al_all $fname' title 'Summed alignments -markov=$pMM'";
 $cmd .= "\n";
 
 if ($toFile) {
@@ -73,9 +69,9 @@ if ($toFile) {
   print F $cmd;
   close(F);
 } else {
-  open(F, "| gnuplot -persist - 2>/dev/null") or (die "Can't run gnuplot");
+  open(F, "| gnuplot -persist -") or (die "Can't run gnuplot");
   { my $oldfh = select F; $|=1; select $oldfh; }
   print F $cmd;
   close(F);
-#  print $cmd;
+  #print $cmd;
 }

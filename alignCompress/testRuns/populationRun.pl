@@ -30,7 +30,7 @@ my $model = new Markov_gen(0, [qw(a t g c)],
 #			    'g' => {a=>0.3, t=>0.3, g=>0.2, c=>0.2},
 #			    'c' => {a=>0.1, t=>0.2, g=>0.2, c=>0.5}
 #			   });
-$model->model_power(1.3);
+#$model->model_power(1.3);
 #$model->makeUniModel(2);
 $model->{PCHANGE} = 0.6;
 my $model2 = new Markov_gen(-1, [qw(a t g c)]);
@@ -56,7 +56,7 @@ $str .= "\nProgs to use:\n$compProg$compProgOpt\n$prssProg\n\n";
 $str .= "Produce $numArchetypes sequences of the form gen($l1_s+-$l_range) . sub_seq($l_sub+-$l_sub_range)) . gen($l1_e+-$l_range)\n";
 $str .= "From these children will be produced of the form gen($l2_s+-$l_range). mutate_sub_seq(numMutate).gen($l2_e+-$l_range)\n";
 $str .= "Repeat each mutation rate $numEachMutations. Num mutations = (@numMutation)\n";
-$str .= "Model for start, middle and end chosen randomly (at 0.5)\n\n";
+#$str .= "Model for start, middle and end chosen randomly (at 0.5)\n\n";
 #$str .= "Note the model has biased 1st order stats, _but_ uniform 0 order stats\n";
 $str .= "model1: " . $model->as_string();
 $str .= "model2: " . $model2->as_string();
@@ -69,6 +69,7 @@ my @population;
 
 for my $i (0 .. $numArchetypes-1) {
   my $m = ($i < $numArchetypes/2 ? $model : $model2);
+#  my $m = $model;
   my $subseq = $m->gen_sequence(rand_length($l_sub, $l_sub_range));
   my $s1 = $m->gen_sequence(rand_length($l1_s, $l_range));
   my $e1 = $m->gen_sequence(rand_length($l1_e, $l_range));

@@ -2,7 +2,8 @@
 
 use strict;
 
-use Markov_gen;
+#use Markov_gen;
+use Multi_model;
 
 my $timeProg = '/usr/bin/time';
 my $compProg = 'java -Xmx512m -cp ../..:../../hb15.zip alignCompress/AlignCompress';
@@ -21,9 +22,17 @@ my $log = new IO::File "> outLog.$$";
 (defined $log) || die "Can't open output log";
 $log->autoflush(1);
 
-my $model = new Markov_gen(-1, [qw(a t g c)]);
+my $model = new Multi_model();
+#my $model = new Markov_gen(-1, [qw(a t g c)]);
 #$model->model_power(2);
 #$model->makeUniModel(2);
+
+
+my ($l_sub, $l_sub_range) = (120, 30);
+my ($l1_s, $l1_e) = (50, 100);
+my ($l2_s, $l2_e) = (100, 50);
+my ($l_range) = 50;
+
 
 my $str  = "";
 $str .= `hostname`."\n";
@@ -34,10 +43,10 @@ $str .= "pid=$$\n";
 $str .= "\nProgs to use:\n$compProg$compProgOpt\n$prssProg\n";
 #$str .= "\nSequences are unrelated both of length exactly 400 characters\n\n";
 $str .= "\nSequences are related.\n";
-$str .= "subseq1 = gen(100)\n";
+$str .= "subseq1 = gen($l_sub +- $l_sub_range)\n";
 $str .= "subseq2 = mutate(subseq1, n_times)\n";
-$str .= "s1 = gen(200) . subseq1 . gen(100)\n";
-$str .= "s2 = gen(100) . subseq2 . gen(200)\n\n";
+$str .= "s1 = gen($l1_s+-$l_range) . subseq1 . gen($l1_e+-$l_range)\n";
+$str .= "s2 = gen($l2_s+-$l_range) . subseq2 . gen($l2_e+-$l_range)\n\n";
 #$str .= "Note the model has biased 1st order stats, _but_ uniform 0 order stats\n";
 $str .= $model->as_string();
 
@@ -50,21 +59,22 @@ my @to_delete;
 
 for my $numMutations (0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 300) {
   for my $runNum (1..$numRuns) {
-    my $subseq = $model->gen_sequence(100);
-    my $str1 = $model->gen_sequence(200) . $subseq . $model->gen_sequence(100);
-    my $str2 = $model->gen_sequence(100) . $model->mutate($subseq, $numMutations) .
-     $model->gen_sequence(200);
+    my $subseq = $model->gen_sequence(rand_length($l_sub, $l_sub_range));
+    my $str1 = $model->gen_sequence(rand_length($l1_s, $l_range)) . $subseq . $model->gen_sequence(rand_length($l1_e, $l_range));
+    my $str2 = $model->gen_sequence(rand_length($l2_s, $l_range)) . $model->mutate($subseq, $numMutations) . $model->gen_sequence(rand_length($l2_e, $l_range));
 #    my $str1 = $model->gen_sequence(400);
 #    my $str2 = $model->gen_sequence(400);
 #    my $numMutations = -1; # Use -1 to denote unrelated sequences
 
     print $log "s1=$str1\ns2=$str2\n";
 
-    for my $sum (qw(true false)) {
-      my($r, $rTime1, $uTime1, $sTime1, $swaps1) = 
-	runProg($compProg . $compProgOpt . " --sum=$sum", $str1, $str2);
+    for my $blend (qw(true false)) {
+      for my $sum (qw(true false)) {
+	my($r, $rTime1, $uTime1, $sTime1, $swaps1) = 
+	  runProg($compProg . $compProgOpt . " --sum=$sum --blend=$blend", $str1, $str2);
 
-      printf "AlignCompress (sum=$sum): mutates=$numMutations r=%f uTime=%f\n",$r->[-1],$uTime1;
+	printf "AlignCompress (blend=$blend sum=$sum): mutates=$numMutations r=%f uTime=%f\n",$r->[-1],$uTime1;
+      }
     }
 
     my($prob,$score,$expect,$num, $rTime2, $uTime2, $sTime2, $swaps2) = 
@@ -135,7 +145,7 @@ sub runFastaProg {
   push(@to_delete, $f1,$f2);
   $SIG{QUIT} = \&done;
   $SIG{INT} = \&done;
-  
+
   open(F,"> $f1") or die "Can't create tmp file";
   print F ">GEN_IN1\n$str1\n";
   close(F);
@@ -210,4 +220,9 @@ sub runFastaProg {
 sub done {
   unlink(@to_delete);
   exit;
+}
+
+sub rand_length {
+  my($mid, $range) = @_;
+  return $mid + int(rand($range*2+1))-$range;
 }
