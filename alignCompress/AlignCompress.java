@@ -352,8 +352,8 @@ class AlignCompress {
 		// So encode 2 from the shorter sequence, and 1 from the longer.
 		double l1 = (seqA.length() < seqB.length() ? seqA.length() : seqB.length());
 		double l2 = (seqA.length() > seqB.length() ? seqA.length() : seqB.length());
-		//encAlignment += MyMath.log2(l1) * 2 - 1;
-		//encAlignment += MyMath.log2(l2);
+		encAlignment += MyMath.log2(l1) * 2 - 1;
+		encAlignment += MyMath.log2(l2);
 	    }
 
 
