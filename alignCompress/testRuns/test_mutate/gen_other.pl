@@ -14,17 +14,17 @@ my @alpha = qw(a t g c);
 my $m = {};
 fill($m);
 norm($m);
-model_power($m, 3);
+#model_power($m, 3);
 
 my $m2 = deep_copy($m);
 negate_model($m2);
 norm($m2);
 
-my $subseq = gen_sequence($m2, 50);
+my $subseq = gen_sequence($m2, 40);
 #$subseq = "";
 
-print gen_sequence($m, 400), $subseq, gen_sequence($m, 400),"\n";
-print gen_sequence($m, 800), $subseq, gen_sequence($m, 20),"\n";
+print gen_sequence($m, 100), $subseq, gen_sequence($m, 200),"\n";
+print gen_sequence($m, 300), $subseq, gen_sequence($m, 50),"\n";
 
 printf("entropy of subseq: under m=%.3f bits/ch   under m2=%.3f bits/ch\n", 
        entropy($m,$subseq), entropy($m2,$subseq));
@@ -77,6 +77,8 @@ sub norm {
 # Calculate the entropy of $str under model $probs (assumes a 0th order model!)
 sub entropy {
   my($probs, $str) = @_;
+
+  return undef if (length($str)==0);
 
   my $s = 0;
   for my $i (0..length($str)-1) {
