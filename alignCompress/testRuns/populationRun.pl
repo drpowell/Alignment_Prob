@@ -99,16 +99,17 @@ for my $i (0 .. $numArchetypes-1) {
     #print STDERR "Running process $$\n";
     $SIG{CHLD} = 'IGNORE';
 
-    for my $sum (qw(true false)) {
+    for my $sum (qw(false true)) {
       my($r, $a_len, $d_len, $rTime1, $uTime1, $sTime1, $swaps1) = 
 	runProg($compProg . $compProgOpt . " --sum=$sum", $str1, $str2);
 
-      printf("AlignCompress (sum=$sum): s1=%d s2=%d parent=%d mutates=%d r=%f al=%f dl=%f uTime=%f\n",
+      printf("AlignCompress (sum=$sum): s1=%d s2=%d parent=%d mutates=%d r=%f (%f) al=%f (%f) dl=%f (%f) uTime=%f\n",
 	     $i, $j,
 	     $population[$j]{PARENT},
 	     $population[$j]{MUTATES},
-	     $r->[-1],
-	     $a_len->[-1], $d_len->[-1],
+	     $r->[-1], $r->[0],
+	     $a_len->[-1], $a_len->[0],
+	     $d_len->[-1], $d_len->[0],
 	     $uTime1);
     }
 
