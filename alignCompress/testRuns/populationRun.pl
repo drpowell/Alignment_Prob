@@ -30,9 +30,10 @@ my $model = new Markov_gen(0, [qw(a t g c)],
 my $numArchetypes = 10;
 my $numEachMutations = 4;
 my @numMutation = (10, 30, 50, 80, 100);
-my ($l_sub_min, $l_sub_max) = (90, 150);
+my ($l_sub, $l_sub_range) = (120, 30);
 my ($l1_s, $l1_e) = (50, 100);
 my ($l2_s, $l2_e) = (100, 50);
+my ($l_range) = 20;
 
 my $str  = "";
 $str .= `hostname`."\n";
@@ -42,8 +43,8 @@ $str .= `date`."\n";
 $str .= "pid=$$\n";
 $str .= "\nProgs to use:\n$compProg$compProgOpt\n$prssProg\n\n";
 
-$str .= "Produce $numArchetypes sequences of the form gen($l1_s) . sub_seq(uni($l_sub_min..$l_sub_max)) . gen($l1_e)\n";
-$str .= "From these children will be produced of the form gen($l2_s). mutate_sub_seq(numMutate).gen($l2_e)\n";
+$str .= "Produce $numArchetypes sequences of the form gen($l1_s+-$l_range) . sub_seq($l_sub+-$l_sub_range)) . gen($l1_e+-$l_range)\n";
+$str .= "From these children will be produced of the form gen($l2_s+-$l_range). mutate_sub_seq(numMutate).gen($l2_e+-$l_range)\n";
 $str .= "Repeat each mutation rate $numEachMutations. Num mutations = (@numMutation)\n\n";
 #$str .= "Note the model has biased 1st order stats, _but_ uniform 0 order stats\n";
 $str .= $model->as_string();
@@ -55,16 +56,15 @@ my @archetypes;
 my @population;
 
 for my $i (0 .. $numArchetypes-1) {
-  my $sub_len = int(rand($l_sub_max-$l_sub_min)) + $l_sub_min;
-  my $subseq = $model->gen_sequence($sub_len);
-  my $s1 = $model->gen_sequence($l1_s);
-  my $e1 = $model->gen_sequence($l1_e);
+  my $subseq = $model->gen_sequence(rand_length($l_sub, $l_sub_range));
+  my $s1 = $model->gen_sequence(rand_length($l1_s, $l_range));
+  my $e1 = $model->gen_sequence(rand_length($l1_e, $l_range));
   my $str1 = $s1 . $subseq . $e1;
   $archetypes[$i] = {SEQ => $str1, S_LEN=>length($s1), E_LEN=>length($e1), SUB_LEN=>length($subseq)};
   for my $numMutations (@numMutation) {
     for my $j (1 .. $numEachMutations) {
-      my $s2 = $model->gen_sequence($l2_s);
-      my $e2 = $model->gen_sequence($l2_e);
+      my $s2 = $model->gen_sequence(rand_length($l2_s, $l_range));
+      my $e2 = $model->gen_sequence(rand_length($l2_e, $l_range));
       my $subseq2 = $model->mutate($subseq, $numMutations);
       my $str2 = $s2 . $subseq2 . $e2;
       push( @population, {SEQ => $str2, PARENT=>$i, MUTATES=>$numMutations,
@@ -144,6 +144,11 @@ for my $i (0 .. $numArchetypes-1) {
 while ($numRunning>0) {
   sleep(1);
 }
+
+
+
+
+
 
 
 sub runProg {
@@ -297,3 +302,9 @@ sub done {
   unlink(@to_delete);
   exit;
 }
+
+sub rand_length {
+  my($mid, $range) = @_;
+  return $mid + int(rand($range*2+1))-$range;
+}
+
