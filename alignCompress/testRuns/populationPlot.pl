@@ -46,17 +46,18 @@ if (defined($ARGV[0])) {
 
 $cmd .= "set key left\n";
 $cmd .= "set logscale y\n";
+$cmd .= "set data style lines\n";
 $cmd .= sprintf("set title 'ROC for MM order=$MMorder entropy=$entropy%s'\n",
 		$uni0 ? " (uniform 0 order stats)" : "");
 $cmd .= "set xlabel 'Coverage'\n";
 $cmd .= "set ylabel 'Errors'\n";
 
 
-$cmd .= "plot '< $myLoc/extractPopData.pl prss $fname' title 'PRSS p-value' with lines";
-$cmd .= ",'< $myLoc/extractPopData.pl prss2 $fname' title 'PRSS raw-score' with lines";
-$cmd .= ",'< $myLoc/extractPopData.pl al_one $fname' title 'Optimal Alignment -markov=$pMM' with lines";
-$cmd .= ",'< $myLoc/extractPopData.pl al_all $fname' title 'Average Alignment -markov=$pMM' with lines";
-$cmd .= ",'< $myLoc/extractPopData.pl al_sw $fname' title 'Optimal SW alignment' with lines" if ($haveSW);
+$cmd .= "plot '< $myLoc/extractPopData.pl prss $fname' title 'PRSS p-value'";
+$cmd .= ",'< $myLoc/extractPopData.pl prss2 $fname' title 'PRSS raw-score'";
+$cmd .= ",'< $myLoc/extractPopData.pl al_one $fname' title 'Optimal Alignment -markov=$pMM'";
+$cmd .= ",'< $myLoc/extractPopData.pl al_all $fname' title 'Average Alignment -markov=$pMM'";
+$cmd .= ",'< $myLoc/extractPopData.pl al_sw $fname' title 'Optimal SW alignment'" if ($haveSW);
 $cmd .= "\n";
 
 if ($toFile) {
@@ -71,4 +72,5 @@ if ($toFile) {
   print F $cmd;
   <STDIN>;
   close(F);
+  print $cmd;
 }
