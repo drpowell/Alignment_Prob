@@ -864,6 +864,7 @@ in terms of this.
 \begin{eqnarray*}
 P_{insert} & = & \frac{(1-P_{change})(4\times(|A|+1))}{(5\times|A|+4)} \\
 P_{delete} & = & \frac{(1-P_{change})}{(5\times|A|+4)}
+THERE IS AN ERROR HERE  should be (1-Pchange) / (5 + 4/len)
 \end{eqnarray*}
 
 When we mutate sequence $A$, a random choice is made whether to consider an
