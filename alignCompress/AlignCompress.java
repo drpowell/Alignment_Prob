@@ -552,7 +552,9 @@ class AlignCompress {
 	a.verbose         = cmdLine.getIntVal("verbose");
 	a.paramString     = cmdLine.getStringVal("params");
 
-	a.alphabet = new char[] {'a', 't', 'g', 'c'};
+	//a.alphabet = new char[] {'a', 't', 'g', 'c'};
+	a.alphabet = new char[] {'a', 't', 'g', 'c', 
+		                 'y', 'r', 'w', 'n'};
 
 	System.out.println("-log odds ratio = " + a.doAlign() + " bits");
 
