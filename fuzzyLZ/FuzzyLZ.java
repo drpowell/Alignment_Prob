@@ -2,7 +2,6 @@
 package fuzzyLZ;
 
 import java.io.*;
-import com.braju.format.*; // in hb15.zip  provides the Format.printf routines.
 
 import common.*;
 
@@ -35,7 +34,7 @@ class Markov0_DNA implements Seq_Model {
     int countTotal;
 
     Markov0_DNA(int alphaSize) {
-	Misc.assert(alphaSize == this.alphaSize, "Markov0_DNA class only works for an alphabet of "+this.alphaSize);
+	Misc.my_assert(alphaSize == this.alphaSize, "Markov0_DNA class only works for an alphabet of "+this.alphaSize);
 	for (int i=0; i<alphaSize; i++)
 	    charCounts[i] = 1;
 	countTotal=this.alphaSize;
@@ -45,7 +44,7 @@ class Markov0_DNA implements Seq_Model {
 	int res;
 	for (res=0; res<alphaSize; res++)
 	    if (chars[res] == a) break;
-	Misc.assert(res<alphaSize, "Character '"+a+"' is unexpected.");
+	Misc.my_assert(res<alphaSize, "Character '"+a+"' is unexpected.");
 	return res;
     }
 
@@ -57,7 +56,7 @@ class Markov0_DNA implements Seq_Model {
 	double res = (double)charCounts[ charToNum(a) ]/countTotal;
 	charCounts[ charToNum(a) ]++;
 	countTotal++;
-	Misc.assert(countTotal>0, "Overflow in Markov0_DNA class");
+	Misc.my_assert(countTotal>0, "Overflow in Markov0_DNA class");
 	return -MyMath.log2(res);
     }
 }
@@ -96,7 +95,8 @@ class Model_SeqA implements Two_Seq_Model_Counts {
 	double sum = MyMath.exp2(-match_cost)+MyMath.exp2(-change_cost);
 	match_cost  = match_cost + MyMath.log2( sum );
 	change_cost = change_cost + MyMath.log2( sum );
-	Format.printf("match_cost=%.5f change_cost=%.5f\n", new Parameters(match_cost).add(change_cost));
+	if (FuzzyLZ.DEBUG>=2)
+	    Misc.printf("match_cost=%.5f change_cost=%.5f\n", match_cost, change_cost);
     }
 
     public double encA(char a, int i) {
@@ -149,8 +149,8 @@ class Model_SeqA_DNA implements Two_Seq_Model_Counts {
     public Model_SeqA_DNA(Params p, int alphaSize, int countIndex) {
         this.countIndex = countIndex;
 
-	Misc.assert(chars.length == this.alphaSize, "Internal class error: char array and alphaSize don't match");
-	Misc.assert(this.alphaSize == alphaSize, "Model_SeqA_DNA only works for an alphabet of "+this.alphaSize);
+	Misc.my_assert(chars.length == this.alphaSize, "Internal class error: char array and alphaSize don't match");
+	Misc.my_assert(this.alphaSize == alphaSize, "Model_SeqA_DNA only works for an alphabet of "+this.alphaSize);
 
 	costs = new double[alphaSize*alphaSize];
 
@@ -174,7 +174,7 @@ class Model_SeqA_DNA implements Two_Seq_Model_Counts {
 		r=i;
 		break;
 	    }
-	Misc.assert(i<alphaSize, "Unknown character in DNA sequence");
+	Misc.my_assert(i<alphaSize, "Unknown character in DNA sequence");
 	r *= alphaSize;
 
 	for (i=0; i<alphaSize; i++)
@@ -182,7 +182,7 @@ class Model_SeqA_DNA implements Two_Seq_Model_Counts {
 		r += i;
 		break;
 	    }
-	Misc.assert(i<alphaSize, "Unknown character in DNA sequence");
+	Misc.my_assert(i<alphaSize, "Unknown character in DNA sequence");
 
 	return r;
     }
@@ -250,6 +250,7 @@ class Model_SeqA_DNA implements Two_Seq_Model_Counts {
                                           in Intell. Sys. in Mol. Biol. '98
 */
 public class FuzzyLZ implements Seq_Model {
+    static int DEBUG = 0;
 
     /** Parent class for forward/reverse matches.  Has parameters to continue a match (cont_cost) 
 	and to end a match (end_cost) 
@@ -300,7 +301,8 @@ public class FuzzyLZ implements Seq_Model {
 	    double sum = MyMath.exp2(-encEnd)+MyMath.exp2(-encContinue);
 	    encEnd      = encEnd + MyMath.log2( sum );
 	    encContinue = encContinue + MyMath.log2( sum );
-	    Format.printf("encEnd=%.5f encContinue=%.5f\n", new Parameters(encEnd).add(encContinue));
+	    if (DEBUG>=2)
+		Misc.printf("encEnd=%.5f encContinue=%.5f\n", encEnd, encContinue);
 	}
 
 	public abstract void beginLinks(int i, double startLen, Counts startCounts);
@@ -325,6 +327,7 @@ public class FuzzyLZ implements Seq_Model {
 
 
 
+    static int img_width = 800, img_height = 800;
 
 
     Seq_Model seqModel;
@@ -363,8 +366,7 @@ public class FuzzyLZ implements Seq_Model {
 	encStartMachines = new double [numFwd + numRev];
 	machines         = new Matches[numFwd + numRev];
 
-	plot = new Plot(seqLen+1, seqLen+1, 800, 800);
-	
+	plot = new Plot(seqLen+1, seqLen+1, img_width, img_height);
 
 	int mdlCounts = Model_SeqA.required_counts();
         int fsmCounts = Mutation_1State.required_counts();
@@ -402,8 +404,10 @@ public class FuzzyLZ implements Seq_Model {
 		machines[m].setHash(machines[0].getHash());
 
 	    machines[m].setPlot(plot);
+
+	    //Misc.printf("Starting costs:\n%s:\n", fsmType.paramsToString());
 	}
-	Misc.assert(countPos == totCounts, "Internal error: countPos!=totCounts");
+	Misc.my_assert(countPos == totCounts, "Internal error: countPos!=totCounts");
 
 
 	// Setup the base states.
@@ -430,9 +434,11 @@ public class FuzzyLZ implements Seq_Model {
 	encNoStart += MyMath.log2( sum );
 	for (int i=0; i < numFwd+numRev; i++) encStartMachines[i] += MyMath.log2( sum );
 
-	Format.printf("encNoStart=%.5f ", new Parameters(encNoStart));
-	for (int i=0; i < numFwd+numRev; i++) Format.printf("encMachine"+i+"=%.5f ",new Parameters(encStartMachines[i]));
-	Format.printf("\n");
+	if (DEBUG>=2) {
+	    Misc.printf("encNoStart=%.5f ", encNoStart);
+	    for (int i=0; i < numFwd+numRev; i++) Misc.printf("encMachine"+i+"=%.5f ", encStartMachines[i]);
+	    Misc.printf("\n");
+	}
     }
 
     public double encodeLen(char a, int i) {
@@ -473,7 +479,8 @@ public class FuzzyLZ implements Seq_Model {
 	plot.putMax(i+1, i+1, p, p, p);
 	for (int m=0; m < numFwd+numRev; m++) {
 	    machines[m].plotVals(i+1, msgLen);
-	    ((Matches_Sparse)machines[m]).display_stats();
+	    if (DEBUG>=4)
+		((Matches_Sparse)machines[m]).display_stats();
 	}
 
 	if (msgLen > 100) {	// Renormalise values so we don't lose accuracy
@@ -536,10 +543,16 @@ public class FuzzyLZ implements Seq_Model {
     }
 
     public void display() {
-	//	Format.printf("Final counts:\n%s\n", new Parameters(baseCounts[seqLen]));
-	Format.printf("Final costs:\n%s\n", new Parameters(counts_to_params()));
+	//	Misc.printf("Final counts:\n%s\n", baseCounts[seqLen]);
+	Misc.printf("Final costs:\n%s\n", counts_to_params());
     }
 
+    public void display_stats() {
+	for (int m=0; m < numFwd+numRev; m++) {
+	    ((Matches_Sparse)machines[m]).display_stats();
+	}
+	System.out.println("");
+    }
 
 
     public void saveState(String fname) {
@@ -569,40 +582,5 @@ public class FuzzyLZ implements Seq_Model {
 	return r;
      }
 
-    public static void main(String args[]) {
-        DNA seq = DNA.guess_format(args[0]);
-	char[] str = seq.sequence();
-	Params p = new Params();
-	char alphabet[] = {'a','t','g','c'};
 
-	for (int iteration=0; iteration<4; iteration++) {
-	    Format.printf("\n\n\nIteration %d\nParams:\n%s\n", new Parameters(iteration).add(p));
-	    Seq_Model m1 = new Markov0_DNA(4);
-	    Seq_Model m2 = new FuzzyLZ( p, new Markov0_DNA(4), str, 4);
-	    //Seq_Model m2 = new FuzzyLZ( p, new Uniform(4), str, 4);
-	    
-	    double totd1=0, totd2=0;
-	    for (int i=0; i<str.length; i++) {
-		char c = str[i];
-		double d1 = m1.update(c, i);
-		double d2 = m2.update(c, i);
-		
-		totd1 += d1;
-		totd2 += d2;
-		Misc.assert(d2 > 0, "Bugger! -ve bits to encode char");
-		
-		Format.printf("%c %02d: m1=%.2f m2=%.2f tot(m1)=%.2f tot(m2)=%.2f\n",
-			      new Parameters(c).add(i).add(d1).add(d2).add(totd1).add(totd2));
-
-		if (i%10000==0)
-		    ((FuzzyLZ)m2).plot.save("out"+(i/10000)%2+".ppm", "Seq: " + args[0]);
-	    }
-	    Format.printf("Total for m1 = %.4f  Total for m2 = %.4f\n", new Parameters(totd1).add(totd2));
-	    
-	    ((FuzzyLZ)m2).display();
-	    p = ((FuzzyLZ)m2).counts_to_params();
-
-	    ((FuzzyLZ)m2).plot.save("out.ppm", "Seq: " + args[0]);
-	}
-    }
 }

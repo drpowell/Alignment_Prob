@@ -3,7 +3,6 @@ package fuzzyLZ;
 
 import java.util.*;
 import java.io.*;
-//import com.braju.format.*; // in hb15.zip  provides the Format.printf routines.
 
 /**
    This class implements a hashing scheme to find matches of a fixed size within a String
@@ -16,11 +15,11 @@ public class ExactMatches implements Serializable {
 
     //    public static class Convert implements Serializable {
    public static class Convert {
-        public static String conv(String s) { return s; }
+        public String conv(String s) { return s; }
     }
 
     public static class Reverse_Convert extends Convert {
-        public static String conv(String s) { 
+        public String conv(String s) { 
             //return (new StringBuffer(s)).reverse().toString(); 
             char c[] = s.toCharArray();
             for (int i=0; i<c.length/2; i++) {
@@ -33,7 +32,7 @@ public class ExactMatches implements Serializable {
     }
 
     public static class Reverse_Complement_DNA extends Convert {
-        public static String conv(String s) {
+        public String conv(String s) {
             //return (new StringBuffer(s)).reverse().toString(); 
             char c[] = new char [s.length()];
             for (int i=0; i<s.length(); i++) {
@@ -154,20 +153,50 @@ public class ExactMatches implements Serializable {
     int strLen;
     MyHash h;
 
+
     ExactMatches(char[] str, int winSize) {
 	this.str = str;
 	this.winSize = winSize;
 
 	strLen = str.length;
-	h = new MyHash(str, winSize);
 
-	System.err.println("Constructing table of repeats...");
+	if (FuzzyLZ.DEBUG>=2)
+	  System.err.println("Constructing table of repeats...");
+
+	h = new MyHash(str, winSize);
 	for (int i=0; i<strLen+1-winSize; i++) {
 	    h.put(i);
 	}
 
-	System.err.println("Done constructing table of repeats.");
+	if (FuzzyLZ.DEBUG>=2)
+	  System.err.println("Done constructing table of repeats.");
     }
+
+    // Write our own serization handler.  We will _not_ save the hash table.
+    // Only the string, and recompute the hash table on reload
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+	out.writeObject(str);
+	out.writeInt(winSize);
+	out.writeInt(strLen);
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	str = (char[])in.readObject();
+	winSize = in.readInt();
+	strLen  = in.readInt();
+
+	if (FuzzyLZ.DEBUG>=2)
+	  System.err.println("Re-Constructing table of repeats...");
+
+	h = new MyHash(str, winSize);
+	for (int i=0; i<strLen+1-winSize; i++) {
+	    h.put(i);
+	}
+
+	if (FuzzyLZ.DEBUG>=2)
+	  System.err.println("Done re-constructing table of repeats.");
+    }
+
 
     MyList get(char[] s, int pos) {
 	return h.get(s, pos);
@@ -177,6 +206,20 @@ public class ExactMatches implements Serializable {
 	return h.get(s);
     }
 
+    public long count_hits(Convert convert) {
+	long count = 0;
+	for (int i=0; i<strLen+1-winSize; i++) {
+	    String s = new String(str, i, winSize);
+            MyList l = h.get( convert.conv(s) );
+	    if (l!=null) {
+		for (MyList.L l2=l.start; l2!=null && l2.val<i; l2=l2.next) {
+		    count++;
+		}
+	    }
+	}
+	return count;
+    }
+	
     public void dispAll(Convert convert) {
 	for (int i=0; i<strLen+1-winSize; i++) {
 	    String s = new String(str, i, winSize);
@@ -184,6 +227,7 @@ public class ExactMatches implements Serializable {
 	    if (l!=null) {
 		for (MyList.L l2=l.start; l2!=null && l2.val<i; l2=l2.next) {
 		    System.out.println("String at "+i+" has a match at "+l2.val);
+		    System.out.println("    :"+s+":"+new String(str, l2.val, winSize));
 		}
 	    }
 	}

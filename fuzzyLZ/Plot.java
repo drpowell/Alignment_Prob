@@ -36,7 +36,8 @@ class Plot implements Serializable {
     }
 
     void save(String fname, String comments) {
-	System.err.println("Writing image");
+      if (FuzzyLZ.DEBUG>=1)
+	  System.out.println("Writing image '"+fname+"'");
 	try {
 	    File f = new File(fname);
 	    DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(f)));
@@ -60,7 +61,8 @@ class Plot implements Serializable {
 	} catch (Exception e) {
 	    System.err.println("Error writing file: "+e);
 	}
-	System.err.println("Done image");
+	if (FuzzyLZ.DEBUG>=1)
+	  System.out.println("Done image");
     }
 
 

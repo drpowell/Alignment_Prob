@@ -4,59 +4,61 @@ package fuzzyLZ;
 import common.*;
 
 class Matches_Sparse extends FuzzyLZ.Matches {
+    static int def_winSize    = 25;
+    static int def_computeWin = 10;
+    static int def_cutML      = 4;
+    static boolean def_plotActive = false;
+   
+
     Sparse b,e;
     ExactMatches hash;
-    int winSize;
-    int computeWin;
-    boolean fullN2, plotActive;
+
+    int winSize;		// What window size to use for constructing the hashtable
+    int computeWin;		// How many cells do we activate on a hashtable hit
+    double cutML;		// At what message length to we kill active cells
+    boolean fullN2;		// Do the full N^2 algorithm
+    boolean plotActive;		// If true we plot active cells, if false we plot cell values
+
     int debug;
     boolean fwd;
+    ExactMatches.Convert converter;
     long hashHits;
-    double cutML;
     double plotBrightness;
 
     double beginCost;
-
-    class Sparse_Fsm implements Sparse.Obj {
-	Mutation_FSM fsm;
-	Sparse_Fsm(Mutation_FSM fsm) {
-	    this.fsm = fsm;
-	}
-
-	public double get_val() {
-	    return fsm.get_val();
-	}
-
-	public Object clone() {
-	    return new Sparse_Fsm((Mutation_FSM)fsm.clone());
-	}
-    }
 
     Matches_Sparse(boolean fwd, Mutation_FSM fsm, Params p, int countIndex, char[] seq) {
         super(fsm,p,countIndex,seq);
 
 	this.fwd = fwd;
 
-	Sparse_Fsm sparse_fsm = new Sparse_Fsm(fsmType);
-	b = new Sparse(sparse_fsm);
-	e = new Sparse(sparse_fsm);
+	b = new Sparse(fsmType);
+	e = new Sparse(fsmType);
 	hash       = null;
 
-	winSize    = 25;
-	computeWin = 10;
-	cutML      = 4;
+	winSize    = def_winSize;
+	computeWin = def_computeWin;
+	cutML      = def_cutML;
 
 	plotBrightness = 0.5;
 	
-	fullN2     = false;
-	plotActive = false;
+	fullN2     = (winSize == 0);
+	plotActive = def_plotActive;
+
+	converter = (fwd ? new ExactMatches.Convert() : new ExactMatches.Reverse_Complement_DNA());
 
 	debug = 0;
 	hashHits = 0;
     }
 
     void constructHash() {
-	hash = new ExactMatches(sequence, winSize);
+	if (!fullN2) {
+	    hash = new ExactMatches(sequence, winSize);
+	    if (FuzzyLZ.DEBUG>=2) {
+		System.out.println("fwd: total hash hits="+hash.count_hits(new ExactMatches.Convert()));
+		System.out.println("rev: total hash hits="+hash.count_hits(new ExactMatches.Reverse_Complement_DNA()));
+	    }
+	}
     }
 
     void setHash(ExactMatches h) {
@@ -75,7 +77,7 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 	// Do begin links into b,  (startLen & startCounts)
 	if (debug>1) System.err.print("Active at ");
 	for (Sparse.Iterate iter = b.moveFwd(null); iter.o != null; iter = b.moveFwd(iter)) {
-	    Mutation_FSM cell = (Mutation_FSM)iter.o;
+	    Mutation_FSM cell = (Mutation_FSM)(iter.o);
 	    cell.or(startLen, startCounts);
 
 	    if (plotActive) plot.putMax(i, iter.i, (fwd ? 0.5 : 0), (fwd ? 0 : 0.5), 0);
@@ -101,7 +103,7 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 		l = hash.get( sequence, i+1 );
 	    else {
 		String str = new String(sequence, i+1, winSize);
-		l = hash.get( ExactMatches.Reverse_Complement_DNA.conv(str) );
+		l = hash.get( converter.conv(str) );
 	    }
 	    if (l!=null)
 		for (ExactMatches.MyList.L l2=l.start; l2!=null && l2.val<i; l2=l2.next) {
@@ -127,12 +129,12 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 	if (debug>1) System.err.println("After  join. Sparse = " + e);
 	e.checkAlloc();
 
-	Misc.assert(e.tail==null || e.tail.end <= i, "Cheating! Sparse end past current character");
-	Misc.assert(e.head==null || e.head.start >= 0, "Bugger. Sparse start < 0");
+	Misc.my_assert(e.tail==null || e.tail.end <= i, "Cheating! Sparse end past current character");
+	Misc.my_assert(e.head==null || e.head.start >= 0, "Bugger. Sparse start < 0");
 
 	// Reset all 'e' cells.
 	for (Sparse.Iterate eIter=e.moveFwd(0, null); eIter.o!=null; eIter=e.moveFwd(eIter))
-	    ((Mutation_FSM)eIter.o).reset();
+	    ((Mutation_FSM)(eIter.o)).reset();
 
 	{
 	    // Compute 'e' from 'b' using FSM
@@ -141,7 +143,7 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 	    while (bIter.o != null) {
 		Mutation_FSM cell,hcell,vcell,dcell;
 
-		cell  = (Mutation_FSM)bIter.o;
+		cell  = (Mutation_FSM)(bIter.o);
 		hcell = (Mutation_FSM)(fwd ? b.getNext(bIter) : b.getPrev(bIter));
 
 		eIter = fwd ? e.moveFwd(bIter.i, eIter, true) : e.moveRev(bIter.i, eIter, true);
@@ -177,7 +179,7 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 
 	// Compute 'e' to include CONT_COPY
 	for (Sparse.Iterate eIter=e.moveFwd(0, null); eIter.o!=null; eIter=e.moveFwd(eIter)) {
-	    Mutation_FSM cell  = (Mutation_FSM)eIter.o;
+  	    Mutation_FSM cell  = (Mutation_FSM)eIter.o;
 
 	    cell.add(encContinue, countIndex+contIndex);
 	}
@@ -231,17 +233,17 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 	StringBuffer r = new StringBuffer();
 	r.append((fwd ? "fwd: " : "rev: "));
 	for (Sparse.Iterate bIter=b.moveFwd(0, null); bIter.o!=null; bIter=b.moveFwd(bIter)) {
-	    Mutation_FSM cell  = (Mutation_FSM)bIter.o; 
+	    Mutation_FSM cell  = (Mutation_FSM)bIter.o;
 	    r.append(bIter.i + ": " + cell.get_val() + " ");
 	}
 	return r.toString();
     }
 
     public void display_stats() {
-	if (debug==0) return;
-	System.err.print(fwd ? "fwd: " : "rev: ");
-	System.err.println("Number of hash hits = "+hashHits);
-	b.display_stats();
+	String pre = (fwd ? "fwd: " : "rev: ");
+	System.out.println(pre + "Number of hash hits    = "+hashHits);
+	b.display_stats(pre);
+	System.out.println("");
     }
 
 }

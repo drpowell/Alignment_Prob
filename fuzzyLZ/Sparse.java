@@ -9,11 +9,6 @@ import java.util.*;
 
 class Sparse implements Serializable {
     
-    interface Obj {
-	public Object clone();
-	public double get_val();
-    }
-
     class Link implements Serializable {
 	int start,end,age;
 	ArrayList o;
@@ -33,10 +28,14 @@ class Sparse implements Serializable {
 	    o.ensureCapacity(end-start);
 
 	    while (o.size() > end-start)
-		delObj((Obj)o.remove(o.size()-1));
+		delObj((Has_Value)o.remove(o.size()-1));
 
 	    while (o.size() < end-start)
 		o.add(newObj());
+	}
+
+	public String toString() {
+	    return "l("+start+"->" + end+" "+age+") ";
 	}
     }
 
@@ -45,10 +44,14 @@ class Sparse implements Serializable {
     static class Iterate {
 	Link curr;
 	int i;
-	Obj o;
+	Has_Value o;
+
+        public String toString() {
+	    return "Link:"+curr+" i="+i+" o="+o;
+	}
     }
 
-    final Obj type;
+    final Has_Value type;
     Link head;		// Keep these sorted by link.start
     Link tail;
     int numLinks;
@@ -59,7 +62,7 @@ class Sparse implements Serializable {
     LinkedList unusedObj;	// Storage of FSM not being used.  So we don't have to 
 				// keep destroying/creating new ones.
 
-    Sparse(Obj type) {
+    Sparse(Has_Value type) {
 	this.type = type;
 	unusedObj = new LinkedList();
     }
@@ -128,7 +131,7 @@ class Sparse implements Serializable {
 
 	    int start=-1, end=-1;
 	    for (int i=ol.start; i<ol.end; i++) {
-		Obj o = (Obj)ol.o.get(i-ol.start);
+		Has_Value o = (Has_Value)ol.o.get(i-ol.start);
 		if (o.get_val() <= cutOff) {
 		    if (start<0) {
 			// Start of a new significant part
@@ -243,13 +246,13 @@ class Sparse implements Serializable {
     // Remove a link from the sparse list
     void remove(Link l) {
 	if (l.prev == null) {
-	    Misc.assert(head == l, "head!=l in Sparse.remove()");
+	    Misc.my_assert(head == l, "head!=l in Sparse.remove()");
 	    head = l.next;
 	} else
 	    l.prev.next = l.next;
 	
 	if (l.next == null) {
-	    Misc.assert(tail == l, "tail!=l in Sparse.remove()");
+	    Misc.my_assert(tail == l, "tail!=l in Sparse.remove()");
 	    tail = l.prev;
 	} else
 	    l.next.prev = l.prev;
@@ -303,6 +306,7 @@ class Sparse implements Serializable {
 
     // Remove elements from the start and end of each sparse list that are > cutoff
     // Skip any sparse lists that have an age < minage
+    //    Not used by current implementation.
     void cull(int min_age, double cutoff) {
 	Link l=head;
 	while (l != null) {
@@ -314,7 +318,7 @@ class Sparse implements Serializable {
 	    int len = l.end - l.start;
 	    int s,e;
 	    for (s=0; s<len; s++) {	// Find first element < cutoff
-		Obj o = (Obj)l.o.get(s);
+		Has_Value o = (Has_Value)l.o.get(s);
 		if (o.get_val() <= cutoff)
 		    break;
 	    }
@@ -328,7 +332,7 @@ class Sparse implements Serializable {
 
 	    // Find last element that is < cutoff
 	    for (e=len; e>s; e--) {
-		Obj o = (Obj)l.o.get(e-1);
+		Has_Value o = (Has_Value)l.o.get(e-1);
 		if (o.get_val() <= cutoff)
 		    break;
 	    }
@@ -338,7 +342,7 @@ class Sparse implements Serializable {
 
 	    // Remove elements from the start of the list.
 	    for (int i=0; i<s; i++) {
-		delObj((Obj)l.o.remove(0));
+		delObj((Has_Value)l.o.remove(0));
 	    }
 
 	    l.realloc();	// This will remove any elements from the end of the list
@@ -349,14 +353,14 @@ class Sparse implements Serializable {
     }
 
 
-    private Obj newObj() {
+    private Has_Value newObj() {
 	if (unusedObj.size()>0)
-	    return (Obj)unusedObj.removeFirst();
+	    return (Has_Value)unusedObj.removeFirst();
 	newObj++;
-	return (Obj)((Obj)type).clone();
+	return (Has_Value)((Has_Value)type).clone();
     }
 
-    private void delObj(Obj o) {
+    private void delObj(Has_Value o) {
 	unusedObj.addFirst(o);
     }
 
@@ -388,7 +392,7 @@ class Sparse implements Serializable {
 	    if (n < res.curr.end) {
 		if (n<res.curr.start) n=res.curr.start;	// Update n to next available item
 		res.i = n;
-		res.o = (Obj)res.curr.o.get(n-res.curr.start);
+		res.o = (Has_Value)res.curr.o.get(n-res.curr.start);
 		return res;
 	    }
 	    res.curr = res.curr.next;
@@ -419,7 +423,7 @@ class Sparse implements Serializable {
 	    if (n >= res.curr.start) {
 		if (n>=res.curr.end) n=res.curr.end-1;
 		res.i = n;
-		res.o = (Obj)res.curr.o.get(n-res.curr.start);
+		res.o = (Has_Value)res.curr.o.get(n-res.curr.start);
 		return res;
 	    }
 	    res.curr = res.curr.prev;
@@ -428,25 +432,25 @@ class Sparse implements Serializable {
     }
 
     // get the object at interate pos + 1.  Expected to be in same link.
-    Obj getNext(Iterate res) {
+    Has_Value getNext(Iterate res) {
 	if (res.curr == null)
 	    return null;
 
 	int n = res.i + 1;
 	if (n<res.curr.start || n>=res.curr.end)
 	    return null;
-	return (Obj)res.curr.o.get(n-res.curr.start);
+	return (Has_Value)res.curr.o.get(n-res.curr.start);
     }
 
     // Get the object at interate pos - 1.  Expected to be in same link.
-    Obj getPrev(Iterate res) {
+    Has_Value getPrev(Iterate res) {
 	if (res.curr == null)
 	    return null;
 
 	int n = res.i - 1;
 	if (n<res.curr.start || n>=res.curr.end)
 	    return null;
-	return (Obj)res.curr.o.get(n-res.curr.start);
+	return (Has_Value)res.curr.o.get(n-res.curr.start);
     }
 
 
@@ -461,7 +465,7 @@ class Sparse implements Serializable {
     public String toString() {
 	StringBuffer r = new StringBuffer();
 	for (Link l = head; l != null; l=l.next) {
-	    r.append("l("+l.start+"->" + l.end+" "+l.age+") ");
+	    r.append(l);
 	}
 	return r.toString();
     }
@@ -469,42 +473,44 @@ class Sparse implements Serializable {
     public void sanity() {
 	Link p = null;
 	for (Link l=head; l != null; l=l.next) {
-	    Misc.assert( l.start>=0 && l.start<l.end, "Insane. start/end index stuffed.");
+	    Misc.my_assert( l.start>=0 && l.start<l.end, "Insane. start/end index stuffed.");
 
 	    if (l.prev != null)
-		Misc.assert(l == l.prev.next, "Insane 1");
+		Misc.my_assert(l == l.prev.next, "Insane 1");
 	    if (l.next != null)
-		Misc.assert(l == l.next.prev, "Insane 2");
+		Misc.my_assert(l == l.next.prev, "Insane 2");
 
 	    p = l;
 	}
 
 	if (head != null)
-	    Misc.assert(head.prev==null, "Insane 4");
+	    Misc.my_assert(head.prev==null, "Insane 4");
 
 	if (tail != null)
-	    Misc.assert(tail.next==null, "Insane 5");
+	    Misc.my_assert(tail.next==null, "Insane 5");
 
 	if (p != null)
-	    Misc.assert(p == tail, "Insane 6");
+	    Misc.my_assert(p == tail, "Insane 6");
     }
 
     public void sanity2() {
 	Link p = null;
 	for (Link l=head; l != null; l=l.next) {
-	    Misc.assert( l.start>=0 && l.start<l.end, "Insane. start/end index stuffed.");
+	    Misc.my_assert( l.start>=0 && l.start<l.end, "Insane. start/end index stuffed.");
 	    if (p != null) {
 		if ( p.end > l.start ) {
 		    System.err.println("Insane.  Regions overlap");
 		    System.err.println("Sparse = " + this);
-		    Misc.assert(false, "");
+		    Misc.my_assert(false, "");
 		}
 	    }
 	    p = l;
 	}
     }
 
-    public void display_stats() {
+    public void display_stats() { display_stats(""); }
+
+    public void display_stats(String pre) {
 	long waste=0;
 	long num=0;
 	long numActive=0;
@@ -513,11 +519,11 @@ class Sparse implements Serializable {
 	    waste += l.o.size()-(l.end-l.start);
 	    num++;
 	}
-	System.err.println("Number of active lists = " + num);
-	System.err.println("Total active cells = " + numActive);
-	System.err.println("Wastage = "+waste+" array elements");
-	System.err.println("Total links created so far = " + links_created);
-	System.err.println("Total Obj created so far = " + newObj);
-	System.err.println(this);
+	System.out.println(pre + "Number of active lists = " + num);
+	System.out.println(pre + "Total active cells     = " + numActive);
+	System.out.println(pre + "Wasted array elements  = " + waste);
+	System.out.println(pre + "Total links created    = " + links_created);
+	System.out.println(pre + "Total Obj created      = " + newObj);
+	//System.out.println(this);
     }
 }
