@@ -20,8 +20,8 @@ my $log = new IO::File "> outLog.$$";
 (defined $log) || die "Can't open output log";
 $log->autoflush(1);
 
-my $model = new Markov_gen(-1, [qw(a t g c)]);
-#$model->model_power(2);
+my $model = new Markov_gen(0, [qw(a t g c)]);
+$model->model_power(2);
 
 my $str  = "";
 $str .= `hostname`."\n";
@@ -51,12 +51,12 @@ for my $numMutations (0, 10, 20, 30, 40, 50, 70, 100, 150, 200, 300) {
 
     for my $sum (qw(true false)) {
       my($r, $rTime1, $uTime1, $sTime1, $swaps1) = 
-	runProg($compProg . " --markov=0 --iterations=4"
+	runProg($compProg . " --markov=0"
 		          . " --linear=true"
                	          . " --sum=$sum"
 	                  . " --local=true", $str1, $str2);
 
-      printf "AlignCompress (sum=$sum): mutates=$numMutations r=%f uTime=%f\n",$r->[0],$uTime1;
+      printf "AlignCompress (sum=$sum): mutates=$numMutations r=%f uTime=%f\n",$r->[-1],$uTime1;
     }
 
     my($prob,$score,$expect,$num, $rTime2, $uTime2, $sTime2, $swaps2) = 

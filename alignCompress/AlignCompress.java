@@ -184,7 +184,7 @@ class AlignCompress {
 
     String paramString;
     int markovOrder;
-    int numIterations;
+    int maxIterations;
     int verbose;
     boolean linearCosts;
     boolean localAlign;
@@ -192,7 +192,7 @@ class AlignCompress {
 
     boolean doTraceBack;
 
-    //static final double PcharEncode = 1.0/300;
+    //  static final double PcharEncode = 1.0/170;
 
     // Encode length l: 0..infinity
     static private double encode_length(double l) {
@@ -273,7 +273,7 @@ class AlignCompress {
     public double doAlign() {
 	System.out.println("# SeqA = "+seqA+"\n# SeqB = "+seqB+
 			   "\n# markov order="+markovOrder+
-			   "\n# num iterations="+numIterations+
+			   "\n# max iterations="+maxIterations+
 			   "\n# linearCosts="+linearCosts+
 			   "\n# sumAlignments="+sumAlignments+
 			   "\n# local Alignment="+localAlign+
@@ -306,11 +306,12 @@ class AlignCompress {
 	int totCounts = myCounts + mdlCounts + fsmCounts;
 
 	double bestDiff = Double.NEGATIVE_INFINITY;
+	double lastAlignment = 0;
 
-	for (int iter=0; iter<numIterations; iter++) {
-
-	    double PalignChar = 0.9;
-	    if (p.exists("PalignChar")) PalignChar = p.get("PalignChar");
+	int iter=0;
+	while (  maxIterations<0 || iter<maxIterations ) {
+	    //double PalignChar = 0.9;
+	    //if (p.exists("PalignChar")) PalignChar = p.get("PalignChar");
 
 	    int countPos = myCounts;
 	    Two_Seq_Model_Counts model = new Model_SeqAB(p, modelA, modelB, countPos);
@@ -380,8 +381,8 @@ class AlignCompress {
 	    if (verbose>=1) { 
 		System.out.println("\n\nIteration: " + iter);
 		System.out.println(model);
-		System.out.println(cell(D,0,0).paramsToString()+
-				   (localAlign ? "PalignChar="+PalignChar : ""));
+		System.out.println(cell(D,0,0).paramsToString());
+		//				   (localAlign ? "PalignChar="+PalignChar : ""));
 	    }
 
 	    // Do the DPA!
@@ -408,8 +409,8 @@ class AlignCompress {
 
 			// Compute contribution of a local alignment that starts at (i,j)
 			val = modelA.encodeCumulative(i) +  modelB.encodeCumulative(j);
-			val += encode_length(i);
-			val += encode_length(j);
+			//val += encode_length(i);
+			//val += encode_length(j);
 			cell(D,i,j).or(val, initialCounts);
 
 
@@ -418,10 +419,10 @@ class AlignCompress {
 			    (modelA.encodeCumulative( seqA.length() ) - modelA.encodeCumulative(i)) +
 			    (modelB.encodeCumulative( seqB.length() ) - modelB.encodeCumulative(j));
 
-			val += encode_length(seqA.length()-i);
-			val += encode_length(seqB.length()-j);
+			//val += encode_length(seqA.length()-i);
+			//val += encode_length(seqB.length()-j);
 
-			val += -MyMath.log2(1-PalignChar); // No more alignment characters
+			//val += -MyMath.log2(1-PalignChar); // No more alignment characters
 			//val += -MyMath.log2(1-PcharEncode); // No more alignment characters
 
 			if (doTraceBack)
@@ -432,7 +433,7 @@ class AlignCompress {
 			    final_cell.or(val, cell(D,i,j).get_counts());
 
 
-			cell(D,i,j).add(-MyMath.log2(PalignChar), 0); // Count 0 is count for Palign
+			//cell(D,i,j).add(-MyMath.log2(PalignChar), 0); // Count 0 is count for Palign
 			//cell(D,i,j).add(-MyMath.log2(PcharEncode), 0); // Count 0 is count for Palign
 		    }
 
@@ -465,6 +466,15 @@ class AlignCompress {
 	    
 	    double encAlignModel = final_cell.encode_params();
 	    double encAlignment = encAlignModel + final_cell.get_val();
+	    if (localAlign) {
+		// Add a cost for the length of the alignment.
+		// Assume we know the length of the sequences. Need to encode the start and end
+		// of the alignment.  Assume uniform over all positions.  Have 4 cut-points to
+		// encode, then -2 bits cause these can be stated in two different orders.
+		encAlignment += MyMath.log2(seqA.length()) * 2 - 1;
+		encAlignment += MyMath.log2(seqB.length()) * 2 - 1;
+	    }
+
 
 	    double encA = modelA.encodeCumulative( seqA.length() );
 	    double encB = modelB.encodeCumulative( seqB.length() );
@@ -473,8 +483,8 @@ class AlignCompress {
 	    if (localAlign) {
 		// Encode lengths for the null theory
 		// Note that global alignments ignore lengths, ignore for null when doing global.
-		encNull += encode_length(seqA.length());
-		encNull += encode_length(seqB.length());
+		//		encNull += encode_length(seqA.length());
+		//		encNull += encode_length(seqB.length());
 	    }
 
 	    if (doTraceBack) {
@@ -482,14 +492,14 @@ class AlignCompress {
 		System.out.println("ALIGNMENT:\n"+s);
 	    }
 
-	    if (bestDiff < encNull-encAlignment) bestDiff = encNull-encAlignment;
-
 	    // Get new parameters for next iteration
 	    p = fsmType.counts_to_params(final_cell.get_counts());
+	    /*
 	    if (localAlign) {
 		double n = final_cell.get_counts().get(0);
 		p.put("PalignChar", (n-1)/n);
 	    }
+	    */
 
 	    if (verbose>=2) {
 		System.out.println("encA="+encA+" encB="+encB+" encNull="+(encNull));
@@ -502,7 +512,20 @@ class AlignCompress {
 	    System.out.println((encAlignment < encNull ? 
 				"related" : "unrelated") + " ("+(encNull-encAlignment)+")" +
 			       "  log odds ratio = "+(encNull-encAlignment)+" bits");
-	    
+
+
+	    if (bestDiff < encNull-encAlignment) bestDiff = encNull-encAlignment;
+
+	    if (iter>0 && verbose>=1 && encAlignment>lastAlignment) {
+		System.err.println("NON-CONVERGENCE: this="+encAlignment+" last="+lastAlignment);
+	    }
+
+	    // Done we little change in alignment length
+	    if (iter>0 && lastAlignment-encAlignment < 0.05)
+		break;
+
+	    lastAlignment = encAlignment;
+	    iter++;
 	} // End iterations
 
 	return bestDiff;
@@ -511,7 +534,7 @@ class AlignCompress {
     public static void main(String args[]) {
 	CommandLine cmdLine = new CommandLine();
 	cmdLine.addInt("markov", -1, "Order of Markov Model to use for sequence models.");
-	cmdLine.addInt("iterations", 1, "Number of iterations.");
+	cmdLine.addInt("iterations", -1, "Maximum number of iterations.");
 	cmdLine.addBoolean("linearCosts", true, "Use linear gap costs.");
 	cmdLine.addBoolean("sumAlignments", true, "Sum over all alignments.");
 	cmdLine.addBoolean("local", false, "Compute using local alignments.");
@@ -556,7 +579,7 @@ class AlignCompress {
 	}
 
 	a.markovOrder     = cmdLine.getIntVal("markov");
-	a.numIterations   = cmdLine.getIntVal("iterations");
+	a.maxIterations   = cmdLine.getIntVal("iterations");
 	a.linearCosts     = cmdLine.getBooleanVal("linearCosts");
 	a.sumAlignments   = cmdLine.getBooleanVal("sumAlignments");
 	a.localAlign      = cmdLine.getBooleanVal("local");
