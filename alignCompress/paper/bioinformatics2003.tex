@@ -87,7 +87,7 @@ real and artificial data.
 
 \noindent
 {\bf Availability:}
-A basic implementation of the software is available under the Gnu GPL via the
+An implementation of the software is available under the Gnu GPL via the
 Web~\footnote{http://www.csse.monash.edu.au/$\sim$powell/m-align.tar.gz}.
 
 \noindent
@@ -169,6 +169,14 @@ on mixed populations,
 on populations of mixed sequences, and
 on populations described by higher-order models.
 
+At this point it is convenient to clarify some of the terminology we use in
+this paper.  We use the term {\em rank-order} to mean order obtained when
+items are ranked according to some score.  When a group or population of
+sequences are well explained by a particular model, we say that model is a
+{\em population model} for those sequences.  An alignment can be seen as a
+hypothesis of how two (or more) sequences are related.  Using
+information-theoretic techniques we can quantify how likely a hypothesis is,
+and thus discuss the {\em probability of an alignment}.
 
 %-------------------------------------------------------------------------
 \section{Systems and Methods} \label{sec:sys}
@@ -288,18 +296,44 @@ L and L' are compressed with both the population and mutation models,
 in a way to be described.
 For the relatedness problem we {\em sum} over all such configurations,
 that is over all A, L, B, C, L' and D and all alignments of L with L',
-still in O(n**2)-time.
+still in $O(n^2)$-time.
 For the optimal local alignment problem we choose the best such configuration.
 
 Secondly,
 the DPA operates cell by cell on a two-dimensional array.
 For affine gap-costs, each cell contains three values for the -log probability
 of S1[1..i] and S2[1..j] conditional on the last operation
-being a diagonal, vertical or horizontal move.
+being an insert, delete or match/mismatch.
 Each increment involves the -log probabilities of a mutation and
 of a character from one or both strings as appropriate.
 The key idea of M-alignment is to obtain the latter from a population model.
 
+Then contribution of an insertion or deletion is calculated as the product or
+the mutation probability (more on this later), and probability of the
+character being inserted or deleted.  {\em This character probability is
+calculated by using the population model}.  A mismatch is calculated in a
+similar fashion, except using two probabilities, one for each character.  The
+calculation of a match is slightly different since we have two different
+probabilities for the same character.  The probability of a match is
+multiplied by the {\em average} of the two character probabilities.
+
+There is the problem of what mutation probabilities to use.  We solve this by
+starting the probabilities at sensible values, then run the algorithm a number
+of times re-estimating the mutation probabilities each time.  This is simple
+expectation maximisation which is guaranteed to converge in this case,
+possibly to a local maximum.  The initial mutation probabilities used are
+calculated by transforming Smith-Waterman costs into probabilities
+\cite{allison93a}.  Note that a side-effect of this is that an explicit
+probability is given to terminal gaps rather than the somewhat arbitrary zero
+used in the Smith-Waterman algorithm.
+
+This explanation of the M-alignment algorithm is for the particular case of
+DNA sequences where the mutations are insertion, deletion, mismatch or match.
+Instead of simply considering matches and mismatches, it is sometimes useful
+to use a 4x4 grid of scores to assign a score for aligning each DNA base
+against each other DNA base.  This is very similar to the use substitution
+matrices when aligning proteins (BLOSUM, PAM, etc.).  The modification of
+M-alignment for this is given in Section~\ref{sec:proteins}.
 
 %-------------------------------------------------------------------------
 \section{Implementation} \label{sec:impl}
@@ -540,10 +574,11 @@ the query sequence.  The \verb!prss! program ranks this fragment at 25499 of
 60765, while the M-alignment program ranks it at 241.
 
 \section{Proteins}
+\label{sec:proteins}
 
 Our use of the M-alignment algorithm has concentrated on DNA sequences thus
-far.  Here we will briefly describe how it would be possible to extend
-M-alignment to protein sequences.
+far, and our implementation is solely for DNA sequences.  Here we will briefly
+describe how it would be possible to extend M-alignment to protein sequences.
 
 When aligning proteins it is not sufficient to simply have a mismatch score
 (or cost) unlike for DNA.  Protein alignment commonly uses a scoring matrix
@@ -574,6 +609,8 @@ Pr(x,y | a[1..i-1],b[1..j-1] ) = \frac{1}{2}
 }
 
 It is not clear what type of population model would work well for proteins.
+We have concentrated on DNA sequences thus far because DNA sequences typically
+have a larger variation in information content than protein sequences.
 
 %-------------------------------------------------------------------------
 \section{Conclusion} \label{sec:conc}
