@@ -131,7 +131,7 @@ if (0) {
   my $cutoff;
   ($prss eq 'prss')   && ($cutoff = 0.00001);
   ($prss eq 'prss2')  && (exit);
-  ($prss eq 'al_all') && ($cutoff = 3);
+  ($prss eq 'al_all') && ($cutoff = 0);
   ($prss eq 'al_one') && ($cutoff = 0);
   my($c,$e)=(0,0);
   for my $i (0..$#$arr) {

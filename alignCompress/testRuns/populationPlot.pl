@@ -60,7 +60,7 @@ $cmd .= "set ylabel 'Errors'\n";
 $cmd .= "plot '< $myLoc/extractPopData.pl prss $fname' title 'PRSS p-value'";
 $cmd .= ",'< $myLoc/extractPopData.pl prss2 $fname' title 'S-W raw score'";
 #$cmd .= ",'< $myLoc/extractPopData.pl al_one $fname' title 'Optimal Alignment -markov=$pMM'";
-$cmd .= ",'< $myLoc/extractPopData.pl al_all $fname' title 'Summed alignments -markov=$pMM'";
+$cmd .= ",'< $myLoc/extractPopData.pl al_all $fname' title '(Summed) M-alignment -markov=$pMM'";
 $cmd .= "\n";
 
 if ($toFile) {

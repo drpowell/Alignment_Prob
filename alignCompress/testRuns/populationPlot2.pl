@@ -58,10 +58,10 @@ $cmd .= "set ylabel 'Errors'\n";
 
 
 $cmd .= "plot '< $myLoc/extractPopData.pl blend prss $fname' title 'PRSS p-value'";
-$cmd .= ",'< $myLoc/extractPopData.pl blend prss2 $fname' title 'PRSS raw-score'";
+$cmd .= ",'< $myLoc/extractPopData.pl blend prss2 $fname' title 'S-W raw-score'";
 #$cmd .= ",'< $myLoc/extractPopData.pl al_one $fname' title 'Optimal Alignment -markov=$pMM'";
-$cmd .= ",'< $myLoc/extractPopData.pl blend al_one $fname' title 'Average Alignment -markov=$pMM'";
-$cmd .= ",'< $myLoc/extractPopData.pl blend al_all $fname' title 'Average Alignment -blendModel'";
+$cmd .= ",'< $myLoc/extractPopData.pl blend al_one $fname' title '(Summed) M-alignment -markov=$pMM'";
+$cmd .= ",'< $myLoc/extractPopData.pl blend al_all $fname' title '(Summed) M-alignment -blendModel'";
 #$cmd .= ",'< $myLoc/extractPopData.pl al_sw $fname' title 'Optimal SW alignment'" if ($haveSW);
 $cmd .= "\n";
 
