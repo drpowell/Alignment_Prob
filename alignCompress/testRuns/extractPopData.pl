@@ -26,10 +26,17 @@ while (<>) {
     next;
   }
 
-  if (/^AlignCompress \(sum=(true|false)\): s1=(\d+) s2=(\d+) parent=(\d+) mutates=(\d+) r=(\S+) \(([\d.]+)\).*dl=\S+ \(([\d.]+)\)/) {
-#    my $d = {S1=>$2, S2=>$3, PARENT=>$4, MUTATES=>$5, VAL=>-$8};
+  if (/^AlignCompress   \s  \(sum=(true|false)\): \s
+      s1=(\d+) \s s2=(\d+) \s parent=(\d+) \s mutates=(\d+) \s
+      r=(\S+)    \s \(  ([-\d.]+)     \)   \s
+        al=\S+   \s \(   [-\d.]+      \)   \s
+      ( ml=(\S+) \s \(  ([-\d.]+)     \)   \s)?
+        dl=\S+   \s \(  ([-\d.]+)     \)           /x) {
+#    my $d = {S1=>$2, S2=>$3, PARENT=>$4, MUTATES=>$5, VAL=>-$11};
 #    my $d = {S1=>$2, S2=>$3, PARENT=>$4, MUTATES=>$5, VAL=>$7};
+#    my $d = {S1=>$2, S2=>$3, PARENT=>$4, MUTATES=>$5, VAL=>$7+$10};
     my $d = {S1=>$2, S2=>$3, PARENT=>$4, MUTATES=>$5, VAL=>$6};
+#    my $d = {S1=>$2, S2=>$3, PARENT=>$4, MUTATES=>$5, VAL=>$6+$9};
     if ($1 eq 'true') {
       push(@al_all,$d);
     } else {
@@ -49,19 +56,19 @@ while (<>) {
 my $arr;
 
 ($prss eq 'prss')   && ($arr = \@prss);
-($prss eq 'prss2')   && ($arr = \@prss2);
+($prss eq 'prss2')  && ($arr = \@prss2);
 ($prss eq 'al_all') && ($arr = \@al_all);
 ($prss eq 'al_one') && ($arr = \@al_one);
-($prss eq 'al_sw') && ($arr = \@al_sw);
+($prss eq 'al_sw')  && ($arr = \@al_sw);
 
-#$arr = [ grep { $_->{MUTATES}>80 } @$arr];
+#$arr = [ grep { $_->{MUTATES}<80 } @$arr];
 
 $arr = [sort { $b->{VAL} <=> $a->{VAL} } @$arr];
 
 my $errors = 0;
 my $correct = 0;
 for my $l (@$arr) {
-#  print join " ", (map { "$_ => $l->{$_}" } keys %$l), "\n";
+#  print join " ", (map { "$_ => $l->{$_}" } keys %$l), ($l->{S1} == $l->{PARENT} ? "   #\n" : "\n");
   if ($l->{PARENT} == $l->{S1}) {
     $correct++;
   } else {
