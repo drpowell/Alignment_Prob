@@ -26,8 +26,8 @@ $log->autoflush(1);
 my $model = new Multi_model();
 
 my $numArchetypes = 10;
-my $numEachMutations = 4;
-my @numMutation = (10, 30, 50, 60, 80);
+my $numEachMutations = 5;
+my @numMutation = (30, 40, 50, 60, 80);
 my ($l_sub, $l_sub_range) = (120, 30);
 my ($l1_s, $l1_e) = (50, 100);
 my ($l2_s, $l2_e) = (100, 50);
