@@ -1,4 +1,4 @@
-#!/usr/monash/bin/perl -w
+#!/usr/bin/perl -w
 #
 # Calculate the entropy under Markov Models of different orders
 
