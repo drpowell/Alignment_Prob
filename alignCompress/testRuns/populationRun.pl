@@ -28,6 +28,9 @@ my $model = new Markov_gen(-1, [qw(a t g c)]);
 my $numArchetypes = 10;
 my $numEachMutations = 4;
 my @numMutation = (10, 30, 50, 80, 100);
+my ($l_sub) = (100);
+my ($l1_s, $l1_e) = (200, 100);
+my ($l2_s, $l2_e) = (100, 200);
 
 my $str  = "";
 $str .= `hostname`."\n";
@@ -37,8 +40,8 @@ $str .= `date`."\n";
 $str .= "pid=$$\n";
 $str .= "\nProgs to use:\n$compProg$compProgOpt\n$prssProg\n\n";
 
-$str .= "Produce $numArchetypes sequences of the form gen(200) . sub_seq(100) . gen(100)\n";
-$str .= "From these children will be produced of the form gen(100). mutate_sub_seq(numMutate).gen(200)\n";
+$str .= "Produce $numArchetypes sequences of the form gen($l1_s) . sub_seq($l_sub) . gen($l1_e)\n";
+$str .= "From these children will be produced of the form gen($l2_s). mutate_sub_seq(numMutate).gen($l2_e)\n";
 $str .= "Repeat each mutation rate $numEachMutations. Num mutations = (@numMutation)\n\n";
 $str .= $model->as_string();
 
@@ -49,13 +52,13 @@ my @archetypes;
 my @population;
 
 for my $i (0 .. $numArchetypes-1) {
-  my $subseq = $model->gen_sequence(100);
-  my $str1 = $model->gen_sequence(200) . $subseq . $model->gen_sequence(100);
+  my $subseq = $model->gen_sequence($l_sub);
+  my $str1 = $model->gen_sequence($l1_s) . $subseq . $model->gen_sequence($l1_e);
   $archetypes[$i] = $str1;
   for my $numMutations (@numMutation) {
     for my $j (1 .. $numEachMutations) {
-      my $str2 = $model->gen_sequence(100) . $model->mutate($subseq, $numMutations) .
-	$model->gen_sequence(200);
+      my $str2 = $model->gen_sequence($l2_s) . $model->mutate($subseq, $numMutations) .
+	$model->gen_sequence($l2_e);
       push( @population, {SEQ => $str2, PARENT=>$i, MUTATES=>$numMutations});
     }
   }
@@ -70,12 +73,31 @@ for my $i (0 .. $numArchetypes-1) {
 
 my @to_delete;
 
+my $numToRun = 5;
+my $numRunning = 0;
+
+$SIG{CHLD} = sub { my $pid=wait;
+		   #print STDERR "Child $pid finished\n";
+		   $numRunning--; };
+
 for my $i (0 .. $numArchetypes-1) {
   my $str1 = $archetypes[$i];
   for my $j (0 .. $#population) {
     my $str2 = $population[$j]{SEQ};
 
-    print $log "s1=$str1\ns2=$str2\n";
+    while ($numRunning >= $numToRun) { # Wait until someone exits.
+      sleep(1);
+    }
+
+    $numRunning++;
+    my $pid = fork();
+    die "Fork failed!" if (!defined($pid));
+
+    next if ($pid);		# I'm the parent continue;
+
+    # I'm the child;
+    #print STDERR "Running process $$\n";
+    $SIG{CHLD} = 'IGNORE';
 
     for my $sum (qw(true false)) {
       my($r, $rTime1, $uTime1, $sTime1, $swaps1) = 
@@ -106,7 +128,13 @@ for my $i (0 .. $numArchetypes-1) {
 	   $population[$j]{MUTATES});
 
     printf $log "\nDONE\n\n";
+
+    exit;			# The child is done
   }
+}
+
+while ($numRunning>0) {
+  sleep(1);
 }
 
 

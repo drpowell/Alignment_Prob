@@ -470,6 +470,8 @@ class AlignCompress {
 	    double encB = modelB.encodeCumulative( seqB.length() );
 	    double encNull = encA + encB;
 
+	    if (doSmithWaterman) encNull=0;
+
 	    if (localAlign) {
 		// Encode lengths for the null theory
 		// Note that global alignments ignore lengths, ignore for null when doing global.

@@ -179,11 +179,7 @@ public abstract class Mutation_SW extends Mutation_FSM {
     }
 
     public String toString() {
-	return 
-	    "dval="+dval+" hval="+hval+" vval="+vval+"\n"+
-	    "d_counts="+d_counts+"\n"+
-	    "h_counts="+h_counts+"\n"+
-	    "v_counts="+v_counts+"\n";
+	return "dval="+dval+" hval="+hval+" vval="+vval+"\n";
     }
 
     /** add() - something extra must be encoded in this state.  

@@ -8,15 +8,14 @@ if (defined($ARGV[0]) && (
     $ARGV[0] eq 'prss' ||
     $ARGV[0] eq 'prss2' ||
     $ARGV[0] eq 'al_all' ||
-    $ARGV[0] eq 'al_one')) {
+    $ARGV[0] eq 'al_one' ||
+    $ARGV[0] eq 'al_sw')) {
     $prss = shift;
 }
 
-(defined($prss)) or die "Usage: $0 <prss|prss2|al_all|al_one>";
-# prss  - plot using p value
-# prss2 - plot using raw score
+(defined($prss)) or die "Usage: $0 <prss|prss2|al_all|al_one|al_sw>";
 
-my(@prss, @prss2, @al_all, @al_one);
+my(@prss, @prss2, @al_all, @al_one, @al_sw);
 
 while (<>) {
   next if (/^\#/);
@@ -36,6 +35,11 @@ while (<>) {
     push(@al_one,{S1=>$1, S2=>$2, PARENT=>$3, MUTATES=>$4, VAL=>$5});
     next;
   }
+
+  if (/^AlignCompress \(SW\): s1=(\d+) s2=(\d+) parent=(\d+) mutates=(\d+) r=(\S+)/) {
+    push(@al_sw,{S1=>$1, S2=>$2, PARENT=>$3, MUTATES=>$4, VAL=>$5});
+    next;
+  }
 }
 
 my $arr;
@@ -44,6 +48,7 @@ my $arr;
 ($prss eq 'prss2')   && ($arr = \@prss2);
 ($prss eq 'al_all') && ($arr = \@al_all);
 ($prss eq 'al_one') && ($arr = \@al_one);
+($prss eq 'al_sw') && ($arr = \@al_sw);
 
 #$arr = [ grep { $_->{MUTATES}>80 } @$arr];
 
