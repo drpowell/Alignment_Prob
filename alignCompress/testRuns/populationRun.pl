@@ -73,7 +73,7 @@ for my $i (0 .. $numArchetypes-1) {
 
 my @to_delete;
 
-my $numToRun = 5;
+my $numToRun = 1;
 my $numRunning = 0;
 
 $SIG{CHLD} = sub { my $pid=wait;
