@@ -4,105 +4,6 @@ package alignCompress;
 import java.io.*;
 import common.*;
 
-/**
-   A model of 2 sequences (for alignments) with counts.
-
-   Characters from each sequence are encoded with a sequence
-   specific model.  Matches/changes average the probabilites from these models.
-
-   Uses two parameters: match_cost, change_cost
-**/
-class Model_SeqAB implements Two_Seq_Model_Counts {
-    double match_cost,change_cost;
-    Seq_Model modelA, modelB;
-
-    int countIndex;
-    final private int matchIndex=0, changeIndex=1;
-
-    public Model_SeqAB(Params p, Seq_Model modelA, Seq_Model modelB, int countIndex) {
-        this.countIndex = countIndex;
-	this.modelA = modelA;
-	this.modelB = modelB;
-
-        if (!p.exists("match_cost")) {
-            set_default_costs();
-        } else {
-            match_cost = p.get("match_cost");
-            change_cost = p.get("change_cost");
-        }
-
-        normalize_costs();
-    }
-
-    public String toString() {
-	return this.getClass() + ": match_cost="+match_cost+" change_cost="+change_cost;
-    }
-
-    void set_default_costs() {
-        match_cost  = -MyMath.log2(9.0);
-        change_cost = -MyMath.log2(1.0);
-    }
-
-    void normalize_costs() {
-        double sum = MyMath.exp2(-match_cost)+MyMath.exp2(-change_cost);
-        match_cost  = match_cost + MyMath.log2( sum );
-        change_cost = change_cost + MyMath.log2( sum );
-    }
-
-    public double encA(char a, int i) {
-        return modelA.encodeLen(a, i);
-    }
-
-    public double encB(char a, int i) {
-        return modelB.encodeLen(a, i);
-    }
-
-    public double encBoth(char a, char b, int i, int j) {
-	double A_cost = encA(a,i);
-	double B_cost = encB(b,j);
-	if (a==b) {
-	    // Match
-	    // Do: P(match) * ( P(char a) + P(char b) ) / 2
-	    //System.err.println("enc match = " + ( match_cost + MyMath.logplus(A_cost, B_cost) + 1));
-	    return match_cost + MyMath.logplus(A_cost, B_cost) + 1;
-	} else {
-	    // Change
-	    // Do: P(change) * P(char a) * P(char b) * 0.5 * (1/(1-P(char b)) + 1/(1-P(char a)))
-	    double aN = MyMath.exp2(-encA(b,i));
-	    double bN = MyMath.exp2(-encB(a,j));
-	    double norm = -MyMath.log2( 1/(1-aN) + 1/(1-bN) );
-	    //System.err.println("enc change = " + (change_cost + A_cost + B_cost + 1 + norm));
-	    return change_cost + A_cost + B_cost + 1 + norm;
-	}
-    }
-
-    public static int required_counts() { return 2; }
-    public Params counts_to_params(Counts counts) {
-        double sum = counts.counts[countIndex+matchIndex] + 
-            counts.counts[countIndex+changeIndex];
-        Params par = new Params();
-        par.put("match_cost", -MyMath.log2(counts.counts[countIndex+matchIndex]/sum));
-        par.put("change_cost", -MyMath.log2(counts.counts[countIndex+changeIndex]/sum));
-        return par;
-    }
-
-    public void update_count_encA(Counts c, double w, char a, int i) {};
-    public void update_count_encB(Counts c, double w, char a, int i) {};
-    public void update_count_encBoth(Counts c, double w, char a, char b, int i, int j) {
-        if (a==b) {
-            c.inc(countIndex+matchIndex, w);
-        } else {
-            c.inc(countIndex+changeIndex, w);
-        }
-    }
-
-    public double encode_params(double N) { 
-	return Multinomial.MMLparameter_cost(new double[] { MyMath.exp2(-match_cost), 
-							    MyMath.exp2(-change_cost) },
-					     N);
-    }
-}
-
 /** BufferModel takes a model and a sequence and the sequence alphabet.
     It precomputes the encoding length of every alphabet character for every 
     position in the sequence.
@@ -197,8 +98,9 @@ class AlignCompress {
     // Encode length l: 0..infinity
     static private double encode_length(double l) {
 	Misc.assert(l>=0, "Bad length to encode:"+l);
-	return MyMath.logstar_continuous(l+1);
+	//return MyMath.logstar_continuous(l+1);
 	//return -(l*MyMath.log2(PcharEncode) + MyMath.log2(1-PcharEncode)); // Geometric distribution
+	return 0.104808 * l;	// This is to match SW costs. (TESTING!)
     }
 
     public AlignCompress() {
@@ -342,8 +244,8 @@ class AlignCompress {
 	    doTraceBack = false;
 	    if (fsmType instanceof Mutation_FSM.TraceBack_Info)
 		doTraceBack = true;
-	    
-	    
+
+
 	    // Setup the DPA matrix
 	    Mutation_FSM D[][];
 	    Mutation_FSM final_cell;
@@ -409,8 +311,8 @@ class AlignCompress {
 
 			// Compute contribution of a local alignment that starts at (i,j)
 			val = modelA.encodeCumulative(i) +  modelB.encodeCumulative(j);
-			//val += encode_length(i);
-			//val += encode_length(j);
+			val += encode_length(i);
+			val += encode_length(j);
 			if (doSmithWaterman)
 			    cell(D,i,j).or(0, initialCounts);
 			else
@@ -422,8 +324,8 @@ class AlignCompress {
 			    (modelA.encodeCumulative( seqA.length() ) - modelA.encodeCumulative(i)) +
 			    (modelB.encodeCumulative( seqB.length() ) - modelB.encodeCumulative(j));
 
-			//val += encode_length(seqA.length()-i);
-			//val += encode_length(seqB.length()-j);
+			val += encode_length(seqA.length()-i);
+			val += encode_length(seqB.length()-j);
 
 			if (doSmithWaterman)
 			    val = cell(D,i,j).get_val();
@@ -461,8 +363,8 @@ class AlignCompress {
 		// So encode 2 from the shorter sequence, and 1 from the longer.
 		double l1 = (seqA.length() < seqB.length() ? seqA.length() : seqB.length());
 		double l2 = (seqA.length() > seqB.length() ? seqA.length() : seqB.length());
-		encAlignment += MyMath.log2(l1) * 2 - 1;
-		encAlignment += MyMath.log2(l2);
+		//encAlignment += MyMath.log2(l1) * 2 - 1;
+		//encAlignment += MyMath.log2(l2);
 	    }
 
 
@@ -475,8 +377,8 @@ class AlignCompress {
 	    if (localAlign) {
 		// Encode lengths for the null theory
 		// Note that global alignments ignore lengths, ignore for null when doing global.
-		//		encNull += encode_length(seqA.length());
-		//		encNull += encode_length(seqB.length());
+		encNull += encode_length(seqA.length());
+		encNull += encode_length(seqB.length());
 	    }
 
 	    if (doTraceBack) {
