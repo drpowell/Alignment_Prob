@@ -28,6 +28,10 @@ public class DNA {
 	return seq;
     }
 
+    public String toString() {
+	return new String(seq);
+    }
+
     protected static BufferedReader openFile(String fname) {
 	BufferedReader in = null;
 	try {
@@ -60,6 +64,8 @@ public class DNA {
 
 	    if (new String(buf).startsWith("LOCUS"))
 		return new DNA.Genbank(in);
+	    else if (new String(buf).startsWith(">"))
+		return new DNA.FASTA(in);
 	    else
 		return new DNA.Raw(in);
 
@@ -102,6 +108,50 @@ public class DNA {
 	    } catch (IOException e) {
 		System.err.println("Error reading '"+filename+"' "+e);
 	    }
+	}
+    }
+
+    static class FASTA extends DNA {
+	String name;
+	FASTA(BufferedReader r) {
+	    super(r);
+	    name = null;
+
+	    read(r);
+	}
+
+	FASTA(String fname) {
+	    super(fname);
+	    name = null;
+	    
+	    read(openFile(fname));
+	}
+
+	private void read(BufferedReader in) {
+	    System.err.println("Try to read as FASTA");
+	    try {
+		StringBuffer seqBuf   = new StringBuffer();
+		String line;
+		while ( (line=in.readLine()) != null) {
+		    if (name==null && line.startsWith(">")) {
+			name = line.substring(1);
+			continue;
+		    }
+
+		    if (name==null) throw(new IOException("Bad FASTA format. Name not found"));
+
+		    for (int i=0; i<line.length(); i++) {
+			char c = line.charAt(i);
+			
+			if (Character.isWhitespace(c) || Character.isDigit(c)) continue;
+			seqBuf.append(c);
+		    }
+		}
+		seq = new char[seqBuf.length()];
+		seqBuf.getChars(0, seqBuf.length(), seq, 0);
+	    } catch (IOException e) {
+		System.err.println("Error reading '"+filename+"' "+e);
+	    }	
 	}
     }
 
