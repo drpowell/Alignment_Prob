@@ -1,0 +1,67 @@
+Copyright (c) 2002 David Powell
+
+  M-align aligns two sequences using the M-alignment algorithm.
+
+Please cite:
+  L. Allison, D. R. Powell and T. I. Dix
+  "Compression and Approximate Matching"
+  The Computer Journal, 1999 42:1 pp1-10
+
+
+This implementation of the M-alignment algorithm is specifically for
+testing the relatedness of two DNA sequences.  It also differs from
+the description abovementioned paper in the following ways:
+
+- It performs local alignment.
+- Uses affine gap costs.
+
+
+
+
+The key idea to m-alignment to incorporate a model of each sequence
+into the alignment process.  This program comes with code to model
+sequence by a fixed order Markov Model.  But it is possible to use any
+sequence model that gives a probabilistic prediction for each
+character in the sequences.
+
+This implementation does sums over all possible alignment to calculate
+how "related" the sequences are.  So, it does not produce an actual
+alignment.  The algorithm is iterated to find a (possibly local)
+optimum for the alignment parameters.
+
+
+USAGE
+------
+
+Usage: m-align [-mfiabh] <seqA> <seqB>
+  Where <seqA> and <seqB> are files in FASTA format.
+       -m <n>     Use a n'th order Markov Model
+       -f <file>  Read the Markov Model parameters from <file>
+       -s <file>  Save the Markov Model parameters to <file> after fitting the sequences
+       -i <n>     Set max iterations to <n>.  Use -1 for unlimited
+       -a <file>  Read character prediction probabilites for seqA from <file>
+       -b <file>  Read character prediction probabilites for seqB from <file>
+       -h         This help
+
+
+The program takes two files on the commandline.  These two files
+contain the two sequences to be tested for relatedness and must
+be in FASTA format.
+
+By default m-align fits a fixed order Markov Model to the sequences.
+The order of this Markov Model may be set using the '-m' option, the
+default value is 1.  To use a uniform model (ie. 2 bits per DNA
+character), specify the Markov Model order as -1.
+
+
+The Markov Model parameters that are calculated by fitting the the
+sequences can be saved using the '-s' option.  This parameters file
+can be loaded later using the '-f' option (be sure to specify the
+correct Markov Model order using '-m').
+
+The maximum number of iterations may be specified with the '-i'
+option.  A value of -1 means unlimited iterations, that is, iterate to
+convergence.
+
+
+

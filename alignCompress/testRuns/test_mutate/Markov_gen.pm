@@ -35,28 +35,33 @@ use Data::Dumper;
 sub MAIN_TEST {
   my $order = 1;
   my $t = new Markov_gen($order, [qw(a t g c)], 
-			 { 'a' => { 'a' => 11, 't' => 2, 'g'=> 1, 'c' => 1},
-			   't' => { 'a' => 1,  't' => 12,'g'=> 1, 'c' => 1},
-			   'g' => { 'a' => 1,  't' => 1, 'g'=> 11,'c' => 2},
-			   'c' => { 'a' => 1,  't' => 1, 'g'=> 1, 'c' => 12}
-			 });
+  			 { 'a' => { 'a' => 11, 't' => 2, 'g'=> 1, 'c' => 1},
+  			   't' => { 'a' => 1,  't' => 12,'g'=> 1, 'c' => 1},
+  			   'g' => { 'a' => 1,  't' => 1, 'g'=> 11,'c' => 2},
+  			   'c' => { 'a' => 1,  't' => 1, 'g'=> 1, 'c' => 12}
+  			 });
   $t->normalise();
 
-  print $t->as_string(),"\n";
+  #print $t->as_string(),"\n";
   print "New Entropy = ",$t->model_entropy(),"\n";
   print "Old Entropy = ",$t->model_entropy_wrong(),"\n";
 
-  my $tot=0;
-  for (1..5) {
-    my $seq = $t->gen_sequence(100000);
-    my $v = $t->entropy($seq);
-    $tot += $v;
-    print "A sequence entropy = ",$v,"\n";
-  }
-  print "Avg = ", $tot/5,"\n";
+  #my $tot=0;
+  #for (1..5) {
+  #  my $seq = $t->gen_sequence(100000);
+  #  my $v = $t->entropy($seq);
+  #  $tot += $v;
+  #  print "A sequence entropy = ",$v,"\n";
+  #}
+  #print "Avg = ", $tot/5,"\n";
 
-  #my $s1 = $t->gen_sequence(100);
-  #my $s2 = $t->mutate($s1, 50);
+  for (1..10) {
+    my $s1 = $t->gen_sequence(10000);
+    my $s2 = $t->mutate($s1, 5000);
+
+    printf "len(s1)=%d len(s2)=%d  ent(s1)=%f ent(s2)=%f\n", length($s1), length($s2),
+           $t->entropy($s1), $t->entropy($s2);
+  }
   #print $t->gen_sequence(10) . $s1 . "\n";
   #print $s2 . $t->gen_sequence(10) . "\n";
   #my $t = new Markov_gen(0, [qw(a t g c)]);
@@ -564,7 +569,7 @@ sub mutate {
 
   my $probs = $s->{PROBS};
 
-  my $entropy = $s->entropy($str);
+  my $entropy = $s->entropy($str) * length($str);
   my %mutate_counts;
   while ($num>0) {
     my $len = length($str);
