@@ -1,4 +1,4 @@
-\%\documentclass[letterpaper,12pt,oneside]{article}
+%\documentclass[letterpaper,12pt,oneside]{article}
 \documentclass[a4paper,11pt,oneside]{article}
  
 \usepackage{multicol}
@@ -15,7 +15,7 @@
 %\geometry{top=2cm,bottom=2cm,left=1.5cm,right=1.5cm,nohead}
 \geometry{top=1in,bottom=1in,left=1in,right=1in,nohead}
 
-\def\plotwidth{0.7\columnwidth}
+\def\plotwidth{0.55\columnwidth}
 
 %\setlength{\parindent}{0pt}
 %\setlength{\parskip}{1.0ex plus0.5ex minus0.5ex}
@@ -30,7 +30,7 @@ medium or low information sequences}
 \author{
   David R. Powell\footnotemark[1]~, Lloyd Allison and Trevor I. Dix \\
 {\small powell@csse.monash.edu.au, lloyd@bruce.cs.monash.edu.au, trevor@csse.monash.edu.au} \\
-{\small tel: +61 3 99059010 ~~~ fax: +61 3 9905 5146} \\
+{\small tel: +61 3 99059010 ~~~ fax: +61 3 99055146} \\
   Member of the Victorian Bioinformatics Consortium and \\
   School of Computer Science and Software Engineering, \\
   Monash University, Australia 3800.}
@@ -146,12 +146,12 @@ optimal v. summed alignment.
 Modelling- (M-) alignment (Figure~\ref{fig:algs}(h)), where statistical properties of a
 population are considered, is then defined in
 local-alignment, global-alignment, affine-gapped, optimal-alignment and summed-alignment variants.
-Finally it is compared to the standard Smith Waterman program plus shuffling
+It is compared to the standard Smith Waterman program plus shuffling
 on various populations of sequences.
-ROC curves (Figures~\ref{fig:roc_uni} to \ref{fig:roc_blend})
-show M-alignment performs as well as the standard method on uniform 
-random data, and better on more complex models.
-
+Firstly, artificial data is used to show M-alignment performs as well as the
+standard method on uniform random data, and better on more complex models. 
+Then, real DNA sequence data is used to show the superior performance of the
+M-alignment algorithm.
 
 
 
@@ -420,29 +420,6 @@ At m[i,j]:
 \caption{\label{fig:algs}Summary of various 1-state, global alignment algorithms.}
 \end{figure}
 
-\begin{figure}
-%\begin{minipage}{\textwidth}
-\begin{multicols}{2}
-
-%\begin{figure}
-\centering
-\epsfig{file=3state.eps, width=0.8\columnwidth}
-\caption{\label{fig:3state}DPA for affine gap costs aka. 3-State mutation model.}
-%\end{figure}
-
-\pagebreak
-
-%\begin{figure}
-\centering
-\epsfig{file=local.eps, width=0.7\columnwidth}
-\caption{\label{fig:local}Local alignments}
-%\end{figure}
-
-\end{multicols}
-%\end{minipage}
-\end{figure}
-
-
 \section{Description}
 
 The aim of probabilistic optimal alignment is to find the probability of the
@@ -462,12 +439,12 @@ known as the null model.  The ratio in these probabilities, $P(A \& B) / (P(A)
 \times P(B))$, alternatively, by taking logs, the difference in the encoding
 length from the null model and the alignment model, quantifies which model is
 a better description of the data and by how much.  If we are able to use the
-correct population model in calculating $P(A\&B)$, then difference in encoding
-length indicates exactly how much information the sequences contain about each
-other.  We refer to this difference as the log-odds ratio and it is the metric
-for our tests. Using the wrong population model, or implicitly assuming a
-uniform model, may cause us to overestimate the joint probability leading to
-false positives.
+correct population model in calculating $P(A\&B)$, then the difference in
+encoding length indicates exactly how much information the sequences contain
+about each other.  We refer to this difference as the log-odds ratio and it is
+the metric for our tests. Using the wrong population model, or implicitly
+assuming a uniform model, may cause us to overestimate the joint probability
+leading to false positives.
 \newpage
 The new M-alignment algorithm is as shown in Figure~\ref{fig:algs}(h), using
 the following probabilities for characters:
@@ -477,6 +454,20 @@ Pr(b[j]|b[1..j-1]) ) \\
 Pr(x,y|x<>y,a[1..i-1],b[1..j-1]) & = & \frac{1}{2}\frac{Pr(a[i]|a[1..i-1])
 Pr(b[j]|b[1..j-1])}{(1-Pr(a[i]|b[1..j-1]))(1-Pr(b[j]|a[1..i-1]))}
 \end{eqnarray*}
+
+If we view these probabilities from an encoding viewpoint, then the first
+equation defines how to encode a character that matches in both sequences.
+There are two obvious possibilities for the probability of this character;
+calculated by applying the population model to either sequence $A$ or sequence
+$B$.  We encode the character by using the average of these probabilities.
+
+The second equation given above, is for encoding mismatching characters.
+Again, this is an average of two possibilities.  First possibility, encode the
+character from sequence $A$ using the population model then encode the
+character from sequence $B$ again using the population model but
+re-normalising to account for the fact that it must be a different character
+to that from sequence $A$.  The second possibility switches the role of
+sequences $A$ and $B$.
 
 This version of the algorithm is for global alignment with a point mutation
 model.  This is readily extended to affine gap costs by including three states
@@ -490,7 +481,7 @@ costs.  When measuring the relatedness of two sequences, we sum over all
 alignments as this is a better test than simply using the optimal alignment.
 
 It is necessary for the encoding of the alignment to include any changeable
-parameters so it is fair comparison between the null model and the alignment
+parameters so it is a fair comparison between the null model and the alignment
 model.  For affine gap costs M-alignment encodes the probabilities for each of
 the different types of mutations.  Hence, it is possible to compare different
 mutation models.  This may be useful in testing whether a point mutation
@@ -517,12 +508,12 @@ Markov Models and mixtures of these, but there is no reason more complex models
 could not used.  Indeed, the best model to use would be one that accounts for
 all known structure in a population of sequences.
 
-It is possible to use adaptive models.  However, such a model takes some time
-to adapt to the sequence, so characters at the start of the sequence are
-generally encoded with more bits than characters towards the end.  Hence, the
-alignment algorithm may attempt to align characters at the start of the
-sequences more carefully than characters at the end.  For this reason it is
-best to use a fitted model instead of an adaptive model.
+%It is possible to use adaptive models.  However, such a model takes some time
+%to adapt to the sequence, so characters at the start of the sequence are
+%generally encoded with more bits than characters towards the end.  Hence, the
+%alignment algorithm may attempt to align characters at the start of the
+%sequences more carefully than characters at the end.  For this reason it is
+%best to use a fitted model instead of an adaptive model.
 
 \subsection{Encoding of lengths}
 
@@ -571,14 +562,16 @@ significance of each alignment.
 The artificial data was generated using a number of different population
 models.  In all cases, 10 parent sequences were generated from the population
 model(s).  Each parent sequence was generated to be of the form $gen(50\pm50)
-.. gen(120\pm30) .. gen(100\pm50)$.  Where $gen(x\pm y)$ means to generate a
-sequence with length selected uniform randomly from the range $[x-y, x+y]$.
-Then from each parent, 25 child sequences were generated having only the
-(mutated) middle sequence in common.  Of these 25 children, 5 were generated
-by making 30 mutations, 5 by making 40 mutations, 5 with 50 mutations, 5 with
-60 mutations and 5 with 80 mutations.  The exact method used for these
-mutations is interesting in itself, but distracting at this point, the details
-are given in Appendix~\ref{sec:mutations}.  The child sequences were
+.. gen(120\pm30) .. gen(100\pm50)$.  Where $gen(x\pm y)$ indicates generation
+of a sequence with length selected randomly from the range $[x-y, x+y]$.  From
+each parent, 25 child sequences were generated having only the (mutated)
+middle sequence in common.  Of these 25 children, 5 were generated by making
+30 mutations, 5 by making 40 mutations, 5 with 50 mutations, 5 with 60
+mutations and 5 with 80 mutations.  The exact method used for these mutations
+is interesting in itself, but distracting at this point.
+%, the details
+%are given in Appendix~\ref{sec:mutations}.  
+The child sequences were
 considered as the library to be searched, and each parent was used in turn as
 the query sequence.  Thus for each query there were 25 related sequences of
 differing relatedness and 225 unrelated sequences.  This ratio of related to
@@ -601,39 +594,26 @@ on the x-axis the ratio of true positives to the total number of related
 comparisons.  The better an algorithm is at separating related from unrelated
 sequences the closer its curve will be to the bottom right corner of the ROC
 plots.  Since we are mostly interested in the behaviour for a smallish number
-of false positives the y-axis is plotted with a log scale.
-
-In the first test, the population model is the simplest possible, a uniform
-model.  That is, each character occurs with a probability of 1/4.  The ROC
-plot in Figure~\ref{fig:roc_uni} shows that the \verb!prss! program, the raw
-Smith-Waterman score and the M-alignment algorithm perform similarly.  This
-test is relatively uninteresting and is only presented to show that for high
-entropy sequences M-alignment performs like existing algorithms.  Recall that
+of false positives the y-axis is plotted with a log scale.  Recall that
 M-alignment may take as a parameter the model for the sequences.  Except where
 noted otherwise, the M-alignment algorithm is told to fit a 1st order Markov
 Model to the sequences.
 
+In tests with a simple unbiased model, (i.e. each character occurs with
+probability 1/4) the raw Smith-Waterman score, the \verb!prss! program and
+M-alignment perform similarly.  For a population model that produces sequences
+with a simple composition bias, tests showed that the \verb!prss! program and
+M-alignment perform in a similar manner, while raw Smith-Waterman score is
+inferior.
 
-The next test is for sequences with a biased composition, that is, sequences
-from a 0th order Markov Model.  The model chosen has an entropy of 1.76 bits
-per character.  The shuffling method of the \verb!prss! algorithm is designed
-to account for this type of alphabet bias, and indeed, as seen in
-Figure~\ref{fig:roc_0} the performance of the \verb!prss! program and our
-algorithm is similar.  Also, as expected, the raw score from the
-Smith-Waterman algorithm does not do a very good job at separating the related
-from unrelated sequences in this case.  Since the alphabet is essentially less
-that 4 here, all algorithms have more difficulty in detecting relatedness than
-in the previous test.
-
-
-Figure~\ref{fig:roc_uni_0} shows the results for the next test.  In a sense,
-this test is a combination of the previous two.  Instead of all 10 parent
-sequences coming from the same population model, 5 come from a uniform model
-(like the first test), and 5 from a 0th order Markov Model (like the second
-test).  The shuffling of the \verb!prss! program does account for sequences
-with a biased composition, but as seen in this test it does not perform as
-well as M-alignment when there are different models in the population.
-Similar behaviour has been seen when using other combinations of models.
+Figure~\ref{fig:roc_uni_0} shows the results of a test that combines unbiased
+and biased sequences.  Instead of all 10 parent sequences coming from the same
+population model, 5 come from an unbiased model, and 5 from a 0th order Markov
+Model (simple composition bias).  The shuffling of the \verb!prss! program
+does account for sequences with a biased composition, but as seen in this test
+it does not perform as well as M-alignment when there are different models in
+the population.  Similar behaviour has been seen when using other combinations
+of models.
 
 %It may be argued that in practice the \verb!prss! program wouldn't use
 %shuffling, but would use the results of all the database searches to fit the
@@ -690,8 +670,9 @@ cut-off value would be used; a cut-off of 3 bits indicates the alignment model
 is 8 times better than the null model, a cut-off of 10 bits gives a confidence
 of about 99.9\% provided population model assumptions are appropriate.
 
+\begin{comment}
 The table below summarises the performance of the algorithms for a fixed
-cut-off over the same data as the previous four tests.  The cut-off used for
+cut-off over the same data as the previous tests.  The cut-off used for
 M-alignment was 0, and for the \verb!prss! program $p=10^{-5}$ was used as
 this seemed to do best over all.  In all cases the number of truly related
 sequences is 250 (some very distantly related), and of unrelated 2250.
@@ -715,68 +696,74 @@ more alternative models can be detected on the basis of compression.
 
 %\begin{minipage}{\textwidth}
 \begin{center}
-%\footnotesize
+\footnotesize
 \begin{tabular}{|l|c||c|c|} \hline
 Test set & Algorithm & true positives & false positives \\ \hline
-Uni &  prss & 195 & 0  \\ 
-Uni & Sum & 226 & 14  \\ \hline
+Unbiased &  prss & 195 & 0  \\ 
+Unbiased & Sum & 226 & 14  \\ \hline
 
 0-order & prss & 89 & 0  \\ 
 0-order & Sum & 211 & 17  \\ \hline
 
-Uni \& 0-order & prss & 160 & 0  \\ 
-Uni \& 0-order & Sum & 222 & 9  \\  \hline
+Unbiased \& 0-order & prss & 160 & 0  \\ 
+Unbiased \& 0-order & Sum & 222 & 9  \\  \hline
 
-Blend Uni \& 1-order & prss & 224 & 135  \\ 
-Blend Uni \& 1-order & Sum (default 1st order) & 248 & 957 \\ 
-Blend Uni \& 1-order & Sum (blendModel) & 246 & 116 \\ 
+Blend Unbiased \& 1-order & prss & 224 & 135  \\ 
+Blend Unbiased \& 1-order & Sum (default 1st order) & 248 & 957 \\ 
+Blend Unbiased \& 1-order & Sum (blendModel) & 246 & 116 \\ 
 \hline \end{tabular}
+\normalsize
 \end{center}
 %\end{minipage}
+\end{comment}
 
 \subsection{Real Data}
 
 In this section we show that M-alignment also performs well on real DNA data.
 We chose a relatively low information sequence from \emph{Plasmodium
 falciparum} chromosome 2.  The sequence is from the end of the intron and
-start of the second exon of PFB0010w.
+start of the second exon of PFB0010w and of 157 characters in length.
 
-\begin{verbatim}
-TATATATATA TATATATATA TATACCCATA ACTACATTCA CATATACACA
-TACATATATA TATATTATAT ATATATATAC CCATAACTAC ATACATACAT
-ACATACATAA ATATATACAT ACACATATAT ATGTTCATTT TTTTTTTTAG
-AAAAAAA
-\end{verbatim}
+%\begin{verbatim}
+%TATATATATA TATATATATA TATACCCATA ACTACATTCA CATATACACA
+%TACATATATA TATATTATAT ATATATATAC CCATAACTAC ATACATACAT
+%ACATACATAA ATATATACAT ACACATATAT ATGTTCATTT TTTTTTTTAG
+%AAAAAAA
+%\end{verbatim}
 
-This sequence was used in a BLAST search against all of nucleic sequences in
-Genbank.  The default options were used with the exception that filtering was
-turned off and the cut-off E value was set to 10.  This search resulted in
-60765 ``matching'' sequences.  Each of these 60765 sequences were retrieved,
-including an extra 50 characters at each end so the alignment programs could
-have some extra context information.  As one would expect most of these
-sequences are in fact unrelated to the query sequence.  Most of the false
-positives are due to matching \verb!TATA! regions.  Using M-alignment with a
-sequence model that correctly apportions weight to such regions should give
-good results.  The model we used here, was a fifth-order Markov Model trained
-on all 60765 matching sequences.  While such a model is not ideal, we assume
-that most of the sequences are unrelated but do represent a certain
-population.  If a sequence is to be said to be related to the query sequence
-then it must have more in common than simply coming from the that population.
+This sequence was used in a nucleotide-nucleotide BLAST search against the
+\verb!nr! database.  The default options were used with the exception that
+filtering was turned off.  This search resulted in 60765 ``matching''
+sequences (no matches are found when filtering is on).  Each of these 60765
+sequences were retrieved with an extra 50 characters at each end so the
+alignment programs could have some extra context information.  The vast
+majority of these sequences are in fact unrelated to the query sequence.  Most
+of these false positives are due to matching \verb!TATA! regions.  Using
+M-alignment with a sequence model that correctly apportions weight to such
+regions should give good results.  The model we used, was a fifth-order Markov
+Model trained on all 60765 matching sequences.  While such a model is not
+ideal, we assume that most of the sequences are unrelated but do represent a
+certain population, and that a fifth-order model can capture much of the
+information about the population.  If a sequence is to be said to be related
+to the query sequence then it must have more in common than simply coming from
+the that population.
 
-The \verb!prss! and M-alignment programs then did a pair-wise comparison
-between the query sequence and each of the 60765 matching sequences.  Thus, a
-ranking of the matching sequences was produced by both programs.  
-It is difficult to say which ordering is better.
+The \verb!prss! and M-alignment programs were then used to do a pair-wise
+comparison between the query sequence and each of the 60765 matching
+sequences.  Thus, a ranking of all the matching sequences was produced by both
+programs.  M-alignment gives roughly 1300 sequences a significant score, while
+\verb!prss! claims more than 10000 significant matches.  It is difficult
+to assess objectively which ordering is better.  Our subjective comparison of
+the two rankings suggests that the M-alignment ranking is superior.
 
-A fragment was taken from pseudo-gene PFB0045c which is known to be distantly
-related to the query sequence, PFB0010w.  This fragment was not found by the
-BLAST search.  If this fragment is ranked amongst the other sequences ideally
-it would rank fairly highly since most of the 60765 sequences are unrelated to
+A fragment was taken from pseudo-gene PFB0045c~\cite{huestis01}, which is
+known to be distantly related to the gene the query sequence was taken from,
+PFB0010w.  This fragment comes from the region of PFB0045c that corresponds to
+the intron of PFB0010w.  The fragment was not found by the BLAST search.  If
+this fragment is ranked amongst the other sequences it would, ideally, rank
+fairly high since the vast majority of the 60765 sequences are unrelated to
 the query sequence.  The \verb!prss! program ranks this fragment at 25499 of
-60765, while the M-alignment program ranks it at 241.  
-
-
-
+60765, while the M-alignment program ranks it at 241.
 
 
 
@@ -817,34 +804,51 @@ It could also be used on a client-computer to post-process, and re-rank,
 putative matches returned from a large collection of sequences
 by a fast search algorithm running on a server.
 The latter use could reduce false-positives but not bring back
-any false negatives.
+any false negatives.  The superior performance of M-alignment was illustrated
+for this task by using a short sequence from \emph{Plasmodium
+falciparum} chromosome 2.
 
+To date, development of the M-alignment method has focused on DNA sequence
+data.  Research is currently underway to extend M-alignment to protein
+sequences.
 
 %\begin{figure}
 %\begin{minipage}{\textwidth}
 %\begin{multicols}{2}
 
-\clearpage
+%\clearpage
 
-\begin{figure}
+\begin{figure}[ht]
+%\begin{minipage}{\textwidth}
+\begin{multicols}{2}
+
+%\begin{figure}
 \centering
-\epsfig{file=roc_uni.eps, width=\plotwidth}
-\caption{\label{fig:roc_uni}ROC for a uniform sequence model.}
+\epsfig{file=3state.eps, width=0.8\columnwidth}
+\caption{\label{fig:3state}DPA for affine gap costs aka. 3-State mutation model.}
+%\end{figure}
+
+\pagebreak
+
+%\begin{figure}
+\centering
+\epsfig{file=local.eps, width=0.7\columnwidth}
+\caption{\label{fig:local}Local alignments}
+%\end{figure}
+
+\end{multicols}
+%\end{minipage}
 \end{figure}
 
-\begin{figure}
-\centering
-\epsfig{file=roc_0.eps, width=\plotwidth}
-\caption{\label{fig:roc_0}ROC for biased composition sequences.}
-\end{figure}
+%\clearpage
 
-\begin{figure}
+\begin{figure}[ht]
 \centering
 \epsfig{file=roc_uni_0.eps, width=\plotwidth}
 \caption{\label{fig:roc_uni_0}ROC for a uniform sequence model and biased composition sequences.}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[ht]
 \centering
 \epsfig{file=roc_blend.eps, width=\plotwidth}
 \caption{\label{fig:roc_blend}ROC for a blended model}
@@ -862,83 +866,6 @@ any false negatives.
 \bibliography{biblio}
 %\normalsize
 
-
-\appendix
-\section{Mutation Model}
-\label{sec:mutations}
-
-When using a population model for sequences the problem arises of how to
-mutate a sequence from this model such that the mutated sequence still
-``fits'' the population model.  If characters are inserted, deleted or changed
-without regard to the population model, the resulting mutated sequence will
-tend towards a uniform population model.
-
-We have a sequence, $A$, and a population model $M$.  The entropy of $A$ under
-this model shall be written $M(A)$.  The length of sequence $A$ will be
-written $|A|$.  The sequence that results from making $x$ mutations to $A$
-shall be referred to as $A_x$.  We earlier described the motivation as wanting
-the mutated sequence to ``fit'' the population model.  To make this precise,
-what is desired is that as $x$ tends to infinity, the entropy of the mutated
-sequence, $M(A_x)$, will tend to the entropy of the population model, $M$,
-itself.
-
-The method used to mutate sequences was inspired by the Metropolis
-algorithm~\cite{metropolis53}.  Consider every possible sequence as having a
-node, $S_i$ in a graph.  An arc between two nodes, $S_i$ and $S_j$, implies
-that a single mutation relates the two corresponding sequences.  As we make
-mutations to a sequence, we move between nodes in the graph.  In the extreme
-case where many mutations are made, we want to visit each node with a
-frequency equal to probability $p$, where $p$ is probability of that node's
-sequence under the population model.  A sufficient condition for this is to
-have the probability of taking the arc from $S_i$ to $S_j$ equal to the
-probability of taking the arc from $S_j$ to $S_i$.
-
-We will assume a point mutation model for simplicity.  That is, we consider
-making mutations of the form delete a character, insert a character or change
-a character.  For an alphabet of 4 characters, sequence $A$ has $3\times|A|$
-possible change mutations, $|A|$ possible delete mutations and
-$4\times(|A|+1)$ possible insert mutations.  If we assume a uniform, or
-relatively flat, prior on the length of sequences, then we have the
-requirement when mutating a sequence that on average the number of deletions
-should be the same as the number of insertions.  There is a degree of freedom
-in choosing the ratio of changes to insertions and deletions.  We shall use a
-probability parameter $P_{change}$ for this.  We define two other probabilities
-in terms of this.
-
-\begin{eqnarray*}
-P_{insert} & = & \frac{(1-P_{change})(4\times(|A|+1))}{(5\times|A|+4)} \\
-P_{delete} & = & \frac{(1-P_{change})}{(5\times|A|+4)}
-\end{eqnarray*}
-
-When we mutate sequence $A$, a random choice is made whether to consider an
-insertion, a deletion or a change mutation using the three above probabilities
-(note they sum to unity).  If a deletion is to be considered, then the
-position of the deletion is chosen uniform randomly over the length of the
-sequence.  If a change, then the position and character are chosen randomly.
-If an insertion, then the position and the character to be inserted are
-randomly selected.  The sequence that would result from this mutation is $A'$.
-Let $q$ be the probability given to sequence $A$ by the population model, and
-$q'$ the probability given to sequence $A'$.  If $q'$ is greater than $q$ then
-the mutation is accepted and $A'$ becomes $A_1$.  Otherwise, the mutation is
-accepted with probability $q'/q$.  This process is repeated until the desired
-number of mutations has been made.
-
-The process of calculating $q'$ from the potential mutation can be done
-efficiently if the population model $M$ is such that it operates on a local
-level.  That is, if $q'$ can be calculated from $q$ and the potential mutation
-in constant time.  This is true for fixed order Markov Models.
-
-Since this method does not preclude a mutation ``undoing'' previous mutations,
-the resulting mutated sequence, $A_x$, may be more similar to $A$ than
-otherwise expected.  This tends to be more likely if $M$ is a very low entropy
-model.
-
-In the blendModel tests we make mutations as if the population model were a
-uniform model.  Thus the more a sequence is mutated the higher its entropy
-will become on average.  It is possible to use the method described above to
-perform population mutations correctly.  Indeed, it could done efficiently
-provided information were kept about which regions of the sequence came from
-which sub-model.
 
 
 %\section{STUFF TO BE DONE} 
