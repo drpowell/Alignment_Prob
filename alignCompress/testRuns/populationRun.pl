@@ -30,16 +30,16 @@ my $model = new Markov_gen(0, [qw(a t g c)],
 #			    'g' => {a=>0.3, t=>0.3, g=>0.2, c=>0.2},
 #			    'c' => {a=>0.1, t=>0.2, g=>0.2, c=>0.5}
 #			   });
-#$model->model_power(2);
+$model->model_power(1.3);
 #$model->makeUniModel(2);
 $model->{PCHANGE} = 0.6;
-my $model2 = new Markov_gen(0, [qw(a t g c)],
-			   {'' => {a=>0.4, t=>0.2, g=>0.1, c=>0.3}});
+my $model2 = new Markov_gen(-1, [qw(a t g c)]);
+#			   {'' => {a=>0.4, t=>0.2, g=>0.1, c=>0.3}});
 $model2->{PCHANGE} = 0.6;
 
-my $numArchetypes = 10;
-my $numEachMutations = 4;
-my @numMutation = (10, 30, 50, 60, 80);
+my $numArchetypes = 20;
+my $numEachMutations = 2;
+my @numMutation = (30, 40, 50, 60, 80);
 my ($l_sub, $l_sub_range) = (120, 30);
 my ($l1_s, $l1_e) = (50, 100);
 my ($l2_s, $l2_e) = (100, 50);
@@ -55,7 +55,8 @@ $str .= "\nProgs to use:\n$compProg$compProgOpt\n$prssProg\n\n";
 
 $str .= "Produce $numArchetypes sequences of the form gen($l1_s+-$l_range) . sub_seq($l_sub+-$l_sub_range)) . gen($l1_e+-$l_range)\n";
 $str .= "From these children will be produced of the form gen($l2_s+-$l_range). mutate_sub_seq(numMutate).gen($l2_e+-$l_range)\n";
-$str .= "Repeat each mutation rate $numEachMutations. Num mutations = (@numMutation)\n\n";
+$str .= "Repeat each mutation rate $numEachMutations. Num mutations = (@numMutation)\n";
+$str .= "Model for start, middle and end chosen randomly (at 0.5)\n\n";
 #$str .= "Note the model has biased 1st order stats, _but_ uniform 0 order stats\n";
 $str .= "model1: " . $model->as_string();
 $str .= "model2: " . $model2->as_string();
@@ -69,14 +70,14 @@ my @population;
 for my $i (0 .. $numArchetypes-1) {
   my $m = ($i < $numArchetypes/2 ? $model : $model2);
   my $subseq = $m->gen_sequence(rand_length($l_sub, $l_sub_range));
-  my $s1 = $m->gen_sequence(rand_length($l1_s, $l_range));
-  my $e1 = $m->gen_sequence(rand_length($l1_e, $l_range));
+  my $s1 = (rand>0.5 ? $model : $model2)->gen_sequence(rand_length($l1_s, $l_range));
+  my $e1 = (rand>0.5 ? $model : $model2)->gen_sequence(rand_length($l1_e, $l_range));
   my $str1 = $s1 . $subseq . $e1;
   $archetypes[$i] = {SEQ => $str1, S_LEN=>length($s1), E_LEN=>length($e1), SUB_LEN=>length($subseq)};
   for my $numMutations (@numMutation) {
     for my $j (1 .. $numEachMutations) {
-      my $s2 = $m->gen_sequence(rand_length($l2_s, $l_range));
-      my $e2 = $m->gen_sequence(rand_length($l2_e, $l_range));
+      my $s2 = (rand>0.5 ? $model : $model2)->gen_sequence(rand_length($l2_s, $l_range));
+      my $e2 = (rand>0.5 ? $model : $model2)->gen_sequence(rand_length($l2_e, $l_range));
       my $subseq2 = $m->mutate($subseq, $numMutations);
       my $str2 = $s2 . $subseq2 . $e2;
       push( @population, {SEQ => $str2, PARENT=>$i, MUTATES=>$numMutations,
@@ -124,10 +125,10 @@ for my $i (0 .. $numArchetypes-1) {
     $SIG{CHLD} = 'IGNORE';
 
     for my $sum (qw(false true)) {
-      my($r, $a_len, $m_len, $d_len, $params, $rTime1, $uTime1, $sTime1, $swaps1) = 
+      my($r, $a_len, $m_len, $d_len, $params, $cuts, $rTime1, $uTime1, $sTime1, $swaps1) = 
 	runProg($compProg . $compProgOpt . " --sum=$sum", $str1, $str2);
 
-      printf("AlignCompress (sum=$sum): s1=%d s2=%d parent=%d mutates=%d r=%f (%f) al=%f (%f) ml=%f (%f) dl=%f (%f) uTime=%f params:%s\n",
+      printf("AlignCompress (sum=$sum): s1=%d s2=%d parent=%d mutates=%d r=%f (%f) al=%f (%f) ml=%f (%f) dl=%f (%f) uTime=%f cuts=%s params:%s\n",
 	     $i, $j,
 	     $population[$j]{PARENT},
 	     $population[$j]{MUTATES},
@@ -136,6 +137,7 @@ for my $i (0 .. $numArchetypes-1) {
 	     $m_len->[-1], $m_len->[0],
 	     $d_len->[-1], $d_len->[0],
 	     $uTime1,
+	     (@$cuts ? join(":",@{$cuts->[-1]}) : ''),
 	     join " ", map { "$_=$params->{$_} " } sort keys %$params,
 	    );
     }
@@ -181,6 +183,7 @@ sub runProg {
   $s->add($rdr, $err);
 
   my(@odds_ratio, @total_len, @model_len, @data_len);
+  my @cuts;
   my(%params);
   my($rTime,$uTime,$sTime) = (-1,-1,-1);
   my($swaps)               = (-1);
@@ -196,6 +199,10 @@ sub runProg {
 	  push(@total_len, $1);
 	  push(@model_len, $2);
 	  push(@data_len,  $3);
+	}
+
+	if (/ALIGNMENT CUTS: A\[(\d+)\.\.(\d+)\] B\[(\d+)\.\.(\d+)\]/) {
+	  push(@cuts, [$1, $2, $3, $4]);
 	}
 
 	if (/^(diag_fromD   |
@@ -229,7 +236,7 @@ sub runProg {
 
   (!@odds_ratio) && (die "Unable to find 'log odds ratio'!\n");
 
-  return (\@odds_ratio, \@total_len, \@model_len, \@data_len, \%params, $rTime, $uTime, $sTime, $swaps);
+  return (\@odds_ratio, \@total_len, \@model_len, \@data_len, \%params, \@cuts, $rTime, $uTime, $sTime, $swaps);
 }
 
 sub runFastaProg {

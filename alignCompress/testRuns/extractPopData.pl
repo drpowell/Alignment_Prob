@@ -3,6 +3,12 @@
 use strict;
 
 my $prss;
+my $blend=0;
+
+if (defined($ARGV[0]) && $ARGV[0] eq 'blend') {
+  shift;
+  $blend=1;
+}
 
 if (defined($ARGV[0]) && (
     $ARGV[0] eq 'prss' ||
@@ -17,6 +23,8 @@ if (defined($ARGV[0]) && (
 
 my(@prss, @prss2, @al_all, @al_one, @al_sw);
 
+my $sum_or_blend = ($blend ? "blend" : "sum");
+
 while (<>) {
   next if (/^\#/);
 
@@ -26,7 +34,7 @@ while (<>) {
     next;
   }
 
-  if (/^AlignCompress   \s  \(sum=(true|false)\): \s
+  if (/^AlignCompress   \s  \($sum_or_blend=(true|false)\): \s
       s1=(\d+) \s s2=(\d+) \s parent=(\d+) \s mutates=(\d+) \s
       r=(\S+)    \s \(  ([-\d.]+)     \)   \s
         al=\S+   \s \(   [-\d.]+      \)   \s

@@ -6,17 +6,19 @@ my($myLoc) = ($0 =~ m{^(.*)/});
 $myLoc ||= '.';
 
 my $fname = shift;
-my $MMorder="unknown";
-my $entropy="unknown";
+my(@MMorder) = ("unknown");
+my(@entropy) = ("unknown");
+my(@Pchange) = ("unknown");
 my $pMM="unknown";
 my $uni0 = 0;
 my $haveSW = 0;
 
 open (F, "< $fname") or die "Unable to read $fname";
 while (<F>) {
-  if (/^\#Model order=(\S+) entropy=(\S+)/) {
-    $MMorder=$1;
-    $entropy=$2;
+  if (/^\#model(\d): Model order=(\S+) entropy=(\S+) Pchange=(\S+)/) {
+    $MMorder[$1-1]=$2;
+    $entropy[$1-1]=$3;
+    $Pchange[$1-1]=$4;
   }
 
   if (/^\#java.*--markov=(\S+)/) {
@@ -40,15 +42,20 @@ if (defined($ARGV[0])) {
   $toFile = 1;
   my $file = shift;
   die "$file doesn't have .eps extension" if (!($file =~ /\.eps$/));
-  $cmd .= "set terminal postscript eps\n";
+  $cmd .= "set terminal postscript eps color\n";
   $cmd .= "set output '$file'\n";
 }
 
 $cmd .= "set key left\n";
 $cmd .= "set logscale y\n";
 $cmd .= "set data style lines\n";
-$cmd .= sprintf("set title 'ROC for MM order=$MMorder entropy=$entropy%s'\n",
-		$uni0 ? " (uniform 0 order stats)" : "");
+if (@MMorder == 1) {
+  $cmd .= "set title \"ROC for MM order=$MMorder[0] entropy=$entropy[0] Pchange=$Pchange[0]";
+} else {
+  $cmd .= "set title \"ROC for MM order=$MMorder[0] entropy=$entropy[0] Pchange=$Pchange[0]\\n".
+                          "and MM order=$MMorder[1] entropy=$entropy[1] Pchange=$Pchange[1]";
+}
+$cmd .= ($uni0 ? " (uniform 0 order stats)" : "") . "\"\n";
 $cmd .= "set xlabel 'Coverage'\n";
 $cmd .= "set ylabel 'Errors'\n";
 
@@ -66,11 +73,9 @@ if ($toFile) {
   print F $cmd;
   close(F);
 } else {
-  $cmd .= "pause -1\n";
-  open(F, "| gnuplot -") or (die "Can't run gnuplot");
+  open(F, "| gnuplot -persist - 2>/dev/null") or (die "Can't run gnuplot");
   { my $oldfh = select F; $|=1; select $oldfh; }
   print F $cmd;
-  <STDIN>;
   close(F);
-  print $cmd;
+#  print $cmd;
 }
