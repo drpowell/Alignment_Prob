@@ -1,4 +1,4 @@
-%\documentclass[letterpaper,12pt,oneside]{article}
+\%\documentclass[letterpaper,12pt,oneside]{article}
 \documentclass[a4paper,11pt,oneside]{article}
  
 \usepackage{multicol}
@@ -27,9 +27,6 @@
 medium or low information sequences}
 % ?models don't shuffle?  ha, ha
 
-%\author{
-%  David R. Powell
-%}
 \author{
   David R. Powell\footnotemark[1]~, Lloyd Allison and Trevor I. Dix \\
 {\small powell@csse.monash.edu.au, lloyd@bruce.cs.monash.edu.au, trevor@csse.monash.edu.au} \\
@@ -555,6 +552,8 @@ aligned regions in $2\log_2(l1) - 1 + \log_2(l2)$ bits.
 
 \section{Tests}
 
+\subsection{Artificial Data}
+
 Artificial data was used to compare the new M-alignment algorithm with the
 common Smith-Waterman algorithm using shuffling as a significance test.  The
 benefit of using artificial data is that the conditions can be controlled
@@ -734,6 +733,50 @@ Blend Uni \& 1-order & Sum (blendModel) & 246 & 116 \\
 \hline \end{tabular}
 \end{center}
 %\end{minipage}
+
+\subsection{Real Data}
+
+In this section we show that M-alignment also performs well on real DNA data.
+We chose a relatively low information sequence from \emph{Plasmodium
+falciparum} chromosome 2.  The sequence is from the end of the intron and
+start of the second exon of PFB0010w.
+
+\begin{verbatim}
+TATATATATA TATATATATA TATACCCATA ACTACATTCA CATATACACA
+TACATATATA TATATTATAT ATATATATAC CCATAACTAC ATACATACAT
+ACATACATAA ATATATACAT ACACATATAT ATGTTCATTT TTTTTTTTAG
+AAAAAAA
+\end{verbatim}
+
+This sequence was used in a BLAST search against all of nucleic sequences in
+Genbank.  The default options were used with the exception that filtering was
+turned off and the cut-off E value was set to 10.  This search resulted in
+60765 ``matching'' sequences.  Each of these 60765 sequences were retrieved,
+including an extra 50 characters at each end so the alignment programs could
+have some extra context information.  As one would expect most of these
+sequences are in fact unrelated to the query sequence.  Most of the false
+positives are due to matching \verb!TATA! regions.  Using M-alignment with a
+sequence model that correctly apportions weight to such regions should give
+good results.  The model we used here, was a fifth-order Markov Model trained
+on all 60765 matching sequences.  While such a model is not ideal, we assume
+that most of the sequences are unrelated but do represent a certain
+population.  If a sequence is to be said to be related to the query sequence
+then it must have more in common than simply coming from the that population.
+
+The \verb!prss! and M-alignment programs then did a pair-wise comparison
+between the query sequence and each of the 60765 matching sequences.  Thus, a
+ranking of the matching sequences was produced by both programs.  
+It is difficult to say which ordering is better.
+
+A fragment was taken from pseudo-gene PFB0045c which is known to be distantly
+related to the query sequence, PFB0010w.  This fragment was not found by the
+BLAST search.  If this fragment is ranked amongst the other sequences ideally
+it would rank fairly highly since most of the 60765 sequences are unrelated to
+the query sequence.  The \verb!prss! program ranks this fragment at 25499 of
+60765, while the M-alignment program ranks it at 241.  
+
+
+
 
 
 
