@@ -6,7 +6,7 @@ use Markov_gen;
 
 my $timeProg = '/usr/bin/time';
 my $compProg = 'java -Xmx512m -cp ../..:../../hb15.zip alignCompress/AlignCompress';
-my $compProgOpt = ' --markov=-1 --verbose=2 --maxIterations=20 --linear=true --local=true';
+my $compProgOpt = ' --markov=1 --verbose=2 --maxIterations=20 --linear=true --local=true';
 my $prssProg = './prss33 -b 200 -n -q';
 
 use Data::Dumper;
@@ -22,7 +22,8 @@ my $log = new IO::File "> popLog.$$";
 (defined $log) || die "Can't open output log";
 $log->autoflush(1);
 
-my $model = new Markov_gen(-1, [qw(a t g c)]);
+my $model = new Markov_gen(0, [qw(a t g c)],
+			   {'' => {a=>0.2, t=>0.1, g=>0.5, c=>0.2}});
 #			   {
 #			    'a' => {a=>0.2, t=>0.1, g=>0.5, c=>0.2},
 #			    't' => {a=>0.2, t=>0.5, g=>0.1, c=>0.2},
@@ -31,7 +32,10 @@ my $model = new Markov_gen(-1, [qw(a t g c)]);
 #			   });
 #$model->model_power(2);
 #$model->makeUniModel(2);
-$model->{PCHANGE} = 0.4;
+$model->{PCHANGE} = 0.6;
+my $model2 = new Markov_gen(0, [qw(a t g c)],
+			   {'' => {a=>0.4, t=>0.2, g=>0.1, c=>0.3}});
+$model2->{PCHANGE} = 0.6;
 
 my $numArchetypes = 10;
 my $numEachMutations = 4;
@@ -53,7 +57,8 @@ $str .= "Produce $numArchetypes sequences of the form gen($l1_s+-$l_range) . sub
 $str .= "From these children will be produced of the form gen($l2_s+-$l_range). mutate_sub_seq(numMutate).gen($l2_e+-$l_range)\n";
 $str .= "Repeat each mutation rate $numEachMutations. Num mutations = (@numMutation)\n\n";
 #$str .= "Note the model has biased 1st order stats, _but_ uniform 0 order stats\n";
-$str .= $model->as_string();
+$str .= "model1: " . $model->as_string();
+$str .= "model2: " . $model2->as_string();
 
 $str =~ s/^/#/gm;
 print $str;
@@ -62,16 +67,17 @@ my @archetypes;
 my @population;
 
 for my $i (0 .. $numArchetypes-1) {
-  my $subseq = $model->gen_sequence(rand_length($l_sub, $l_sub_range));
-  my $s1 = $model->gen_sequence(rand_length($l1_s, $l_range));
-  my $e1 = $model->gen_sequence(rand_length($l1_e, $l_range));
+  my $m = ($i < $numArchetypes/2 ? $model : $model2);
+  my $subseq = $m->gen_sequence(rand_length($l_sub, $l_sub_range));
+  my $s1 = $m->gen_sequence(rand_length($l1_s, $l_range));
+  my $e1 = $m->gen_sequence(rand_length($l1_e, $l_range));
   my $str1 = $s1 . $subseq . $e1;
   $archetypes[$i] = {SEQ => $str1, S_LEN=>length($s1), E_LEN=>length($e1), SUB_LEN=>length($subseq)};
   for my $numMutations (@numMutation) {
     for my $j (1 .. $numEachMutations) {
-      my $s2 = $model->gen_sequence(rand_length($l2_s, $l_range));
-      my $e2 = $model->gen_sequence(rand_length($l2_e, $l_range));
-      my $subseq2 = $model->mutate($subseq, $numMutations);
+      my $s2 = $m->gen_sequence(rand_length($l2_s, $l_range));
+      my $e2 = $m->gen_sequence(rand_length($l2_e, $l_range));
+      my $subseq2 = $m->mutate($subseq, $numMutations);
       my $str2 = $s2 . $subseq2 . $e2;
       push( @population, {SEQ => $str2, PARENT=>$i, MUTATES=>$numMutations,
 			  S_LEN=>length($s2), E_LEN=>length($e2), SUB_LEN=>length($subseq2)});
@@ -326,3 +332,4 @@ sub num_processors {
   }
   return $num;
 }
+
