@@ -1,0 +1,25 @@
+
+Show false positives are common if not a simple 0th order MM.  That is, biased
+1st order, but unbiased 0 order.
+
+But extension of ssearch33 method to other model is not ideal cause it only
+finds the optimal alignment and _doesn't_ account for the info content in
+finding the alignment.
+
+Use a biased alphabet (low entropy 0th MM). Generate sequence S1 and S2 such
+that they are related.  Also generate a number of unrelated sequences.  Put
+S2, and the unrelated sequences in a library, and test S1 against each in
+turn.  Find where S2 is ranked - ideally it will be 1st.  Hopefully, this will
+show that the approach of ssearch33 is incorrect.
+
+Can show some false negatives. (Using gen_other.pl script.) Two unrelated
+sequences from 0th order MM.  Embed in both, at different locations, a high
+entropy subsequence.  Local alignments should be able to determine that these
+sequences are related and the related parts.
+
+
+
+ASK LLOYD? Why picking optimal alignment can give better compression that
+summing over all alignments?  Just faster convergence?
+
+

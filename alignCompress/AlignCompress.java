@@ -182,25 +182,104 @@ class AlignCompress {
     String seqA;
     String seqB;
 
+    String paramString;
     int markovOrder;
     int numIterations;
     int verbose;
     boolean linearCosts;
     boolean localAlign;
+    boolean sumAlignments;
+
+    boolean doTraceBack;
+
+    // Encode length l: 0..infinity
+    static private double encode_length(double l) {
+	Misc.assert(l>=0, "Bad length to encode:"+l);
+	return MyMath.logstar_continuous(l+1);
+    }
 
     public AlignCompress() {
     }
 
+    // Return the appropriate cell of D[][].  Use i%2 if only keeping 2 rows
+    private Mutation_FSM cell(Mutation_FSM D[][], int i, int j) {
+	if (doTraceBack) {
+	    return D[i][j];
+	} else {
+	    return D[i%2][j];
+	}
+    }
+
+    private String getAlignment(Mutation_FSM D[][], 
+				Mutation_FSM.TraceBack_Info fcell) {
+	Mutation_FSM.TraceBack_Data d = fcell.get_tbdata();
+	int i=d.i;
+	int j=d.j;
+
+	StringBuffer resA = new StringBuffer();
+	StringBuffer resB = new StringBuffer();
+
+	if (i<0 && j<0) {
+	    d = fcell.get_from(d);
+	    i = d.i;
+	    j = d.j;
+	}
+
+	String endA = seqA.substring(i);
+	String endB = seqB.substring(j);
+	
+	while (true) {
+	    //	    System.err.println("\n\n(i,j)="+i+","+j+"\nA="+resA+"\nB="+resB+"\n");
+
+	    d = ((Mutation_FSM.TraceBack_Info)D[i][j]).get_from(d);
+
+	    if (d==null) break;
+
+	    resA.append((d.i==i) ? '-' : seqA.charAt(d.i));
+	    resB.append((d.j==j) ? '-' : seqB.charAt(d.j));
+
+	    i=d.i;
+	    j=d.j;
+	}
+
+	resA.reverse();
+	resB.reverse();
+
+	StringBuffer res = new StringBuffer();
+
+	// Pretty up the alignment.  For local alignments, put the front and end bits on.
+	for (int x=0; x< j-(i<j ? i : j); x++) res.append(" ");
+	res.append(seqA.substring(0,i));
+	if (i>0 || j>0) res.append("   ");
+	res.append(resA.toString().toUpperCase());
+	res.append("   ");
+	res.append(endA);
+
+	res.append("\n");
+
+	for (int x=0; x< i-(i<j ? i : j); x++) res.append(" ");
+	res.append(seqB.substring(0,j));
+	if (i>0 || j>0) res.append("   ");
+	res.append(resB.toString().toUpperCase());
+	res.append("   ");
+	res.append(endB);
+
+	return res.toString();
+    }
+
     public double doAlign() {
-	System.err.println("# SeqA = "+seqA+"\n# SeqB = "+seqB+
+	System.out.println("# SeqA = "+seqA+"\n# SeqB = "+seqB+
 			   "\n# markov order="+markovOrder+
 			   "\n# num iterations="+numIterations+
 			   "\n# linearCosts="+linearCosts+
+			   "\n# sumAlignments="+sumAlignments+
 			   "\n# local Alignment="+localAlign+
 			   "\n# verbosity="+verbose+
+			   "\n# params="+paramString+
 			   "\n");
 
 	Params p = new Params();
+	p.fromString(paramString);
 
 
 	BufferModel modelA = new BufferModel( new MarkovN_fitted(markovOrder, alphabet, seqA), 
@@ -212,66 +291,85 @@ class AlignCompress {
 	//System.err.println("modelB\n"+modelB+"\n");
 
 	int mdlCounts = Model_SeqAB.required_counts();
-	int fsmCounts = (linearCosts ? FSM_3State.required_counts() : FSM_Prob.required_counts()); 
+
+	int fsmCounts = -1;
+	if (!linearCosts && !sumAlignments) fsmCounts = Mutation_1State.One.required_counts();
+	if (!linearCosts &&  sumAlignments) fsmCounts = Mutation_1State.All.required_counts();
+	if ( linearCosts && !sumAlignments) fsmCounts = Mutation_3State.One.required_counts();
+	if ( linearCosts &&  sumAlignments) fsmCounts = Mutation_3State.All.required_counts();
+
+	Misc.assert(fsmCounts>=0, "Bad number of fsmCounts");
+
 	int totCounts = mdlCounts + fsmCounts;
 
 	double bestDiff = -Double.POSITIVE_INFINITY;
 
 	for (int iter=0; iter<numIterations; iter++) {
-	    // EncNonAlignChar - (local alignments) encode that a non-aligned character follows
-	    // EncEndNonAlign  - (local alignments) next will be the alignment
-	    // EncAlignChar - (local alignments) encode that an alignment pair follows
-	    // EncEndAlign  - (local alignments) encode no more of the alignment to follow
-	    //        The use of these corresponds to encoding the lengths using a geometric distribution.
-	    //        This 'aint ideal but it's a start.  The values here seem reasonable.
-	    //                                         (should they be estimated as well?)
-	    double EncNonAlignChar, EncEndNonAlign;
-	    double EncAlignChar, EncEndAlign;
-
-	    {
-		EncNonAlignChar = -(MyMath.log2(seqA.length()+seqB.length()) - 
-				    MyMath.log2(seqA.length()+seqB.length() + 1));
-		EncEndNonAlign  = -(MyMath.log2(1) -
-				    MyMath.log2(seqA.length()+seqB.length() + 1));
-
-		EncAlignChar = -(MyMath.log2(seqA.length()+seqB.length()) - 
-				 MyMath.log2(seqA.length()+seqB.length() + 2));
-		EncEndAlign  = -(MyMath.log2(2) -
-				 MyMath.log2(seqA.length()+seqB.length() + 2));
-	    }
 
 	    int countPos = 0;
 	    Two_Seq_Model_Counts model = new Model_SeqAB(p, modelA, modelB, countPos);
 	    countPos += mdlCounts;
-	    Mutation_FSM.With_Counts fsmType;
-	    if (linearCosts)
-		fsmType = new FSM_3State(model, p, totCounts, countPos);
-	    else
-		fsmType = new FSM_Prob(model, p, totCounts, countPos);
+	    Mutation_FSM fsmType=null;
+
+	    if (!linearCosts && !sumAlignments) 
+		fsmType = new Mutation_1State.One(model, p, totCounts, countPos);
+	    if (!linearCosts &&  sumAlignments) 
+		fsmType = new Mutation_1State.All(model, p, totCounts, countPos);
+	    if ( linearCosts && !sumAlignments) 
+		fsmType = new Mutation_3State.One(model, p, totCounts, countPos);
+	    if ( linearCosts &&  sumAlignments) 
+		fsmType = new Mutation_3State.All(model, p, totCounts, countPos);
+
+	    Misc.assert(fsmType!=null, "Unable to construct fsmType");
+
+
 	    countPos += fsmCounts;
 	    Misc.assert(countPos == totCounts, "Internal error: countPos!=totCounts");
 
-	    Counts emptyCounts = new Counts(totCounts);
+	    Counts initialCounts = new Counts(totCounts);
 	    for (int i=0; i<totCounts; i++) 
-		emptyCounts.inc(i, 1); // Start all counts at 1.
+		initialCounts.inc(i, 1); // Start all counts at 1.
+
+	    // Determine if fsmType supports traceBack. ie. Does it implement TraceBack_Info
+	    doTraceBack = false;
+	    if (fsmType instanceof Mutation_FSM.TraceBack_Info)
+		doTraceBack = true;
 	    
 	    
 	    // Setup the DPA matrix
-	    Mutation_FSM.With_Counts D[][] = new Mutation_FSM.With_Counts[2][seqB.length()+1];
-	    for (int i=0; i<2; i++) {
-		for (int j=0; j<seqB.length()+1; j++) {
-		    D[i][j] = (Mutation_FSM.With_Counts)fsmType.clone();
+	    Mutation_FSM D[][];
+	    Mutation_FSM final_cell;
+	    if (!doTraceBack) {
+		// No traceback info, only keep 2 rows in D[][]
+		D = new Mutation_FSM[2][seqB.length()+1];
+		for (int i=0; i<2; i++) {
+		    for (int j=0; j<seqB.length()+1; j++) {
+			D[i][j] = (Mutation_FSM)fsmType.clone();
+		    }
 		}
+		final_cell = (Mutation_FSM)fsmType.clone();
+	    } else {
+		// Keep all traceback info, so keep all rows in D[][]
+		D = new Mutation_FSM[seqA.length()+1][seqB.length()+1];
+		for (int i=0; i<seqA.length()+1; i++) {
+		    for (int j=0; j<seqB.length()+1; j++) {
+			D[i][j] = (Mutation_FSM)fsmType.clone();
+			Mutation_FSM.TraceBack_Info c = (Mutation_FSM.TraceBack_Info)D[i][j];
+			c.set_tbdata(new Mutation_FSM.TraceBack_Data(i,j));
+		    }
+		}
+		final_cell = (Mutation_FSM)fsmType.clone();
+		((Mutation_FSM.TraceBack_Info)final_cell).set_tbdata(new Mutation_FSM.TraceBack_Data(-1,-1));
 	    }
 
 	    // Initialise the first cell of the DPA matrix
-	    D[0][0].init_val(0); 
-	    D[0][0].init_counts(emptyCounts); // Initialise counts
+	    cell(D,0,0).init_val(0); 
+	    cell(D,0,0).init_counts(initialCounts); // Initialise counts
 
 	    if (verbose>=1) { 
-		System.out.println("Iteration: " + iter);
+		System.out.println("\n\nIteration: " + iter);
 		System.out.println(model);
-		System.out.println(D[0][0].paramsToString()); 
+		System.out.println(cell(D,0,0).paramsToString()); 
 	    }
 
 	    // Do the DPA!
@@ -281,76 +379,105 @@ class AlignCompress {
 	    for (int i=0; i<seqA.length()+1; i++) {
 
 		// Reset the next row of the DPA matrix
-		for (int j=0; j<seqB.length()+1; j++) {
-		    D[(i+1)%2][j].reset();
-		}
+		if (!doTraceBack)
+		    for (int j=0; j<seqB.length()+1; j++) {
+			cell(D,i+1,j).reset();
+		    }
 
 		for (int j=0; j<seqB.length()+1; j++) {
-		    Mutation_FSM v = (i==seqA.length() ? null : D[(i+1)%2][j]);
-		    Mutation_FSM h = (j==seqB.length() ? null : D[ i   %2][j+1]);
-		    Mutation_FSM d = (i==seqA.length() || j==seqB.length() ? null : D[(i+1)%2][j+1]);
+		    Mutation_FSM v = (i==seqA.length() ? null : cell(D,i+1,j));
+		    Mutation_FSM h = (j==seqB.length() ? null : cell(D,i,j+1));
+		    Mutation_FSM d = (i==seqA.length() || j==seqB.length() ? null : cell(D,i+1,j+1));
 		    char aChar = (i==seqA.length() ? '-' : seqA.charAt(i));
 		    char bChar = (j==seqB.length() ? '-' : seqB.charAt(j));
 
 		    if (localAlign) {
 			// Compute contribution of a local alignment that starts at (i,j)
 			double val = modelA.encodeCumulative(i) +  modelB.encodeCumulative(j);
-			val += i*EncNonAlignChar + EncEndNonAlign;
-			val += j*EncNonAlignChar + EncEndNonAlign;
-			D[i%2][j].or(val, emptyCounts);
-
-			// Encode that an alignment character is coming next
-			D[i%2][j].add(EncAlignChar, -1);
+			val += encode_length(i);
+			val += encode_length(j);
+			cell(D,i,j).or(val, initialCounts);
 		    }
 
 		    if (verbose>=3) {
 			System.err.println("Calc outputs from D["+i+"]["+j+"]");
-			System.err.println(D[i%2][j]);
+			System.err.println(cell(D,i,j));
 		    }
 
 		    
-		    D[i%2][j].calc(h, v, d, aChar, bChar, i, j);
+		    cell(D,i,j).calc(h, v, d, aChar, bChar, i, j);
 
 		    if (localAlign) {
 			// Compute contribution of a local alignment that ends at (i,j)
-			double val = D[i%2][j].get_val() +
+			double val = cell(D,i,j).get_val() +
 			    (modelA.encodeCumulative( seqA.length() ) - modelA.encodeCumulative(i)) +
 			    (modelB.encodeCumulative( seqB.length() ) - modelB.encodeCumulative(j));
 
-			// Remove encoding that an alignment char is next.
-			// Then encode that there is no more alignment chars.
-			val -= EncAlignChar;
-			val += EncEndAlign;
+			val += encode_length(seqA.length()-i);
+			val += encode_length(seqB.length()-j);
 
-			val += (seqA.length()-i)*EncNonAlignChar + EncEndNonAlign;
-			val += (seqB.length()-j)*EncNonAlignChar + EncEndNonAlign;
-			D[seqA.length()%2][seqB.length()].or(val, D[i%2][j].get_counts());
+			//System.err.println("PRE  final_cell = "+final_cell.get_val()+" from: "+((Mutation_FSM.TraceBack_Info)final_cell).get_from(((Mutation_FSM.TraceBack_Info)final_cell).get_tbdata()));
+
+			if (doTraceBack)
+			    ((Mutation_FSM.TraceBack_Info)final_cell).or(val, 
+									 cell(D,i,j).get_counts(),
+									 cell(D,i,j));
+			else
+			    final_cell.or(val, cell(D,i,j).get_counts());
+
+			//System.err.println("POST final_cell = "+final_cell.get_val()+" from: "+((Mutation_FSM.TraceBack_Info)final_cell).get_from(((Mutation_FSM.TraceBack_Info)final_cell).get_tbdata()));
+
 		    }
 		}
 	    }
 
-	    double encAlignModel = D[seqA.length()%2][seqB.length()].encode_params();
-	    double encAlignment = encAlignModel + D[seqA.length()%2][seqB.length()].get_val();
+
+	    if (!localAlign)
+		final_cell = cell(D, seqA.length(),seqB.length());
+	    else {
+		if (!doTraceBack) 
+		    final_cell.or(cell(D, seqA.length(), seqB.length()).get_val(), 
+				  cell(D, seqA.length(), seqB.length()).get_counts());
+		else
+		    ((Mutation_FSM.TraceBack_Info)
+		     final_cell).or(cell(D, seqA.length(), seqB.length()).get_val(), 
+				    cell(D, seqA.length(), seqB.length()).get_counts(),
+				    cell(D, seqA.length(), seqB.length()));
+	    }
+	    
+	    //System.err.println("POSTPOST final_cell = "+final_cell.get_val()+" from: "+((Mutation_FSM.TraceBack_Info)final_cell).get_from(((Mutation_FSM.TraceBack_Info)final_cell).get_tbdata()));
+
+	    double encAlignModel = final_cell.encode_params();
+	    double encAlignment = encAlignModel + final_cell.get_val();
 
 	    double encA = modelA.encodeCumulative( seqA.length() );
 	    double encB = modelB.encodeCumulative( seqB.length() );
 	    double encNull = encA + encB;
 
-	    //	    if (localAlign) encNull += (seqA.length()+seqB.length())*EncNonAlignChar + EncEndNonAlign;
+	    if (localAlign) {
+		// Encode lengths for the null theory as sum and difference of lengths.
+		//		encNull += encode_length(seqA.length()+seqB.length());
+		//		encNull += encode_length(Math.abs(seqA.length()-seqB.length()));
+	    }
+
+	    if (doTraceBack) {
+		String s = getAlignment(D, (Mutation_FSM.TraceBack_Info)final_cell);
+		System.out.println(s);
+	    }
 
 	    if (bestDiff < encNull-encAlignment) bestDiff = encNull-encAlignment;
 
 	    // Get new parameters for next iteration
-	    p = fsmType.counts_to_params(D[seqA.length()%2][seqB.length()].get_counts());
+	    p = fsmType.counts_to_params(final_cell.get_counts());
 
 	    if (verbose>=2) {
 		System.out.println("encA="+encA+" encB="+encB+" encNull="+(encNull));
 
 		System.out.print("Mutual Encoding = " + encAlignment + " bits");
 		System.out.println(" (model=" + encAlignModel + " data="+(encAlignment-encAlignModel)+")");
-		System.out.println("\nCounts:\n"+D[seqA.length()%2][seqB.length()].get_counts());
+		System.out.println("\nCounts:\n"+final_cell.get_counts());
 		System.out.println("\nEstimated Parameters:\n"+
-				   fsmType.counts_to_params(D[seqA.length()%2][seqB.length()].get_counts()));
+				   fsmType.counts_to_params(final_cell.get_counts()));
 	    }
 	    System.out.println((encAlignment < encNull ? 
 				"related" : "unrelated") + " ("+(encNull-encAlignment)+")" +
@@ -366,8 +493,10 @@ class AlignCompress {
 	cmdLine.addInt("markov", -1, "Order of Markov Model to use for sequence models.");
 	cmdLine.addInt("iterations", 1, "Number of iterations.");
 	cmdLine.addBoolean("linearCosts", true, "Use linear gap costs.");
+	cmdLine.addBoolean("sumAlignments", true, "Sum over all alignments.");
 	cmdLine.addBoolean("local", false, "Compute using local alignments.");
 	cmdLine.addInt("verbose", 0, "Display verbose output (larger num means more verbosity).");
+	cmdLine.addString("params", "", "Params to pass to all classes (comma separated)");
 
 	args = cmdLine.parseLine(args);
 
@@ -408,9 +537,11 @@ class AlignCompress {
 
 	a.markovOrder     = cmdLine.getIntVal("markov");
 	a.numIterations   = cmdLine.getIntVal("iterations");
-	a.linearCosts = cmdLine.getBooleanVal("linearCosts");
-	a.localAlign  = cmdLine.getBooleanVal("local");
-	a.verbose     = cmdLine.getIntVal("verbose");
+	a.linearCosts     = cmdLine.getBooleanVal("linearCosts");
+	a.sumAlignments   = cmdLine.getBooleanVal("sumAlignments");
+	a.localAlign      = cmdLine.getBooleanVal("local");
+	a.verbose         = cmdLine.getIntVal("verbose");
+	a.paramString     = cmdLine.getStringVal("params");
 
 	a.alphabet = new char[] {'a', 't', 'g', 'c'};
 
