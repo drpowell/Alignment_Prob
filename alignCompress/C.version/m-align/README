@@ -2,12 +2,16 @@ Copyright (c) David Powell <david@drp.id.au>
 
   M-align aligns two sequences using the M-alignment algorithm.
 
+  M-align is provided under he GNU Public License v2 and
+  comes with ABSOLUTELY NO WARRANTY, or details see file COPYRIGHT
+
 Please cite:
   L. Allison, D. R. Powell and T. I. Dix
   "Compression and Approximate Matching"
   The Computer Journal, 1999 42:1 pp1-10
 
-----------------------------------------------------------------------
+COMPILING
+---------
 
 This code is known to compile under Linux using gcc versions
 3.x and 2.95.  It should be as simple as running 'make'.
@@ -22,7 +26,8 @@ actual characters in the alphabet.
 Good luck!
 
 
-----------------------------------------------------------------------
+THE ALGORITHM
+-------------
 
 This implementation of the M-alignment algorithm is specifically for
 testing the relatedness of two DNA sequences.  It also differs from
@@ -44,6 +49,8 @@ This implementation sums over all possible alignments to calculate
 how "related" the sequences are.  So, it does not produce an actual
 alignment.  The algorithm is iterated to find a (possibly local)
 optimum for the alignment parameters.
+
+
 
 ----------------------------------------------------------------------
   PROGRAM: m-align

@@ -1,3 +1,21 @@
+/*  
+ *  Copyright (c) David Powell <david@drp.id.au>
+ *
+ * 
+ * This file is part of FuzzyLZ 
+ *
+ * FuzzyLZ is a program orginally intended for the
+ * compression of DNA sequeces.  It can be viewed as a
+ * compression model like Lempel-Ziv 77, but instead of
+ * exact matches, allowing matches that contain
+ * inserts/deletes/mismatches.
+ *
+ */
+
+/*
+ * This class implements a sparse array to keep track of the
+ * active cells in the DPA
+ */
 
 package fuzzyLZ;
 

@@ -1,3 +1,27 @@
+/*  
+ *  Copyright (c) David Powell <david@drp.id.au>
+ *
+ * This file is part of AlignCompress.
+ *
+ * AlignCompress aligns two sequences using a modified DPA
+ * that allows the use of a _model_ for each sequence.
+ *
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  as published by the Free Software Foundation; either version 2
+  of the License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+ */
 
 package alignCompress;
 
@@ -484,7 +508,22 @@ class AlignCompress {
 	return bestDiff;
     }
 
+    public static void printLicense() {
+      System.err.println("");
+      System.err.println("  AlignCompress, Copyright (C) 2004 David Powell <david@drp.id.au>");
+      System.err.println("  AlignCompress comes with ABSOLUTELY NO WARRANTY; and is provided");
+      System.err.println("  under the GNU Public License v2, for details see file COPYRIGHT");
+      System.err.println("");
+      System.err.println("Please cite:");
+      System.err.println("  L. Allison, D. R. Powell and T. I. Dix");
+      System.err.println("  \"Compression and Approximate Matching\"");
+      System.err.println("  The Computer Journal, 1999 42:1 pp1-10");
+      System.err.println("");
+    }
+
     public static void main(String args[]) {
+        printLicense();
+
 	CommandLine cmdLine = new CommandLine();
 	cmdLine.addInt("markov", 0, "Order of Markov Model to use for sequence models.");
 	cmdLine.addInt("maxIterations", -1, "Maximum number of iterations.");
@@ -493,18 +532,17 @@ class AlignCompress {
 	cmdLine.addBoolean("sumAlignments", false, "Sum over all alignments.");
 	cmdLine.addBoolean("local", true, "Compute using local alignments.");
 	cmdLine.addInt("verbose", 0, "Display verbose output (larger num means more verbosity).");
-	cmdLine.addBoolean("file", false, "Read sequences from file(s) on command line");
+	cmdLine.addBoolean("exSeq", false, "Command line options are explicit sequence, not filenames");
 	cmdLine.addBoolean("protein", false, "Sequences are protein data");
 	cmdLine.addString("params", "", "Params to pass to all classes (comma separated)");
 
 	args = cmdLine.parseLine(args);
 
 	AlignCompress a = new AlignCompress();
-	boolean readFile = cmdLine.getBooleanVal("file");
+	boolean readFile = !cmdLine.getBooleanVal("exSeq");
 
-	if (args==null || args.length > 2) {
-	    System.err.println("Usage: java AlignCompress [options]\n" + cmdLine.usage());
-	    System.err.println("       sequences can be provided on the commandline, or from stdin");
+	if (args==null || args.length != 2) {
+	    System.err.println("Usage: java AlignCompress [options] <seqA> <seqB>\n" + cmdLine.usage());
 	    System.exit(1);
 	} else if (readFile && args.length == 2) {
 	    // Two filenames on commandline
@@ -516,24 +554,6 @@ class AlignCompress {
 	    // Two strings on commandline, assume they are sequences
 	    a.seqA = args[0];
 	    a.seqB = args[1];
-	} else if (args.length == 1) {
-	    // One arg, assume it is a filename to read the sequences from
-	    try {
-		BufferedReader in = new BufferedReader(new FileReader(args[0]));
-		a.seqA = in.readLine();
-		a.seqB = in.readLine();
-	    } catch (Exception e) {
-		System.err.println("Error reading '"+args[0]+"': "+e);
-	    }
-	} else if (args.length == 0) {
-	    // No args, read sequence from stdin.
-	    try {
-		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-		a.seqA = in.readLine();
-		a.seqB = in.readLine();
-	    } catch (Exception e) {
-		System.err.println("Error stdin: "+e);
-	    }
 	}
 
 	if (a.seqA==null || a.seqB==null) {
