@@ -1,0 +1,22 @@
+aagggaaaaaaaaagaaaaaggggggagaagaaaaaaaaaaaaaaagggaaaaagaggaaaaagaaaaaaaaagaagaaagaagaggggaaaagaaagaaagaaagagaaaagaaaaaagaaagagaaaaaaaggaaaaaaaaaaaaaaagaagggaaaaaaaaagaaaagaaaggaaaaaaaagaaaggaagaaggaaaaaaaaaagaagaaggagaagaaaaaaaaagaagaaggaaaagaaaaaaaaagagagaagaaaaaaaaaaaaaaaaaaaaagaaaaaaaaagaggagagaa
+aaaaaaaaagaaaagaaagaaaaaaagaaagaaaaaaaaaaaagaggaaaagaggagaaggagagaaaaaaagaaaaagaaaaaaagaaaaaaaaaaaaaaaaaaaagaaaaaaaaaaaaaaagaagaaagaaaagaaaaaaaagggagaaaaagaaaaagagaaaaaggaaaagaagaaaggaagaaaaagagaaaaaagaaaaaaaaaagaaaaaagaaaaaaggaaaaaagagaaagaaaagagagaaaaagggaaaagaaaggaaaaaaggaagaaaaaaaaagagaaaagaaggaaaaggaaggaaagggaaagaaaaaaagaaagaagaagaaaaaaagaaaaa
+entropy of subseq: under m=11.799 bits/ch   under m2=1.745 bits/ch
+Entropy: m=0.778 bits m2=1.843 bits
+$VAR1 = {
+          '' => {
+                  'g' => '0.22704973517673',
+                  'a' => '0.77257577217872',
+                  'c' => '4.3485897347081e-06',
+                  't' => '0.000370144054814929'
+                }
+        };
+
+$VAR1 = {
+          '' => {
+                  'g' => '0.257650088274423',
+                  'a' => '0.0758080759404266',
+                  'c' => '0.333331883803422',
+                  't' => '0.333209951981728'
+                }
+        };
+
