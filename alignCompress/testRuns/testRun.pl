@@ -5,7 +5,7 @@ use strict;
 use Generate_Seq;
 
 my $timeProg = '/usr/bin/time';
-my $compProg = 'java -Xmx512m -cp ../..:../../hb15.zip alignCompress/AlignCompress --markov=0';
+my $compProg = 'java -Xmx512m -cp ../..:../../hb15.zip alignCompress/AlignCompress --markov=0 --iterations=3';
 my $prssProg = './prss33 -b 200 -n -q';
 
 use IPC::Open3;
@@ -15,7 +15,8 @@ use IO::File;
 
 $|=1;        # Flush stdout
 
-my $log = new IO::File "> outLog.$$";
+#my $log = new IO::File "> outLog.$$";
+my $log = new IO::File "> /dev/null";
 (defined $log) || die "Can't open output log";
 $log->autoflush(1);
 
