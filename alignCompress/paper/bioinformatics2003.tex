@@ -12,9 +12,11 @@
 \usepackage{multicol}
 
 \usepackage{times}
-\usepackage{epsfig}
+%\usepackage{epsfig}
 
 \usepackage{verbatim}
+
+\usepackage{bioinformatics}
 
 \usepackage[none,bottom,dark,english]{draftcopy}
 \draftcopyName{ DRAFT \number\day\/\number\month\/\number\year}
@@ -26,10 +28,19 @@
 
 %\geometry{top=1in,bottom=1in,left=1in,right=1in,nohead}
 
-\def\plotwidth{0.7\columnwidth}
+\def\plotwidth{0.75\columnwidth}
 
 %\setlength{\parindent}{0pt}
 %\setlength{\parskip}{1.0ex plus0.5ex minus0.5ex}
+
+
+%Check if we are compiling under latex or pdflatex
+\ifx\pdftexversion\undefined
+  \usepackage[dvips]{graphics}
+\else
+  \usepackage[pdftex]{graphics}
+\fi
+
 
 
 \begin{document}
@@ -39,11 +50,16 @@ of Medium to Low Information-Content }
 % ?models don't shuffle?  ha, ha
 
 \author{
-  David R. Powell\footnote{To whom correspondence should be addressed} , Lloyd Allison and Trevor I. Dix \\
-  Victorian Bioinformatics Consortium and \\
-  School of Computer Science and Software Engineering, \\
+  David R. Powell\footnotemark[1]~\footnotemark[2]~~$^{1,2}$, Lloyd Allison$^2$ and Trevor I. Dix$^{1,2}$ \\
+  $^1$Victorian Bioinformatics Consortium and \\
+  $^2$School of Computer Science and Software Engineering, \\
   Monash University, Australia 3800.
 }
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\footnotetext[1]{To whom correspondence should be addressed.}
+\footnotetext[2]{Partially funded by Australian Research Council Grant A49800558.}
+\renewcommand{\thefootnote}{\arabic{footnote}}
 
 \date{}
 \maketitle
@@ -87,7 +103,7 @@ real and artificial data.
 
 \noindent
 {\bf Availability:}
-An implementation of the software is available under the Gnu GPL via the
+An implementation of the software is available via the
 Web~\footnote{http://www.csse.monash.edu.au/$\sim$powell/m-align.tar.gz}.
 
 \noindent
@@ -104,9 +120,9 @@ powell@csse.monash.edu.au
 %-------------------------------------------------------------------------
 \section{Introduction} \label{sec:Intro}
 
-Alignment algorithms are used to solve two quite different kinds of problem,
-(i) are two (or more) sequences {\em related} or not, and
-(ii) {\em how} are two (or more) sequences related,
+Alignment algorithms are used to answer two quite different kinds of questions,
+(i) Are two (or more) sequences {\em related} or not?
+(ii) {\em How} are two (or more) sequences related,
 {\em given} that they are related?
 There is a ``fundamental difference between
 the searching [for related sequences] and [optimal] alignment operations.'' --
@@ -117,7 +133,7 @@ to return false-positive matches and false-negative misses for
 the first kind of problem and may also cause poor alignments,
 for the second kind of problem.
 There are partial solutions, with disadvantages:
-Masking-out~\cite{claverie93} low information content intervals
+Masking-out low information content intervals~\cite{claverie93}
 can reduce false-positives but it throws away some information and
 raises the question of how low is low.
 The significance of a possible match is often assessed by comparing
@@ -137,14 +153,16 @@ i.e. something not otherwise known.
 It has a natural null-theory and hypothesis test.
 Instead of a low information interval being masked-out, it is given
 a low, but non-zero, weight thus not discarding information.
+
 A high information interval, i.e. a {\em feature}, is given a high weight;
-there is a big saving if it is matched in another sequence.
+there is a big scoring advantage if it is matched in another sequence.
 In general this can, and should, change the rank-order of alignments
 between two sequences and the rank-order of matches between multiple sequences.
 There is no hard (and arbitrary) threshold for what is
 a {\em background} low information interval or
 for what is a high information feature;
 there is a continuous spectrum of information content from low to high.
+
 M-alignment is general and places few restrictions on the kind
 of population model that can be used with it.
 If the ``correct'' model is not known in advance
@@ -154,11 +172,11 @@ Algorithm time-complexity remains $O(n^2)$ for reasonable models.
 This paper extends work on the 1-state mutation model~\cite{allison99}
 by applying M-alignment to
 the relatedness and optimal alignment problems,
-for both global and local alignment,
+for both global \cite{needleman70} and local \cite{smith81} alignment,
 under the 3-state, affine gap-costs model \cite{gotoh82} of mutation.
 
 M-alignment results are compared to those of
-the {\tt prss} program~\cite{smith81} (from the FASTA package) which
+the {\tt prss} program -- from the FASTA package~\cite{pearson96} -- which
 is based on {\tt rdf2}~\cite{pearson88} with a shuffling significance test.
 Receiver operating characteristics (ROC) curves show that, as expected,
 both methods give similar results
@@ -172,7 +190,7 @@ on populations described by higher-order models.
 At this point it is convenient to clarify some of the terminology we use in
 this paper.  We use the term {\em rank-order} to mean order obtained when
 items are ranked according to some score.  When a group or population of
-sequences are well explained by a particular model, we say that model is a
+sequences is well explained by a particular model, we say that model is a
 {\em population model} for those sequences.  An alignment can be seen as a
 hypothesis of how two (or more) sequences are related.  Using
 information-theoretic techniques we can quantify how likely a hypothesis is,
@@ -194,16 +212,17 @@ If DNA bases, say, are generated uniformly at random, an optimal code
 assigns each one a two-bit code.
 This follows from
 Shannon's mathematical theory of communication~\cite{shannon49}.
-If the DNA comes from a biased 0-order model, say,
+If the DNA comes from a biased 0-order model say,
 shorter codes can be allocated {\em on average}.
-E.g. Probabilities of [1/2, 1/4, 1/8, 1/8] lead to codes of
+For example, if the respective probabilities of an A, T, G or C are [1/2, 1/4,
+1/8, 1/8] this leads to optimal codes of
 [1, 2, 3, 3]-bits respectively, that is 1~3/4-bits on average.
 For higher-order models, code-words depend on the {\em context}
 of previous characters, on the `k' previous characters
 for a Markov model of order~k.
 Probabilistic finite-state automata (PFSAs),
 also known as hidden Markov models,
-have been used as models \cite{georgeff84} of populations of sequences.
+have been used as models~\cite{georgeff84} of populations of sequences.
 Each of these models, and many others, can deliver a probabilistic
 prediction for the next character in a sequence given a context.
 From Shannon, the length of a code-word for the next character,
@@ -231,7 +250,7 @@ for each cell in the DPA's matrix, for costs (or scores)
 {\em conditional} on diagonal, vertical and horizontal moves.
 
 All of the above DPA variations find a global optimal alignment for
-some criterion given, or at least under the assumption that,
+some given criterion, or at least under the assumption that,
 two sequences are related.
 Shuffling tries to solve the relatedness problem by comparing the
 score (or cost) of an optimal alignment with the scores (costs)
@@ -254,22 +273,27 @@ In fact costs and scores can be {\em normalized}~\cite{allison93a} to show
 the underlying probabilities.
 The DPA can then find a {\em most probable} alignment, but it can also
 be modified to calculate the {\em joint} probability of two sequences:
+
+\begin{minipage}{0.9\columnwidth}
 An alignment is just a hypothesis.
 The set of all alignments is exclusive and exhaustive, given that
 two sequences are related.
 Rather than selecting the largest probability,
 their probabilities can therefore be {\em added}.
-Bishop and Thompson~\cite{bishop86} did this for a 1-state mutation model.
-Allison et al~\cite{allison92a} extended this to 3-state (linear gap-costs)
+\vspace{0.5em}
+\end{minipage}
+\noindent
+This was originally done for a 1-state mutation model \cite{bishop86}.
+Later, it was extended \cite{allison92a} to 3-state (linear gap-costs)
 and 5-state (piece-wise linear gap-costs) mutation models,
 and included the cost (complexity) of models so that simple
 and complex models can be compared fairly.
 Such considerations also give
 a natural {\em null-theory} that the sequences are not related,
-i.e. that one tells nothing new or useful about the other:
-Two sequences are unrelated if
-communicating them together yields no saving in terms
-of compression over sending them separately.
+i.e. that one tells nothing new or useful about the other.
+Two sequences are unrelated if their joint probability is less than or equal
+to the sum of their individual probabilities, given by the null-theory.
+
 The next section describes how these methods
 are extended to local alignment and how the information
 content of compressible sequences is taken into account in M-alignment
@@ -288,8 +312,8 @@ This is done in combination with the 3-state, linear gap-cost mutation model.
 Firstly,
 probabilistic methods are used to estimate the probability of relatedness
 of sequences S1 and S2 under {\em local alignment}, i.e. that there is some
-configuration S1=A+L+B and S2=C+L'+D and that intervals L and L' are
-related (globally) and that intervals A, B, C, and D, which are possibly empty,
+configuration S1=A+L+B and S2=C+L'+D where intervals L and L' are
+related (globally) and intervals A, B, C, and D, which are possibly empty,
 are not related.
 A, B, C and D are compressed with the population model.
 L and L' are compressed with both the population and mutation models,
@@ -310,12 +334,12 @@ The key idea of M-alignment is to obtain the latter from a population model.
 
 Then contribution of an insertion or deletion is calculated as the product or
 the mutation probability (more on this later), and probability of the
-character being inserted or deleted.  {\em This character probability is
-calculated by using the population model}.  A mismatch is calculated in a
+character being inserted or deleted.  This {\em character probability} is
+calculated by using the {\em population model}.  A mismatch is calculated in a
 similar fashion, except using two probabilities, one for each character.  The
 calculation of a match is slightly different since we have two different
-probabilities for the same character.  The probability of a match is
-multiplied by the {\em average} of the two character probabilities.
+probabilities for the same character.  For convenience, the probability of a
+match is multiplied by the {\em average} of the two character probabilities.
 
 There is the problem of what mutation probabilities to use.  We solve this by
 starting the probabilities at sensible values, then run the algorithm a number
@@ -386,17 +410,17 @@ unrelated prefixes A and C and suffixes B and D are generated from the model.
 
 \section{Tests}
 
-It has been suggested that M-alignment be compared to Hidden Markov Model
-alignment algorithms such as HMMER~\cite{eddy98}.  HMMER and M-alignment have
-a number of similarities, both use probabilistic modelling, both sum over all
-possible alignments.  However, they are for different problems and are
-therefore difficult to compare fairly.  HMMER builds a profile HMM, ideally
-from a multiple sequence alignment.  It is then possible to use this HMM to
-align against a sequence or search a database.  This differs from M-alignment
-because M-alignment aligns two actual sequences in the presence of a
-model of the population.  However, since M-alignment may use almost any type
-of model, it would be possible for it to use a HMM profile model, although it
-is not clear whether this would be useful.
+On the face of it M-alignment can be compared to Hidden Markov Model alignment
+algorithms such as HMMER~\cite{eddy98}.  HMMER and M-alignment have a number
+of similarities, both use probabilistic modelling, both sum over all possible
+alignments.  However, they are for different problems and are therefore
+difficult to compare fairly.  HMMER builds a profile HMM, ideally from a
+multiple sequence alignment.  It is then possible to use this HMM to align
+against a sequence or search a database.  This differs from M-alignment
+because M-alignment aligns two actual sequences in the presence of a model of
+the population.  However, since M-alignment may use almost any type of model,
+it would be possible for it to use a HMM profile model, although it is not
+clear whether this would be useful.
 
 
 \subsection{Artificial Data}
@@ -426,14 +450,14 @@ The child sequences were
 considered as the library to be searched, and each parent was used in turn as
 the query sequence.  Thus for each query there were 25 related sequences of
 differing relatedness and 225 unrelated sequences.  This ratio of related to
-unrelated sequence in the library is a high compared to real sequence
+unrelated sequence in the library is high compared to real sequence
 databases but will suffice for testing purposes.  Each parent sequence was
 compared against every child sequence making 2500 pair-wise comparisons.  Of
 these 2500 comparisons, 250 are between related sequences, and 2250 between
 unrelated sequences.
 
 To present the results of the tests Receiver Operating Characteristics (ROC)
-(\cite{gribskov96, brenner98}) plots are used.  Each algorithm tested produces
+\cite{gribskov96,brenner98} plots are used.  Each algorithm tested produces
 a number measuring the relatedness of the two sequences being compared.  This
 may be the raw Smith-Waterman score, or the p-value found by the \verb!prss! 
 program, or the log odds ratio produce by M-alignment.  For each test, the
@@ -529,8 +553,9 @@ We chose a relatively low information sequence from \emph{Plasmodium
 falciparum} chromosome 2.  The sequence is from the end of the intron and
 start of the second exon of PFB0010w and of 157 characters in length.  This
 sequence was chosen because PFB0010w is known to be related to a number of
-genes and pseudo-genes and because it has much repetition.  Thus this is the
-type of sequence we expect traditional algorithms to have difficulty with.
+genes and pseudo-genes and because it has considerable repetition.  Thus this
+is the type of sequence we expect traditional algorithms to have difficulty
+with.
 
 %\begin{verbatim}
 %TATATATATA TATATATATA TATACCCATA ACTACATTCA CATATACACA
@@ -549,12 +574,14 @@ majority of these sequences are in fact unrelated to the query sequence.  Most
 of these false positives are due to matching \verb!TATA! regions.  Using
 M-alignment with a sequence model that correctly apportions weight to such
 regions should give good results.  The model we used, was a fifth-order Markov
-Model trained on all 60765 matching sequences.  While such a model is not
-ideal, we assume that most of the sequences are unrelated but do represent a
-certain population, and that a fifth-order model can capture much of the
-information about the population.  If a sequence is to be said to be related
-to the query sequence then it must have more in common than simply coming from
-the that population.
+Model trained on all 60765 matching sequences.  A fifth-order model was chosen
+because it achieved the best compression across the whole population taking
+into account the complexity of the model.  While such a model is not ideal, we
+assume that most of the sequences are unrelated but do represent a certain
+population, and that a fifth-order model can capture much of the information
+about the population.  If a sequence is to be said to be related to the query
+sequence then it must have more in common than simply coming from that
+population.
 
 The \verb!prss! and M-alignment programs were then used to do a pair-wise
 comparison between the query sequence and each of the 60765 matching
@@ -639,7 +666,7 @@ for this task by using a short sequence from \emph{Plasmodium
 falciparum} chromosome 2.
 
 %-------------------------------------------------------------------------
-
+\vspace{-4ex}      % Cause the stupid bioinformatics .sty tries to put in a gap
 
 \bibliographystyle{bioinformatics}
 
@@ -663,15 +690,19 @@ falciparum} chromosome 2.
 %\caption{\label{fig:roc_0}ROC for biased composition sequences.}
 %\end{figure}
 
-\begin{figure}[ht]
+\newpage
+
+\begin{figure}[ht!]
 \centering
-\epsfig{file=roc_uni_0.eps, width=\plotwidth}
+%\epsfig{file=roc_uni_0.eps, width=\plotwidth}
+\includegraphics{roc_uni_0}
 \caption{\label{fig:roc_uni_0}ROC for a uniform sequence model and biased composition sequences.}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[ht!]
 \centering
-\epsfig{file=roc_blend.eps, width=\plotwidth}
+%\epsfig{file=roc_blend.eps, width=\plotwidth}
+\includegraphics{roc_blend}
 \caption{\label{fig:roc_blend}ROC for a blended model}
 \end{figure}
 

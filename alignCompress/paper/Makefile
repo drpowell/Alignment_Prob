@@ -4,14 +4,22 @@
 
 FILENAME=bioinformatics2003
 TEXFILES=bioinformatics2003.tex
-PLOTFILES=roc_uni_0.eps roc_blend.eps
+EPS_PLOTFILES=roc_uni_0.eps roc_blend.eps
+PDF_PLOTFILES=roc_uni_0.pdf roc_blend.pdf
 #PLOTFILES=roc_uni.eps roc_0.eps roc_uni_0.eps roc_blend.eps
 POP_CONV_SCRIPT=../testRuns/populationPlot.pl
 POP_CONV_SCRIPT2=../testRuns/populationPlot2.pl
 REL_CONV_SCRIPT=../testRuns/relatedPlot.pl
 
-$(FILENAME).ps: $(TEXFILES) $(PLOTFILES) $(FILENAME).bbl
-#$(FILENAME).ps: $(TEXFILES) $(PLOTFILES)
+pdf: $(TEXFILES) $(PDF_PLOTFILES) $(FILENAME).bbl
+	@echo @@@@@@@@@@@@@@@@@@@@@@@@ Pass 1 of latex @@@@@@@@@@@@@@@@@@@@@@@
+	pdflatex $(FILENAME)
+	@echo @@@@@@@@@@@@@@@@@@@@@@@@ Pass 2 of latex @@@@@@@@@@@@@@@@@@@@@@@
+	pdflatex $(FILENAME)
+	@echo @@@@@@@@@@@@@@@@@@@@@@@@ Pass 3 of latex @@@@@@@@@@@@@@@@@@@@@@@
+	pdflatex $(FILENAME)
+
+ps: $(TEXFILES) $(EPS_PLOTFILES) $(FILENAME).bbl
 	@echo @@@@@@@@@@@@@@@@@@@@@@@@ Pass 1 of latex @@@@@@@@@@@@@@@@@@@@@@@
 	latex $(FILENAME)
 	@echo @@@@@@@@@@@@@@@@@@@@@@@@ Pass 2 of latex @@@@@@@@@@@@@@@@@@@@@@@
@@ -20,8 +28,13 @@ $(FILENAME).ps: $(TEXFILES) $(PLOTFILES) $(FILENAME).bbl
 	dvips $(FILENAME)
 
 $(FILENAME).bbl: $(TEXFILES)
+	@echo @@@@@@@@@@@@@@@@@@@@@@@@ latex before bibtex @@@@@@@@@@@@@@@@@@@@@@@
 	latex $(FILENAME)
+	@echo @@@@@@@@@@@@@@@@@@@@@@@@ bibtex @@@@@@@@@@@@@@@@@@@@@@@
 	bibtex $(FILENAME)
+
+$(PDF_PLOTFILES): $(EPS_PLOTFILES)
+	for F in $(EPS_PLOTFILES); do epstopdf $$F; done
 
 roc_uni.eps: ../testRuns/res.population.20020924_2.txt $(POP_CONV_SCRIPT)
 	$(POP_CONV_SCRIPT) $< $@
@@ -73,7 +86,7 @@ r4.eps: ../testRuns/res.related_20020903.txt $(REL_CONV_SCRIPT)
 	$(REL_CONV_SCRIPT) $< $@
 
 clean:
-	rm -f $(FILENAME).ps *~ core *.aux *.log *.dvi *.toc *.bak *.lot *.lof *.bbl *.blg *.lol
+	rm -f $(FILENAME).ps *~ core *.aux *.log *.dvi *.toc *.bak *.lot *.lof *.bbl *.blg *.lol *.pdf
 
 realclean:
 	rm -f $(FILENAME).ps $(PLOTFILES) *~ core *.aux *.log *.dvi *.toc *.bak *.lot *.lof *.bbl *.blg *.lol p?.eps r?.eps
