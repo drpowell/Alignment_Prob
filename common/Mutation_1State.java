@@ -8,13 +8,12 @@ import com.braju.format.*; // in hb15.zip  provides the Format.printf routines.
 abstract public class Mutation_1State extends Mutation_FSM {
 
     private class FSM_Params implements Serializable {
-	double ins_cost, del_cost, diag_cost;
+	double indel_cost, diag_cost;
 	Two_Seq_Model_Counts s;
 
-	FSM_Params(Two_Seq_Model_Counts s, double ins_cost, double del_cost, double diag_cost) {
+	FSM_Params(Two_Seq_Model_Counts s, double indel_cost, double diag_cost) {
 	    this.s = s;
-	    this.ins_cost = ins_cost;
-	    this.del_cost = del_cost;
+	    this.indel_cost = indel_cost;
 	    this.diag_cost = diag_cost;
 
 	    normalize_costs();
@@ -23,11 +22,10 @@ abstract public class Mutation_1State extends Mutation_FSM {
 	FSM_Params(Two_Seq_Model_Counts s, Params p) {
 	    this.s = s;
 
-	    if (!p.exists("ins_cost")) {
+	    if (!p.exists("indel_cost")) {
 		set_default_costs();
 	    } else {
-		ins_cost = p.get("ins_cost");
-		del_cost = p.get("del_cost");
+		indel_cost = p.get("indel_cost");
 		diag_cost = p.get("diag_cost");
 	    }
 
@@ -35,22 +33,20 @@ abstract public class Mutation_1State extends Mutation_FSM {
 	}
 
 	void set_default_costs() {
-	    ins_cost  = 1;
-	    del_cost  = 1;
+	    indel_cost  = 1;
 	    diag_cost = 0;
 	}
 
 	void normalize_costs() {
-	    double sum = MyMath.exp2(-ins_cost)+MyMath.exp2(-del_cost)+MyMath.exp2(-diag_cost);
-	    ins_cost  = ins_cost+MyMath.log2( sum );
-	    del_cost  = del_cost+MyMath.log2( sum );
+	    double sum = 2*MyMath.exp2(-indel_cost) + MyMath.exp2(-diag_cost);
+	    indel_cost  = indel_cost+MyMath.log2( sum );
 	    diag_cost = diag_cost+MyMath.log2( sum );
 	    //	    Format.printf("ins_cost=%.5f del_cost=%.5f diag_cost=%.5f\n", 
 	    //			  new Parameters(ins_cost).add(del_cost).add(diag_cost));
 	}
 
         public String toString() {
-	    return "diag_cost="+diag_cost+" ins_cost="+ins_cost+" del_cost="+del_cost+"\n";
+	    return "diag_cost="+diag_cost+" indel_cost="+indel_cost;
 	}
     }
 
@@ -59,12 +55,12 @@ abstract public class Mutation_1State extends Mutation_FSM {
 
     double val;
 
-    final protected int insIndex=0, delIndex=1, diagIndex=2;
+    final protected int indelIndex=0, diagIndex=1;
 
-    public Mutation_1State(Two_Seq_Model_Counts s, double ins_cost, double del_cost,
-		    double diag_cost, int numCounts, int countIndex) {
+    public Mutation_1State(Two_Seq_Model_Counts s, double indel_cost, double diag_cost, 
+			   int numCounts, int countIndex) {
 	super(numCounts, countIndex);
-	p = new FSM_Params(s, ins_cost, del_cost, diag_cost);
+	p = new FSM_Params(s, indel_cost, diag_cost);
 	reset();
     }
 
@@ -87,14 +83,17 @@ abstract public class Mutation_1State extends Mutation_FSM {
     }
 
 
-    public static int required_counts() { return 3; };
+    public static int required_counts() { return 2; };
+
+    // counts_to_params - convert counts into parameters.  
+    //   Call the Two_Seq_Model to convert its own.
+    //   Note the 0.5* in the indel computation.  This is cause there are 2 indel arcs out
+    //   of each state, but we only have one count for them combined.
     public Params counts_to_params(Counts c) { 
-	double sum = c.counts[countIndex+insIndex] + 
-	    c.counts[countIndex+delIndex] + 
+	double sum = c.counts[countIndex+indelIndex] + 
 	    c.counts[countIndex+diagIndex];
 	Params par = new Params();
-	par.put("ins_cost", -MyMath.log2(c.counts[countIndex+insIndex]/sum));
-	par.put("del_cost", -MyMath.log2(c.counts[countIndex+delIndex]/sum));
+	par.put("indel_cost", -MyMath.log2(0.5*c.counts[countIndex+indelIndex]/sum));
 	par.put("diag_cost", -MyMath.log2(c.counts[countIndex+diagIndex]/sum));
 	par.join( p.s.counts_to_params(c) );
 	return par;
@@ -106,19 +105,17 @@ abstract public class Mutation_1State extends Mutation_FSM {
 	// First encode match/change paramters. Pass the number of these events to encode_params
 	double len = p.s.encode_params(c.counts[countIndex+diagIndex]);
 
-	double dataLen = c.counts[countIndex+diagIndex] + c.counts[countIndex+insIndex] + 
-	    c.counts[countIndex+delIndex];
+	double dataLen = c.counts[countIndex+diagIndex] + c.counts[countIndex+indelIndex];
 
 	len += Multinomial.MMLparameter_cost(new double[] {
-	    MyMath.exp2(-p.ins_cost), MyMath.exp2(-p.del_cost), MyMath.exp2(-p.diag_cost) },
+	    MyMath.exp2(-p.indel_cost), MyMath.exp2(-p.diag_cost) },
 					     dataLen);
 	return len;
     }
 
     public double alignmentLength() {
 	Counts c = get_counts();
-	return c.counts[countIndex+insIndex] + 
-	       c.counts[countIndex+delIndex] + 
+	return c.counts[countIndex+indelIndex] + 
 	       c.counts[countIndex+diagIndex];
     }
 
@@ -181,20 +178,20 @@ abstract public class Mutation_1State extends Mutation_FSM {
 
 	    Counts tcounts = (Counts)counts.clone();
 	    if (hcell != null) {
-		double w = val + p.ins_cost  + p.s.encB(b,j);
+		double w = val + p.indel_cost  + p.s.encB(b,j);
 		
 		tcounts.duplicate(counts);
-		tcounts.inc(countIndex+insIndex, 1);
+		tcounts.inc(countIndex+indelIndex, 1);
 		p.s.update_count_encB(tcounts, 1, b, j);
 
 		hcell.or(w, tcounts, this);
 	    }
 
 	    if (vcell != null) {
-		double w = val + p.del_cost  + p.s.encA(a,i);
+		double w = val + p.indel_cost  + p.s.encA(a,i);
 		
 		tcounts.duplicate(counts);
-		tcounts.inc(countIndex+delIndex, 1);
+		tcounts.inc(countIndex+indelIndex, 1);
 		p.s.update_count_encA(tcounts, 1, a, i);
 
 		vcell.or(w, tcounts, this);
@@ -246,21 +243,21 @@ abstract public class Mutation_1State extends Mutation_FSM {
 	    Mutation_1State.All dcell = (Mutation_1State.All)d;
 
 	    if (hcell != null) {
-		double w = val + p.ins_cost  + p.s.encB(b,j);
+		double w = val + p.indel_cost  + p.s.encB(b,j);
 		double count_inc = 1.0/(1.0+MyMath.exp2(w-hcell.val));
 		if (Double.isNaN(count_inc)) count_inc=0;
 		hcell.or(w, counts);
 		hcell.p.s.update_count_encB(hcell.counts, count_inc, b, j);
-		hcell.counts.inc(countIndex+insIndex,  count_inc);
+		hcell.counts.inc(countIndex+indelIndex,  count_inc);
 	    }
 
 	    if (vcell != null) {
-		double w = val + p.del_cost  + p.s.encA(a,i);
+		double w = val + p.indel_cost  + p.s.encA(a,i);
 		double count_inc = 1.0/(1.0+MyMath.exp2(w-vcell.val));
 		if (Double.isNaN(count_inc)) count_inc=0;
 		vcell.or(w, counts);
 		vcell.p.s.update_count_encA(vcell.counts, count_inc, a, i);
-		vcell.counts.inc(countIndex+delIndex,  count_inc);
+		vcell.counts.inc(countIndex+indelIndex,  count_inc);
 	    }
 
 	    if (dcell != null) {

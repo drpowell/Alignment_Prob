@@ -196,6 +196,7 @@ class AlignCompress {
     static private double encode_length(double l) {
 	Misc.assert(l>=0, "Bad length to encode:"+l);
 	return MyMath.logstar_continuous(l+1);
+	//return -(l*MyMath.log2(0.9) + MyMath.log2(0.1)); // Geometric distribution
     }
 
     public AlignCompress() {
@@ -281,7 +282,6 @@ class AlignCompress {
 	Params p = new Params();
 	p.fromString(paramString);
 
-
 	BufferModel modelA = new BufferModel( new MarkovN_fitted(markovOrder, alphabet, seqA), 
 					      seqA, alphabet );
 	BufferModel modelB = new BufferModel( new MarkovN_fitted(markovOrder, alphabet, seqB), 
@@ -290,6 +290,7 @@ class AlignCompress {
 	//System.err.println("modelA\n"+modelA+"\n");
 	//System.err.println("modelB\n"+modelB+"\n");
 
+	int myCounts  = (localAlign ? 1 : 0);
 	int mdlCounts = Model_SeqAB.required_counts();
 
 	int fsmCounts = -1;
@@ -300,13 +301,16 @@ class AlignCompress {
 
 	Misc.assert(fsmCounts>=0, "Bad number of fsmCounts");
 
-	int totCounts = mdlCounts + fsmCounts;
+	int totCounts = myCounts + mdlCounts + fsmCounts;
 
 	double bestDiff = Double.NEGATIVE_INFINITY;
 
 	for (int iter=0; iter<numIterations; iter++) {
 
-	    int countPos = 0;
+	    double PalignChar = 0.9;
+	    if (p.exists("PalignChar")) PalignChar = p.get("PalignChar");
+
+	    int countPos = myCounts;
 	    Two_Seq_Model_Counts model = new Model_SeqAB(p, modelA, modelB, countPos);
 	    countPos += mdlCounts;
 	    Mutation_FSM fsmType=null;
@@ -328,7 +332,7 @@ class AlignCompress {
 
 	    Counts initialCounts = new Counts(totCounts);
 	    for (int i=0; i<totCounts; i++) 
-		initialCounts.inc(i, 1); // Start all counts at 1.
+		initialCounts.inc(i, 0.5); // Initialise all counts.
 
 	    // Determine if fsmType supports traceBack. ie. Does it implement TraceBack_Info
 	    doTraceBack = false;
@@ -363,17 +367,19 @@ class AlignCompress {
 	    }
 
 	    // Initialise the first cell of the DPA matrix
+	    cell(D,0,0).init_counts(initialCounts); // Initialise counts
 	    if (localAlign)
 		cell(D,0,0).init_val(Double.POSITIVE_INFINITY); 
 	    else
 		cell(D,0,0).init_val(0); 
 
-	    cell(D,0,0).init_counts(initialCounts); // Initialise counts
+	    final_cell.init_val(Double.POSITIVE_INFINITY);
 
 	    if (verbose>=1) { 
 		System.out.println("\n\nIteration: " + iter);
 		System.out.println(model);
-		System.out.println(cell(D,0,0).paramsToString()); 
+		System.out.println(cell(D,0,0).paramsToString()+
+				   (localAlign ? "PalignChar="+PalignChar : ""));
 	    }
 
 	    // Do the DPA!
@@ -396,31 +402,24 @@ class AlignCompress {
 		    char bChar = (j==seqB.length() ? '-' : seqB.charAt(j));
 
 		    if (localAlign) {
+			double val;
+
 			// Compute contribution of a local alignment that starts at (i,j)
-			double val = modelA.encodeCumulative(i) +  modelB.encodeCumulative(j);
-			val += encode_length(i);
-			val += encode_length(j);
+			val = modelA.encodeCumulative(i) +  modelB.encodeCumulative(j);
+			//			val += encode_length(i);
+			//			val += encode_length(j);
 			cell(D,i,j).or(val, initialCounts);
-		    }
 
-		    if (verbose>=3) {
-			System.err.println("Calc outputs from D["+i+"]["+j+"]");
-			System.err.println(cell(D,i,j));
-		    }
 
-		    
-		    cell(D,i,j).calc(h, v, d, aChar, bChar, i, j);
-
-		    if (localAlign) {
 			// Compute contribution of a local alignment that ends at (i,j)
-			double val = cell(D,i,j).get_val() +
+			val = cell(D,i,j).get_val() +
 			    (modelA.encodeCumulative( seqA.length() ) - modelA.encodeCumulative(i)) +
 			    (modelB.encodeCumulative( seqB.length() ) - modelB.encodeCumulative(j));
 
-			val += encode_length(seqA.length()-i);
-			val += encode_length(seqB.length()-j);
+			//			val += encode_length(seqA.length()-i);
+			//			val += encode_length(seqB.length()-j);
 
-			//System.err.println("PRE  final_cell = "+final_cell.get_val()+" from: "+((Mutation_FSM.TraceBack_Info)final_cell).get_from(((Mutation_FSM.TraceBack_Info)final_cell).get_tbdata()));
+			val += -MyMath.log2(1-PalignChar); // No more alignment characters
 
 			if (doTraceBack)
 			    ((Mutation_FSM.TraceBack_Info)final_cell).or(val, 
@@ -429,9 +428,17 @@ class AlignCompress {
 			else
 			    final_cell.or(val, cell(D,i,j).get_counts());
 
-			//System.err.println("POST final_cell = "+final_cell.get_val()+" from: "+((Mutation_FSM.TraceBack_Info)final_cell).get_from(((Mutation_FSM.TraceBack_Info)final_cell).get_tbdata()));
 
+			cell(D,i,j).add(-MyMath.log2(PalignChar), 0); // Count 0 is count for Palign
 		    }
+
+		    cell(D,i,j).calc(h, v, d, aChar, bChar, i, j);
+
+		    if (verbose>=3) {
+			System.err.println("Calc outputs from D["+i+"]["+j+"]");
+			System.err.println(cell(D,i,j));
+		    }
+
 		}
 	    }
 
@@ -439,6 +446,8 @@ class AlignCompress {
 	    if (!localAlign)
 		final_cell = cell(D, seqA.length(),seqB.length());
 	    else {
+		// Must be some _ends_ if there it is local alignment.
+		/*
 		if (!doTraceBack) 
 		    final_cell.or(cell(D, seqA.length(), seqB.length()).get_val(), 
 				  cell(D, seqA.length(), seqB.length()).get_counts());
@@ -447,10 +456,9 @@ class AlignCompress {
 		     final_cell).or(cell(D, seqA.length(), seqB.length()).get_val(), 
 				    cell(D, seqA.length(), seqB.length()).get_counts(),
 				    cell(D, seqA.length(), seqB.length()));
+		*/
 	    }
 	    
-	    //System.err.println("POSTPOST final_cell = "+final_cell.get_val()+" from: "+((Mutation_FSM.TraceBack_Info)final_cell).get_from(((Mutation_FSM.TraceBack_Info)final_cell).get_tbdata()));
-
 	    double encAlignModel = final_cell.encode_params();
 	    double encAlignment = encAlignModel + final_cell.get_val();
 
@@ -460,19 +468,24 @@ class AlignCompress {
 
 	    if (localAlign) {
 		// Encode lengths for the null theory as sum and difference of lengths.
+		// Note that global alignments ignore lengths, ignore for null when doing global.
 		//		encNull += encode_length(seqA.length()+seqB.length());
 		//		encNull += encode_length(Math.abs(seqA.length()-seqB.length()));
 	    }
 
 	    if (doTraceBack) {
 		String s = getAlignment(D, (Mutation_FSM.TraceBack_Info)final_cell);
-		System.out.println(s);
+		System.out.println("ALIGNMENT:\n"+s);
 	    }
 
 	    if (bestDiff < encNull-encAlignment) bestDiff = encNull-encAlignment;
 
 	    // Get new parameters for next iteration
 	    p = fsmType.counts_to_params(final_cell.get_counts());
+	    if (localAlign) {
+		double n = final_cell.get_counts().get(0);
+		p.put("PalignChar", (n-1)/n);
+	    }
 
 	    if (verbose>=2) {
 		System.out.println("encA="+encA+" encB="+encB+" encNull="+(encNull));
@@ -480,8 +493,7 @@ class AlignCompress {
 		System.out.print("Mutual Encoding = " + encAlignment + " bits");
 		System.out.println(" (model=" + encAlignModel + " data="+(encAlignment-encAlignModel)+")");
 		System.out.println("\nCounts:\n"+final_cell.get_counts());
-		System.out.println("\nEstimated Parameters:\n"+
-				   fsmType.counts_to_params(final_cell.get_counts()));
+		System.out.println("\nEstimated Parameters:\n"+ p);
 	    }
 	    System.out.println((encAlignment < encNull ? 
 				"related" : "unrelated") + " ("+(encNull-encAlignment)+")" +

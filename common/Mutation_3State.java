@@ -75,7 +75,7 @@ public abstract class Mutation_3State extends Mutation_FSM {
 
         public String toString() {
 	    return "diag_fromD="+diag_fromD+" start_fromD="+start_fromD+"\n"+
-		"diag_fromI="+diag_fromI+" start_fromI="+start_fromI+" cont_fromI="+cont_fromI+"\n";
+		"diag_fromI="+diag_fromI+" start_fromI="+start_fromI+" cont_fromI="+cont_fromI;
 	}
     }
 
@@ -117,22 +117,23 @@ public abstract class Mutation_3State extends Mutation_FSM {
 
 
     public static int required_counts() { return 5; };
+
+    // counts_to_params - convert counts into parameters.  
+    //   Call the Two_Seq_Model to convert its own.
+    //   Note the 0.5* in the start_fromD computation.  This is cause there are 2 start_fromD 
+    //   arcs out of each state, but we only have one count for them combined.
     public Params counts_to_params(Counts c) { 
 	Params par = new Params();
-	par.put("diag_fromD", -MyMath.log2(c.counts[countIndex+diag_fromD]));
-	par.put("start_fromD", -MyMath.log2(c.counts[countIndex+start_fromD]));
-	par.put("diag_fromI", -MyMath.log2(c.counts[countIndex+diag_fromI]));
-	par.put("start_fromI", -MyMath.log2(c.counts[countIndex+start_fromI]));
-	par.put("cont_fromI", -MyMath.log2(c.counts[countIndex+cont_fromI]));
-	par.join( p.s.counts_to_params(c) );
+	double sum1 = c.counts[countIndex+diag_fromD] + c.counts[countIndex+start_fromD];
+	double sum2 = c.counts[countIndex+diag_fromI] + c.counts[countIndex+start_fromI] +
+	    c.counts[countIndex+cont_fromI];
 
-	// Normalise the costs, and replace them in 'par'
-	FSM_Params new_p = new FSM_Params(p.s, par);
-	par.put("diag_fromD",  new_p.diag_fromD);
-	par.put("start_fromD", new_p.start_fromD); 
-	par.put("diag_fromI",  new_p.diag_fromI);
-	par.put("start_fromI", new_p.start_fromI);
-	par.put("cont_fromI",  new_p.cont_fromI);
+	par.put("diag_fromD", -MyMath.log2(c.counts[countIndex+diag_fromD]/sum1));
+	par.put("start_fromD", -MyMath.log2(0.5*c.counts[countIndex+start_fromD]/sum1));
+	par.put("diag_fromI", -MyMath.log2(c.counts[countIndex+diag_fromI]/sum2));
+	par.put("start_fromI", -MyMath.log2(c.counts[countIndex+start_fromI]/sum2));
+	par.put("cont_fromI", -MyMath.log2(c.counts[countIndex+cont_fromI]/sum2));
+	par.join( p.s.counts_to_params(c) );
 
 	return par;
     };
@@ -564,6 +565,14 @@ public abstract class Mutation_3State extends Mutation_FSM {
 	*/
 	public void or(double d, Counts c) {
 	    or_d(d, c);
+
+	    /*
+	    if (d<dval) {
+		d_counts.duplicate(c);
+		dval = d;
+		hval = vval = Double.POSITIVE_INFINITY;
+	    }
+	    */
 	}
 
 	public void or_d(double d, Counts c) {

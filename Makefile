@@ -1,6 +1,7 @@
 
 JAVAC = javac
-JAVAC_FLAGS = -g -classpath .:hb15.zip
+#JAVAC_FLAGS = -g -classpath .:hb15.zip
+JAVAC_FLAGS = -O -classpath .:hb15.zip
 
 PACKAGES = \
 	common \

@@ -82,9 +82,10 @@ public final class MyMath {
     }
 
     public static void main(String args[]) {
-	for (double i=1; i<4; i+=1) {
+	for (double i=1; i<100; i+=1) {
 	    double v1 = MyMath.logstar_continuous(i);
-	    System.out.println("logstar("+i+") = "+v1);
+	    //	    System.out.println("logstar("+i+") = "+v1);
+	    System.out.println(i + " " + v1 + " " + (-i*log2(0.9) - log2(0.1)));
 	}
 
 

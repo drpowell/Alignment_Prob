@@ -2,10 +2,10 @@
 
 use strict;
 
-use Generate_Seq;
+use Markov_gen;
 
 my $timeProg = '/usr/bin/time';
-my $compProg = 'java -Xmx512m -cp ../..:../../hb15.zip alignCompress/AlignCompress --markov=0 --iterations=3';
+my $compProg = 'java -Xmx512m -cp ../..:../../hb15.zip alignCompress/AlignCompress';
 my $prssProg = './prss33 -b 200 -n -q';
 
 use IPC::Open3;
@@ -15,13 +15,13 @@ use IO::File;
 
 $|=1;        # Flush stdout
 
-#my $log = new IO::File "> outLog.$$";
-my $log = new IO::File "> /dev/null";
+my $log = new IO::File "> outLog.$$";
+#my $log = new IO::File "> /dev/null";
 (defined $log) || die "Can't open output log";
 $log->autoflush(1);
 
-#my $model = new Generate_Seq('markov0', {'a'=>0.1, 't'=>0.1, 'g'=>0.3, 'c'=>0.5});
-my $model = new Generate_Seq('uniform',[qw(a t g c)]);
+my $model = new Markov_gen(-1, [qw(a t g c)]);
+#$model->model_power(2);
 
 my $str  = "";
 $str .= `hostname`."\n";
@@ -35,31 +35,41 @@ $str .= $model->as_string();
 $str =~ s/^/#/gm;
 print $str;
 
-my $numRuns = 100;
+my $numRuns = 5;
 
-my($related, $unrelated) = (0,0);
 my @to_delete;
 
-for my $runNum (1..$numRuns) {
-#  my($str1,$str2) = $model->unrelated(200);
-  my($str1,$str2) = $model->related(60,60);
-  print "s1=$str1\ns2=$str2\n";
+for my $numMutations (0, 10, 20, 30, 40, 50, 70, 100, 150, 200, 300) {
+  for my $runNum (1..$numRuns) {
+    my $subseq = $model->gen_sequence(100);
+    my $str1 = $model->gen_sequence(200) . $subseq . $model->gen_sequence(100);
+    #  my $str2 = $model->gen_sequence(300);
+    my $str2 = $model->gen_sequence(100) . $model->mutate($subseq, $numMutations) .
+      $model->gen_sequence(200);
 
+    print $log "s1=$str1\ns2=$str2\n";
 
-  my($r, $rTime1, $uTime1, $sTime1, $swaps1) = runProg($str1, $str2, $compProg);
-  printf "AlignCompress %f uTime=%f\n",$r,$uTime1;
-  ($r>0) ? $related++ : $unrelated++;
+    for my $sum (qw(true false)) {
+      my($r, $rTime1, $uTime1, $sTime1, $swaps1) = 
+	runProg($compProg . " --markov=0 --iterations=4"
+		          . " --linear=true"
+               	          . " --sum=$sum"
+	                  . " --local=true", $str1, $str2);
 
-  my($prob,$score,$expect,$num, $rTime2, $uTime2, $sTime2, $swaps2) = runFastaProg($str1, $str2, $prssProg);
-  print "PRSS p=$prob s=$score expect=$expect runs=$num uTime=$uTime2\n";
+      printf "AlignCompress (sum=$sum): mutates=$numMutations r=%f uTime=%f\n",$r->[0],$uTime1;
+    }
 
-  printf $log "\nDONE\n\n";
+    my($prob,$score,$expect,$num, $rTime2, $uTime2, $sTime2, $swaps2) = 
+      runFastaProg($prssProg, $str1, $str2);
+    print "PRSS:  mutates=$numMutations p=$prob s=$score expect=$expect runs=$num uTime=$uTime2\n";
+
+    printf $log "\nDONE\n\n";
+  }
 }
 
-print "From $numRuns runs, $related related     $unrelated unrelated\n";
 
 sub runProg {
-  my($str1, $str2, $prog) = @_;
+  my($prog, $str1, $str2) = @_;
 
   open3(undef,\*RDR,\*ERR, "$timeProg $prog $str1 $str2") ||
     die "Can't run $prog";
@@ -74,7 +84,7 @@ sub runProg {
   my $s = new IO::Select;
   $s->add($rdr, $err);
 
-  my($odds_ratio)          = (undef);
+  my(@odds_ratio);
   my($rTime,$uTime,$sTime) = (-1,-1,-1);
   my($swaps)               = (-1);
 
@@ -84,7 +94,7 @@ sub runProg {
         (!defined($_ = <$rdr>)) && do {$s->remove($rdr); next;};
 
 #        printf $log "STDOUT: %s",$_;
-        if (/log odds ratio = (\S+)/) { $odds_ratio = $1;}
+        if (/log odds ratio = (\S+)/) { push(@odds_ratio,$1);}
         next;
       };
       ($fh == $err) && do {
@@ -103,13 +113,13 @@ sub runProg {
 
   wait;
 
-  (!defined($odds_ratio)) && (die "Unable to find 'log odds ratio'!\n");
+  (!@odds_ratio) && (die "Unable to find 'log odds ratio'!\n");
 
-  return ($odds_ratio, $rTime, $uTime, $sTime, $swaps);
+  return (\@odds_ratio, $rTime, $uTime, $sTime, $swaps);
 }
 
 sub runFastaProg {
-  my($str1, $str2, $prog) = @_;
+  my($prog, $str1, $str2) = @_;
 
   my($f1,$f2) = ("in.$$.seq1","in.$$.seq2");
 
