@@ -37,6 +37,8 @@ while (<F>) {
 
 my $cmd = "";
 
+map { $_ = 'uniform' if ($_==-1) } @MMorder;
+
 my $toFile = 0;
 
 if (defined($ARGV[0])) {

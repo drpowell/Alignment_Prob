@@ -1,0 +1,18 @@
+        A = adenine           
+        C = cytosine            
+        G = guanine             
+        T = thymine           
+        U = uracil
+        R = G A (purine)        
+        Y = T C (pyrimidine)    
+        K = G T (keto)    
+        M = A C (amino)
+        S = G C 
+        W = A T 
+        B = G T C
+        D = G A T
+        H = A C T
+        V = G C A
+        N = A G C T (any)     
+
+

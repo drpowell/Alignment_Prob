@@ -2,12 +2,12 @@
 alignCompress - align compressible sequences
 
 Run using:
-java -Xmx512m -cp .:hb15.zip alignCompress/AlignCompress
+java -Xmx512m alignCompress/AlignCompress
 
 
 fuzzyLZ - a compression model using a fuzzy model of repeats
 from self.
 
 Run using:
-java -cp .:hb15.zip fuzzyLZ/FuzzyLZ
+java -Xmx512m fuzzyLZ/FuzzyDriver
 

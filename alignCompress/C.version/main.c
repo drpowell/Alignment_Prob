@@ -11,15 +11,20 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
+//#include <getopt.h>
+#include <unistd.h>
 
 #include "main.h"
 
-#define DEBUG         0
+#define DEBUG         1
 
 #define ALPHA_SIZE    4
 static char alphabet[ALPHA_SIZE] = "atgc";
 //#define ALPHA_SIZE    24
 //static char alphabet[ALPHA_SIZE] = "arndcqeghilkmfpstwyvbzx*";
+
+int markovOrder = 0;
+char *markovFile = NULL;
 
 char int2char(int i)
 {
@@ -433,8 +438,18 @@ DOUBLE alignDriver(int maxIterations, char *seqA, char *seqB)
   for (i=0; i<lenA; i++) seqA_i[i] = char2int(seqA[i]);
   for (i=0; i<lenB; i++) seqB_i[i] = char2int(seqB[i]);
 
-  fit_markovN(ALPHA_SIZE, 1, lenA, seqA_i, (DOUBLE*)seqA_enc);
-  fit_markovN(ALPHA_SIZE, 1, lenB, seqB_i, (DOUBLE*)seqB_enc);
+  markov_init(ALPHA_SIZE, markovOrder);
+  if (markovFile) {
+    markov_load(markovFile);
+  } else {
+    markov_fit(lenA, seqA_i);	/* One model for both sequences */
+    markov_fit(lenB, seqB_i);
+  }
+  markov_predict(lenA, seqA_i, (DOUBLE*)seqA_enc);
+  markov_predict(lenB, seqB_i, (DOUBLE*)seqB_enc);
+
+  if (DEBUG>=1)
+    printf("Markov model entropy = %f bits/char\n", markov_entropy());
   
 
   // Calculate the cumulative encodings
@@ -493,8 +508,26 @@ DOUBLE alignDriver(int maxIterations, char *seqA, char *seqB)
 
 int main(int argc, char **argv)
 {
+  char *exeName = argv[0];
   DOUBLE r;
   char *seqA, *seqB;
+
+  while (1) {
+    int c = getopt(argc, argv, "m:f:");
+    if (c==-1)
+      break;
+    switch (c) {
+    case 'm':
+      markovOrder = atoi(optarg);
+      break;
+    case 'f':
+      markovFile = optarg;
+      break;
+    }
+  }
+	
+  argc -= optind-1;
+  argv += optind-1;
 
   if (argc == 1) {
     seqA = malloc(10000);
@@ -505,16 +538,35 @@ int main(int argc, char **argv)
     if (seqB[strlen(seqB)-1] != '\n') { fprintf(stderr, "seqB too long.\n"); exit(-1); }
     seqA[strlen(seqA)-1]=0;
     seqB[strlen(seqB)-1]=0;
-  } else if (argc ==3) {
+  } else if (argc==2) {
+    FILE *f;
+    f = fopen(argv[1], "r");
+    assert(f && "Unable to open file");
+    seqA = malloc(10000);
+    seqB = malloc(10000);
+    fgets(seqA, 10000, f);
+    fgets(seqB, 10000, f);
+    fclose(f);
+    if (seqA[strlen(seqA)-1] != '\n') { fprintf(stderr, "seqA too long.\n"); exit(-1); }
+    if (seqB[strlen(seqB)-1] != '\n') { fprintf(stderr, "seqB too long.\n"); exit(-1); }
+    seqA[strlen(seqA)-1]=0;
+    seqB[strlen(seqB)-1]=0;
+  } else if (argc==3) {
     seqA = argv[1];
     seqB = argv[2];
   } else {
-    fprintf(stderr, "Usage: %s <seqA> <seqB>\n", argv[0]);
+    fprintf(stderr, "Usage: %s <seqA> <seqB>\n", exeName);
     exit(-1);
   }
 
+  printf("Markov Order = %d\n", markovOrder);
+  if (markovFile)
+    printf("Using markov counts file '%s'\n", markovFile);
+
   r = alignDriver(8, seqA, seqB);
   printf("log odds ratio = %f\n", r);
+
+  //markov_save(stdout);
 
   return 0;
 }

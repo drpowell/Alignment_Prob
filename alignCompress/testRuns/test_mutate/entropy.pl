@@ -49,8 +49,9 @@ print STDERR "Starting $order MM\n";
     $p = $m->addEvent($_);
     $len += -log($p);
   }
-  printf "($order-order MM) Len = %.2f bits (Saving = %.2f bits) (%.4f bits/char)\n",
-    $len/log(2), $null-$len/log(2), $len/log(2)/(scalar @str);
+  printf("($order-order MM) Len = %.2f bits (Saving = %.2f bits) (%.4f bits/char) (model = %.4f bits/char)\n",
+	 $len/log(2), $null-$len/log(2), $len/log(2)/(scalar @str),
+	 $m->model_entropy());
 
   $m->sanityCheck;
 

@@ -34,12 +34,15 @@ my $cmd = "";
 
 my $toFile = 0;
 
+map { $_ = 'uniform' if ($_==-1) } @MMorder;
+
 if (defined($ARGV[0])) {
   $toFile = 1;
   my $file = shift;
   die "$file doesn't have .eps extension" if (!($file =~ /\.eps$/));
 #  $cmd .= "set terminal postscript eps color\n";
   $cmd .= "set terminal postscript eps\n";
+#  $cmd .= "set terminal png small notransparent color xffffff x000000 x00ff00 x00ff00 x0000ff xff0000\n";
   $cmd .= "set output '$file'\n";
 }
 
@@ -47,10 +50,13 @@ $cmd .= "set key left\n";
 $cmd .= "set logscale y\n";
 $cmd .= "set data style lines\n";
 if (@MMorder == 1) {
-  $cmd .= "set title \"ROC for MM order=$MMorder[0] entropy=$entropy[0] Pchange=$Pchange[0]";
+#  $cmd .= "set title \"ROC for MM order=$MMorder[0] entropy=$entropy[0] Pchange=$Pchange[0]";
+  $cmd .= "set title \"ROC for MM order=$MMorder[0] entropy=$entropy[0]";
 } else {
-  $cmd .= "set title \"ROC for MM order=$MMorder[0] entropy=$entropy[0] Pchange=$Pchange[0]\\n".
-                          "and MM order=$MMorder[1] entropy=$entropy[1] Pchange=$Pchange[1]";
+#  $cmd .= "set title \"ROC for MM order=$MMorder[0] entropy=$entropy[0] Pchange=$Pchange[0]\\n".
+#                          "and MM order=$MMorder[1] entropy=$entropy[1] Pchange=$Pchange[1]";
+  $cmd .= "set title \"ROC for MM order=$MMorder[0] entropy=$entropy[0]\\n".
+                          "and MM order=$MMorder[1] entropy=$entropy[1]";
 }
 $cmd .= ($uni0 ? " (uniform 0 order stats)" : "") . "\"\n";
 $cmd .= "set xlabel 'Coverage'\n";

@@ -1,4 +1,5 @@
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -28,8 +29,16 @@ static inline DOUBLE exp2(DOUBLE a) {
 #endif
 
 // Functions in markov.c
-void fit_markovN(int alphaSize, int order, int len, unsigned char *str, DOUBLE *res);
+void markov_init(int alphaSize, int order);
+void markov_fit(int len, unsigned char *str);
+void markov_load(char *fname);
+void markov_save(FILE *f);
+void markov_predict(int len, unsigned char *str, DOUBLE *res);
+DOUBLE markov_entropy();
 
+// Functions in main.c
+int char2int(char c);
+char int2char(int i);
 
 
 // -----------------------------------------------------------------------------------

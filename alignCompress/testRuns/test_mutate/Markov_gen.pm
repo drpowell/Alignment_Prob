@@ -31,12 +31,34 @@ use Data::Dumper;
   }
 }
 
+
 sub MAIN_TEST {
-  my $t = new Markov_gen(-1, [qw(a t g c)]);
-  my $s1 = $t->gen_sequence(100);
-  my $s2 = $t->mutate($s1, 50);
-  print $t->gen_sequence(10) . $s1 . "\n";
-  print $s2 . $t->gen_sequence(10) . "\n";
+  my $order = 1;
+  my $t = new Markov_gen($order, [qw(a t g c)], 
+			 { 'a' => { 'a' => 11, 't' => 2, 'g'=> 1, 'c' => 1},
+			   't' => { 'a' => 1,  't' => 12,'g'=> 1, 'c' => 1},
+			   'g' => { 'a' => 1,  't' => 1, 'g'=> 11,'c' => 2},
+			   'c' => { 'a' => 1,  't' => 1, 'g'=> 1, 'c' => 12}
+			 });
+  $t->normalise();
+
+  print $t->as_string(),"\n";
+  print "New Entropy = ",$t->model_entropy(),"\n";
+  print "Old Entropy = ",$t->model_entropy_wrong(),"\n";
+
+  my $tot=0;
+  for (1..5) {
+    my $seq = $t->gen_sequence(100000);
+    my $v = $t->entropy($seq);
+    $tot += $v;
+    print "A sequence entropy = ",$v,"\n";
+  }
+  print "Avg = ", $tot/5,"\n";
+
+  #my $s1 = $t->gen_sequence(100);
+  #my $s2 = $t->mutate($s1, 50);
+  #print $t->gen_sequence(10) . $s1 . "\n";
+  #print $s2 . $t->gen_sequence(10) . "\n";
   #my $t = new Markov_gen(0, [qw(a t g c)]);
   #$t->model_power(3);
   #$t->makeUniModel(5);
@@ -245,8 +267,71 @@ sub normalise {
   return $max;
 }
 
-# model_entropy - calculate the entropy of the model (I think this is right)
+# Calculate the entropy of an arbitray order markov model.
+# Note: Any high markov model can be considered as a first order
+#       model with a large number of states
+# Entropy = Sum_(over all contexts) ( P(context) * 
+#                      Sum_(over all alpha chars) (P(a|context) * -log P(a|context) )
+# To calculate this we need the steady-state state probabilities P(context).
+# The transition probabilities can be used to form a number of linear equations:
+#    P(context1)  = Sum_(over all contexts) ( P(context1| context) )
+# With the equation Sum_(over all contexts) ( P(context) ) = 1
+# These linear equations can be solved using Gaussian elimination.
 sub model_entropy {
+  my($s) = @_;
+  return log2(scalar @{$s->{ALPHA}}) if $s->{ORDER}<0;
+
+  my $m = $s->{PROBS};
+  my %contexts;
+  { my $i = 0;  map { $contexts{$_} = $i++; } keys %$m; }
+  #%contexts = (a => 0, t=>1, g=>2, c=>3);
+
+  print map { $_ . " -> " . $contexts{$_} . "\n" } keys %contexts;
+
+  my($a_s) = ([]);
+  for my $c (keys %contexts) {
+    for my $k (keys %{$m->{$c}}) {
+      my $to_c = substr($c, 1) . $k;
+      my $to_i = ($s->{ORDER}==0 ? 0 : $contexts{$to_c});
+      $a_s->[$to_i][$contexts{$c}] = $m->{$c}{$k};
+    }
+  }
+
+  for my $i (0..scalar(@$a_s)-1) { $a_s->[$i][$i] -= 1; };
+
+  my($b_s) = ([(0) x scalar(@$a_s)]);
+
+  # Fill in all the undefined values with 0
+  for my $r (@$a_s) {
+    for my $i (0 .. scalar(@$a_s)-1) {
+      $r->[$i] ||= 0;
+    }
+  }
+
+  # Equations are under-constrained.  We can delete any 1 and replace it with sum(probs) = 1
+  for my $j (0..scalar(@$a_s)-1) {
+    $a_s->[0][$j] = 1;
+  };
+  $b_s->[0] = 1;
+
+  solve_matrix($a_s, $b_s);
+
+  # b_s now contains the equlibrium probabilities for each context
+  my $entropy = 0;
+  for my $c (keys %contexts) {
+    my $h = 0;
+    for my $k (keys %{$m->{$c}}) {
+      $h += - $m->{$c}{$k} * log2($m->{$c}{$k});
+    }
+    $entropy += $h * $b_s->[$contexts{$c}];
+  }
+
+  return $entropy;
+}
+
+# model_entropy - calculate the entropy of the model (I think this is right)
+#     THIS IS WRONG. OFTEN CLOSE BUT WRONG
+sub model_entropy_wrong {
   my($s) = @_;
   my $m = $s->{PROBS};
   my $sum=0;
@@ -339,7 +424,7 @@ sub gen_sequence {		# Generate a sequence
   my $alpha = $self->{ALPHA};
   my $order = ($self->{ORDER} < 0 ? 0 : $self->{ORDER});
 
-  my $str = ""; # Pick any 2 starting chars
+  my $str = ""; # Pick any $order starting chars
   for (1 .. $order) {
     $str .= $alpha->[rand(@$alpha)];
   }
@@ -585,5 +670,90 @@ sub min {
   for (@_) { ($_<$i) && ($i=$_); }
   $i;
 }
+
+
+# Solve a set of linear equations of the form [As] * [xs] = [Bs]
+sub solve_matrix {
+  my($a_s, $b_s) = @_;
+
+  my $DEBUG = 1;
+
+  print_matrix($a_s,$b_s) if ($DEBUG);
+
+  my($m,$n) = (scalar @$a_s, scalar @{$a_s->[0]});
+
+  print "Doing $m rows, $n cols\n" if ($DEBUG);
+  die "Only square matrices at the moment!" if ($m != $n);
+
+  die "Bad rank in b_s" if $m != @$b_s;
+
+  for my $i (0 .. $m-2) {
+    # Find the row with the largest value in column[i]  (this will be the pivot)
+    my $max = $i;
+    for my $i2 ($i+1 .. $m-1) {
+      $max = $i2 if (abs($a_s->[$i2][$i] > abs($a_s->[$max][$i])))
+    }
+    # Swap row $max with row $i  (and swap in the b vector)
+    ($a_s->[$i], $a_s->[$max]) = ($a_s->[$max], $a_s->[$i]);
+    ($b_s->[$i], $b_s->[$max]) = ($b_s->[$max], $b_s->[$i]);
+
+    # row a_s[i] is what we are subtracting from everything
+
+    for my $i2 ($i+1 .. $m-1) {
+      # row a_s[i2] is the row we are about to subtract from
+      next if ($a_s->[$i2][$i] == 0);
+      my $r = $a_s->[$i2][$i] / $a_s->[$i][$i];
+
+      for my $j (0 .. $n-1) {
+	# j is the column
+	$a_s->[$i2][$j] -= $a_s->[$i][$j] * $r;
+      }
+      $b_s->[$i2] -= $b_s->[$i] * $r;
+    }
+  }
+  print_matrix($a_s,$b_s) if ($DEBUG);
+
+  for (my $i=$m-1; $i>=0; $i--) {
+    my $sum = 0;
+    for my $j ($i+1 .. $m-1) {
+      $sum += $b_s->[$j] * $a_s->[$i][$j];
+      $a_s->[$i][$j] = 0;
+    }
+
+    if ($a_s->[$i][$i] == 0) {
+      if ($b_s->[$i] == 0) {
+	print "Equations are underconstrained.\n";
+	last;
+      } else {
+	print "Equations are inconsistent.\n";
+	last;
+      }
+    }
+
+    $b_s->[$i] = ($b_s->[$i] - $sum) / $a_s->[$i][$i];
+    $a_s->[$i][$i] = 1;
+  }
+  print_matrix($a_s,$b_s) if ($DEBUG);
+}
+
+sub print_matrix {
+  my($a_s, $b_s) = @_;
+
+  my($m,$n) = (scalar @$a_s, scalar @{$a_s->[0]});
+
+  for my $i (0 .. $m - 1) {
+    print "| ";
+    for my $j (0 .. $n - 1) {
+      printf "%5.2f ", $a_s->[$i][$j];
+    }
+    printf "| %s ", ($i == int($m/2) ? "=" : " ");
+    printf " | %5.2f |\n", $b_s->[$i];
+  }
+  print "\n";
+
+}
+
+
+
 
 1;

@@ -175,7 +175,7 @@ on populations described by higher-order models.
 % non-random, compress'n, inf'n, seq' models, Markov m', Bayes, MML...
 
 There is considerable interest in the compression of biological
-sequences~\cite{grumbach94,lowenstern96,rivals97,allison00},
+sequences~\cite{grumbach94,loewenstern96,rivals97,allison00},
 not so much to save disc space but
 as a criterion for comparing models of populations of sequences.
 The terms {\em biased}, {\em non-random}, {\em low information content}
@@ -212,7 +212,8 @@ Given {\em scores} of one for a match and zero for mismatch, insert and delete,
 the DPA finds the longest common subsequence (LCS).
 Given {\em costs} of zero for a match and one for mismatch, insert and delete,
 it finds an optimal alignment under the Levenshtein~\cite{levenshtein66}
-metric also known as the simple edit-distance~\cite{sellers}.
+metric also known as the simple
+edit-distance~\cite{sellers74}.
 {\em Linear} gap-costs, for runs of inserts or deletes,
 are more plausible bioigically and Gotoh~\cite{gotoh82}
 gave such an alignment algorithm; the key is to have three {\em states}
@@ -239,7 +240,7 @@ A different approach to the relatedness problem
 considers a probabilistic {\em mutation model}.
 The costs (scores) of the DPA are replaced by the -log probabilities
 of match, mismatch, insert and delete.
-In fact costs and scores can be {\em normalized}~\cite{Allison93} to show
+In fact costs and scores can be {\em normalized}~\cite{allison93a} to show
 the underlying probabilities.
 The DPA can then find a {\em most probable} alignment, but it can also
 be modified to calculate the {\em joint} probability of two sequences:
@@ -249,7 +250,7 @@ two sequences are related.
 Rather than selecting the largest probability,
 their probabilities can therefore be {\em added}.
 Bishop and Thompson~\cite{bishop86} did this for a 1-state mutation model.
-Allison et al~\cite{Allison92} extended this to 3-state (linear gap-costs)
+Allison et al~\cite{allison92a} extended this to 3-state (linear gap-costs)
 and 5-state (piece-wise linear gap-costs) mutation models,
 and included the cost (complexity) of models so that simple
 and complex models can be compared fairly.

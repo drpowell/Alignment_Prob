@@ -96,7 +96,7 @@ class BufferModel implements Seq_Model {
 	    for (int j=0; j<alphabet.length; j++) {
 		s = MyMath.logplus(s, enc[i][j]);
 	    }
-	    Misc.assert(Math.abs(s) < 1E-10, "logplus() != 0.  s="+s);
+	    Misc.my_assert(Math.abs(s) < 1E-10, "logplus() != 0.  s="+s);
 	}
     }
 
@@ -117,7 +117,7 @@ class BufferModel implements Seq_Model {
 	for (int i=0; i<alphabet.length; i++)
 	    if (a == alphabet[i])
 		return i;
-	Misc.assert(false, "Charater '"+a+"' not in defined alphabet");
+	Misc.my_assert(false, "Charater '"+a+"' not in defined alphabet");
 	return -1;
     }
 
@@ -152,7 +152,7 @@ class AlignCompress {
 
     // Encode length l: 0..infinity
     static private double encode_length(double l) {
-	Misc.assert(l>=0, "Bad length to encode:"+l);
+	Misc.my_assert(l>=0, "Bad length to encode:"+l);
 	//return MyMath.logstar_continuous(l+1);
 	//return -(l*MyMath.log2(PcharEncode) + MyMath.log2(1-PcharEncode)); // Geometric distribution
 	//return 0.104808 * l;	// This is to match SW costs. (TESTING!)
@@ -273,7 +273,7 @@ class AlignCompress {
 	if ( linearCosts && !sumAlignments) fsmCounts = Mutation_3State.One.required_counts();
 	if ( linearCosts &&  sumAlignments) fsmCounts = Mutation_3State.All.required_counts();
 
-	Misc.assert(fsmCounts>=0, "Bad number of fsmCounts");
+	Misc.my_assert(fsmCounts>=0, "Bad number of fsmCounts");
 
 	int totCounts = mdlCounts + fsmCounts;
 
@@ -297,11 +297,11 @@ class AlignCompress {
 	    if ( linearCosts &&  sumAlignments) 
 		fsmType = new Mutation_3State.All(model, p, totCounts, countPos);
 
-	    Misc.assert(fsmType!=null, "Unable to construct fsmType");
+	    Misc.my_assert(fsmType!=null, "Unable to construct fsmType");
 
 
 	    countPos += fsmCounts;
-	    Misc.assert(countPos == totCounts, "Internal error: countPos!=totCounts");
+	    Misc.my_assert(countPos == totCounts, "Internal error: countPos!=totCounts");
 
 	    Counts initialCounts = new Counts(totCounts);
 	    for (int i=0; i<totCounts; i++) 
@@ -474,7 +474,7 @@ class AlignCompress {
 	    }
 
 	    // Done we change little in alignment length?
-	    if (iter>0 && encAlignment<=lastAlignment && lastAlignment-encAlignment < 0.5)
+	    if (iter>0 && encAlignment<=lastAlignment && lastAlignment-encAlignment < 0.1)
 		break;
 
 	    lastAlignment = encAlignment;
@@ -494,6 +494,7 @@ class AlignCompress {
 	cmdLine.addBoolean("local", true, "Compute using local alignments.");
 	cmdLine.addInt("verbose", 0, "Display verbose output (larger num means more verbosity).");
 	cmdLine.addBoolean("file", false, "Read sequences from file(s) on command line");
+	cmdLine.addBoolean("protein", false, "Sequences are protein data");
 	cmdLine.addString("params", "", "Params to pass to all classes (comma separated)");
 
 	args = cmdLine.parseLine(args);
@@ -552,9 +553,15 @@ class AlignCompress {
 	a.verbose         = cmdLine.getIntVal("verbose");
 	a.paramString     = cmdLine.getStringVal("params");
 
-	//a.alphabet = new char[] {'a', 't', 'g', 'c'};
-	a.alphabet = new char[] {'a', 't', 'g', 'c', 
-		                 'y', 'r', 'w', 'n'};
+	if (cmdLine.getBooleanVal("protein")) {
+	    a.alphabet = new char[] {'a','r','n','d','c','q','e','g','h','i','l',
+				     'k','m','f','p','s','t','w','y','v','b','z',
+				     'x','*'};
+	} else {
+	    a.alphabet = new char[] {'a', 't', 'g', 'c'};
+	    //a.alphabet = new char[] {'a', 't', 'g', 'c', 
+	    //		     'y', 'r', 'w', 'n'};
+	}
 
 	System.out.println("-log odds ratio = " + a.doAlign() + " bits");
 

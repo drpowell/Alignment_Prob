@@ -2,9 +2,10 @@
 #TEXFILES=alignCompress.tex
 #PLOTFILES=p1.eps p2.eps p3.eps p4.eps p5.eps p6.eps p7.eps   r1.eps r2.eps r3.eps r4.eps
 
-FILENAME=ismb2003
-TEXFILES=ismb2003.tex
-PLOTFILES=roc_uni.eps roc_0.eps roc_uni_0.eps roc_blend.eps
+FILENAME=bioinformatics2003
+TEXFILES=bioinformatics2003.tex
+PLOTFILES=roc_uni_0.eps roc_blend.eps
+#PLOTFILES=roc_uni.eps roc_0.eps roc_uni_0.eps roc_blend.eps
 POP_CONV_SCRIPT=../testRuns/populationPlot.pl
 POP_CONV_SCRIPT2=../testRuns/populationPlot2.pl
 REL_CONV_SCRIPT=../testRuns/relatedPlot.pl
@@ -72,5 +73,8 @@ r4.eps: ../testRuns/res.related_20020903.txt $(REL_CONV_SCRIPT)
 	$(REL_CONV_SCRIPT) $< $@
 
 clean:
+	rm -f $(FILENAME).ps *~ core *.aux *.log *.dvi *.toc *.bak *.lot *.lof *.bbl *.blg *.lol
+
+realclean:
 	rm -f $(FILENAME).ps $(PLOTFILES) *~ core *.aux *.log *.dvi *.toc *.bak *.lot *.lof *.bbl *.blg *.lol p?.eps r?.eps
 
