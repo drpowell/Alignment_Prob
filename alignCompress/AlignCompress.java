@@ -302,7 +302,7 @@ class AlignCompress {
 
 	int totCounts = mdlCounts + fsmCounts;
 
-	double bestDiff = -Double.POSITIVE_INFINITY;
+	double bestDiff = Double.NEGATIVE_INFINITY;
 
 	for (int iter=0; iter<numIterations; iter++) {
 
@@ -363,7 +363,11 @@ class AlignCompress {
 	    }
 
 	    // Initialise the first cell of the DPA matrix
-	    cell(D,0,0).init_val(0); 
+	    if (localAlign)
+		cell(D,0,0).init_val(Double.POSITIVE_INFINITY); 
+	    else
+		cell(D,0,0).init_val(0); 
+
 	    cell(D,0,0).init_counts(initialCounts); // Initialise counts
 
 	    if (verbose>=1) { 
