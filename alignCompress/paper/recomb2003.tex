@@ -1,4 +1,5 @@
 \documentclass[letterpaper,11pt,oneside]{article}
+%\documentclass[a4paper,11pt,oneside]{article}
  
 \usepackage{multicol}
 
@@ -10,14 +11,14 @@
 \usepackage[none,bottom,dark,english]{draftcopy}
 \draftcopyName{ DRAFT \number\day\/\number\month\/\number\year}
  
-\usepackage[verbose,letterpaper]{geometry}
+\usepackage[verbose]{geometry}
 %\geometry{top=2cm,bottom=2cm,left=1.5cm,right=1.5cm,nohead}
 \geometry{top=1in,bottom=1in,left=1in,right=1in,nohead}
 
-\def\plotwidth{0.7\columnwidth}
+\def\plotwidth{0.9\columnwidth}
 
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{1.5ex plus0.5ex minus0.5ex}
+%\setlength{\parindent}{0pt}
+%\setlength{\parskip}{1.0ex plus0.5ex minus0.5ex}
 
 
 \begin{document}
@@ -144,19 +145,19 @@ on various populations of sequences.
 
 \section{Gap Costs or Scores}
 
-Simple point mutations rank L separated insertion (or deletion) events
-the same as one event of L contiguous insertions.
+Simple point mutations rank $L$ separated insertion (or deletion) events
+the same as one event of $L$ contiguous insertions.
 It is more plausible in biology to prefer the latter over the former and
 this can be modelled by affine gap costs of the form $a \times L+b$ for
 constants $a$ and $b$.
-Constant `a' is a start-up penalty that applies pressure towards having
+Constant `$a$' is a start-up penalty that applies pressure towards having
 a low number of gaps.
 Gotoh~\cite{gotoh82} gave an O(m*n)-time alignment algorithm for affine gap-costs.
 The key idea is to introduce three {\em states} into  each cell of
 the matrix used by the dynamic programming algorithm (Figure~\ref{fig:3state}).
 The states represent the cost (probability, score, etc.) of reaching
 element (i,j) {\em conditional} upon a
-diagonal (match$|$mismatch), vertical (insert) or horizontal (delete) move.
+diagonal (match or mismatch), vertical (insert) or horizontal (delete) move.
 
 
 
@@ -180,9 +181,9 @@ extended so that an alignment may start (or end) at any cell in the matrix.
 The most common alignment algorithm for comparison of biological sequences, is
 the Smith-Waterman algorithm~\cite{smith81}.  It is a local alignment
 algorithm utilising affine gap costs.  This algorithm is defined in terms of
-scores, positive for a match, and negative for a change and for gaps.  The
+scores; positive for a match, and negative for a change and for gaps.  The
 scores used in the Smith-Waterman algorithm are not unique, indeed, many
-different set scores and also costs produce the same rank ordering of
+different sets of scores and also costs produce the same rank ordering of
 alignments.  We make use of this by converting the Smith-Waterman scores to
 probabilities for the initial mutation probabilities in our M-alignment
 algorithm.
@@ -210,7 +211,7 @@ a ``fundamental difference between the searching [for related sequences]
 and [optimal] alignment operations.''
 
 Every alignment ``explains'' all the characters of the given sequences.
-If a character constant, c, is added for every character
+If a character constant, $c$, is added for every character
 in every column of an alignment (or in every move in the DPA matrix)
 this just adds a constant to the cost (or score) of the alignment.
 It does not change the rank-order of alignments.
@@ -242,7 +243,7 @@ false-positive matches in alignment algorithms that assume
 the data to be random, or perhaps to come from a zero-order model.
 Steps to cure the problem include
 significance tests that compare results against shuffled sequences, and
-the masking-out of repetitive subintervals.
+the masking-out of repetitive subintervals~\cite{wootton93}.
 Needleman and Wunsch~\cite{needleman70}
 asked ``whether a particular [match score] found differs significantly
 from a fortuitous match between two random sequences.''
@@ -406,23 +407,55 @@ At m[i,j]:
 \end{figure}
 
 \begin{figure}
-\centering
-\epsfig{file=3state.eps, width=0.4\columnwidth}
-\caption{\label{fig:3state}DPA for affine gap costs aka. 3-State mutation model.}
-\end{figure}
+\begin{minipage}{\textwidth}
+\begin{multicols}{2}
 
-\begin{figure}
+%\begin{figure}
 \centering
-\epsfig{file=local.eps, width=0.3\columnwidth}
+\epsfig{file=3state.eps, width=0.8\columnwidth}
+\caption{\label{fig:3state}DPA for affine gap costs aka. 3-State mutation model.}
+%\end{figure}
+
+%\begin{figure}
+\centering
+\epsfig{file=local.eps, width=0.6\columnwidth}
 \caption{\label{fig:local}Local alignments}
+%\end{figure}
+
+%\begin{figure}
+\centering
+\epsfig{file=roc_uni.eps, width=\plotwidth}
+\caption{\label{fig:roc_uni}ROC for a uniform sequence model.}
+%\end{figure}
+
+%\begin{figure}
+\centering
+\epsfig{file=roc_0.eps, width=\plotwidth}
+\caption{\label{fig:roc_0}ROC for biased composition sequences.}
+%\end{figure}
+
+%\begin{figure}
+\centering
+\epsfig{file=roc_uni_0.eps, width=\plotwidth}
+\caption{\label{fig:roc_uni_0}ROC for a uniform sequence model and biased composition sequences.}
+%\end{figure}
+
+%\begin{figure}
+\centering
+\epsfig{file=roc_blend.eps, width=\plotwidth}
+\caption{\label{fig:roc_blend}ROC for a blended model}
+%\end{figure}
+
+\end{multicols}
+\end{minipage}
 \end{figure}
 
 
 \section{Description}
 
 The aim of probabilistic optimal alignment is to find the probability of the
-sequences for a given alignment.  Summing over all alignments aims to
-calculate the probability of both sequences given they are related by an
+sequences and the most probable alignment.  Summing over all alignments aims
+to calculate the probability of both sequences given they are related by an
 alignment model.  For practicality -log probabilities are used which directly
 relates to a possible encoding length~\cite{shannon48}.  Much of the following
 discussion alternates between probabilities and encoding length, using
@@ -443,43 +476,49 @@ difference as the log-odds ratio and it is the metric for our tests. Using the
 wrong population model, or implicitly assuming a uniform model, may cause us
 to overestimate the joint probability leading to false positives.
 
-The new M-alignment algorithm shown in Figure~\ref{fig:algs}(h) is for global
-alignment with a point mutation model.  This is readily extend to affine gap
-costs by including three states in each cell of the DPA matrix as shown in
-Figure~\ref{fig:3state}.  The extension to local alignment is achieved by
-allowing an alignment to start at any cell, $m[i,j]$, in the matrix with a
-probability of $P(a[1..i-1]) \times P(b[1..j-1])$.  And an alignment may end at
-any point carrying a probability of $P(a[i+1..|a|] | a[1..i]) \times P(b[j+1..|b|]
-| b[1..j])$.  For comparison to existing techniques we will concentrate on
-local alignment using affine gap costs.  When measuring the relatedness of two
-sequence we sum over all alignments as this is a better test than simply using
-the optimal alignment.
+The new M-alignment algorithm is as shown in Figure~\ref{fig:algs}(h), using
+the following probabilities for characters:
+$$Pr(x|a[1..i-1],b[1..j-1]) = \frac{1}{2} ( Pr(a[i]|a[1..i-1]) +
+Pr(b[j]|b[1..j-1]) )$$
+$$Pr(x,y|x<>y,a[1..i-1],b[1..j-1]) = \frac{1}{2}\frac{Pr(a[i]|a[1..i-1])
+Pr(b[j]|b[1..j-1])}{(1-Pr(a[i]|b[1..j-1]))(1-Pr(b[j]|a[1..i-1]))}$$
 
-To be a fair comparison, the encoding of the alignment should also include any
-parameters.  For affine gap costs M-alignment encode the probabilities for
-each of the different types of mutations.  By doing this it is possible to
-compare different mutation models by calculating the difference in encoding
-lengths.  This may be useful in testing whether a point mutation model, an
-affine gap model or a piece-wise linear model is best for some given
-sequences.
+This version of the algorithm is for global alignment with a point mutation
+model.  This is readily extended to affine gap costs by including three states
+in each cell of the DPA matrix as shown in Figure~\ref{fig:3state}.  The
+extension to local alignment is achieved by allowing an alignment to start at
+any cell, $m[i,j]$, in the matrix with a probability of $P(a[1..i-1]) \times
+P(b[1..j-1])$.  And an alignment may end at any point carrying a probability
+of $P(a[i+1..|a|] | a[1..i]) \times P(b[j+1..|b|] | b[1..j])$.  For comparison
+to existing techniques we will focus on local alignment using affine gap
+costs.  When measuring the relatedness of two sequence we sum over all
+alignments as this is a better test than simply using the optimal alignment.
+
+It is necessary for the encoding of the alignment to include any parameters so
+it is fair comparison between the null model and the alignment model.  For
+affine gap costs M-alignment encode the probabilities for each of the
+different types of mutations.  By doing this it is possible to compare
+different mutation models.  This may be useful in testing whether a point
+mutation model, an affine gap model or a piece-wise linear model is best for
+some given sequences.
 
 The M-alignment algorithm starts with probabilities for mutations based on
 those commonly used for the Smith-Waterman algorithm.  After one pass by the
 algorithm, these parameters are re-estimated and the process repeated until
 the encoding of the alignment converges to some minimum.  It is interesting to
 note that the final estimated mutation probabilities are different depending
-on whether optimal alignment or summed alignment is begin done.
+on whether optimal alignment or summed alignment is being done.
 
 
 
 \subsection{Population models}
 
 The type of population model required by the M-alignment algorithm is one that
-can give a probability $P(a[i]=c|a[1..i-1])$ for any position $i$ in a
+can give a probability $P(a[i]=c|a[1..i-1])$ for every position $i$ in a
 sequence.  This is sometimes known as a left-to-right sequence model and is
-quite general.  The types of models examined in this paper are small order
+quite general.  The types of models tested in this paper are small order
 Markov Model and mixtures of these, but there is no reason more complex models
-couldn't used.  Indeed, the best model to use would be one that accounts for
+could not used.  Indeed, the best model to use would be one that accounts for
 all known structure in a population of sequences.
 
 It is possible to use adaptive models, but these may cause the M-alignment
@@ -492,35 +531,37 @@ best to use a fitted model instead of an adaptive model.
 
 \subsection{Encoding of lengths}
 
-For the encoding of the alignment to be a correct encoding, it is necessary to
-encode at which position in both sequences the alignment begins and ends.  We
-assume that the lengths of the two sequence being compared are encoded
-independently, which seems sensible for local alignments.  Since, we are
-interested only in the difference between the null model and the alignment
-model and both would encoding lengths in the same way, we may ignore them.
+When performing local alignment, for the encoding of the alignment to be a
+correct encoding, it is necessary to encode at which position in both
+sequences the alignment begins and ends.  We assume that the lengths of the
+two sequences being compared are encoded independently, which seems sensible
+for local alignments.  Since, we are interested only in the difference between
+the null model and the alignment model and both would encoding lengths in the
+same way, we may ignore them.
 
 However, it is necessary to encode the beginning and end of the alignment in
 both sequences.  Since we assume the sequence lengths have already been
 encoded, and we have no other prior knowledge on where the aligned section
-will be in each sequence we use a uniform prior on start and end position of
-the aligned section.  Actually, we can do a little better than this.  Once the
-start and end of one aligned subsequence is known and the start of other
-subsequence is known, we have some knowledge about when the end of the second
+will be in each sequence we use a uniform prior on the start and end position
+of the aligned section.  Actually, we can do a little better than this.  Once
+the start and end of one aligned subsequence is known and the start of other
+subsequence is known, we have some knowledge about where the end of the second
 subsequence will be.  This is due to the fact that the two aligned
-subsequences tend to be of similar length.  So, as an approximation, we don't
-encode this final position at all.  This is an underestimate, but appears to
-be reasonable.  To be precise, if $l_1$ is the length of the shorter sequence
-and $l_2$ the length of the longer, we encode the lengths of the un-aligned
-and aligned regions in $2\log_2(l1) - 1 + \log_2(l2)$ bits.
+subsequences will tend to be of similar length.  So, as an approximation, we
+don't encode this final position at all.  This is an underestimate, but
+appears to be reasonable.  To be precise, if $l_1$ is the length of the
+shorter sequence and $l_2$ the length of the longer, we encode the lengths of
+the un-aligned and aligned regions in $2\log_2(l1) - 1 + \log_2(l2)$ bits.
 
 
 
 \section{Tests}
 
 Artificial data was used to compare the new M-alignment algorithm with the
-common Smith-Waterman algorithm.  The benefit of using artificial data is that
-the conditions can be controlled precisely to clearly illustrate the
-advantages and disadvantages of techniques.
+common Smith-Waterman algorithm using shuffling as a significance test.  The
+benefit of using artificial data is that the conditions can be controlled
+precisely to clearly illustrate the advantages and disadvantages of
+techniques.
 
 The implementation used for the Smith-Waterman algorithm was the \verb!prss!
 program that is part of the FASTA 3.3 package.  In all tests, the \verb!prss!
@@ -538,8 +579,8 @@ Then from each parent, 25 child sequences were generated having only the
 (mutated) middle sequence in common.  Of these 25 children, 5 were generated
 by making 30 mutations, 5 by making 40 mutations, 5 with 50 mutations, 5 with
 60 mutations and 5 with 80 mutations.  The exact method used for these
-mutations is interesting in itself, but distracting at this point.  The
-details are given in Appendix~\ref{sec:mutations}.  The child sequences were
+mutations is interesting in itself, but distracting at this point, the details
+are given in Appendix~\ref{sec:mutations}.  The child sequences were
 considered as the library to be searched, and each parent was used in turn as
 the query sequence.  Thus for each query there were 25 related sequences of
 differing relatedness and 225 unrelated sequences.  This ratio of related to
@@ -549,15 +590,15 @@ compared against every child sequence making 2500 pair-wise comparisons.  Of
 these 2500 comparisons, 250 are between related sequences, and 2250 between
 unrelated sequences.
 
-To present the results of the tests, ROC (\cite{gribskov96, brenner98}) plots
+To present the results of the tests ROC (\cite{gribskov96, brenner98}) plots
 are used.  Each algorithm tested produces a number measuring the relatedness
 of the two sequences being compared.  This may be the raw Smith-Waterman
 score, or the p-value found by the \verb!prss! program, or the log odds ratio
-produce by the M-algorithm.  For each test, the 2500 pair-wise comparisons are
+produce by M-alignment.  For each test, the 2500 pair-wise comparisons are
 ranked in order of significance by this measure.  For each possible cut-off
-measure the number of true positives and the number of false positives are
+value the number of true positives and the number of false positives are
 counted.  Plotted on the y-axis is the ratio of false positives to the total
-number of unrelated pair-wise comparison.  And on the x-axis the ratio of true
+number of unrelated pair-wise comparisons.  And on the x-axis the ratio of true
 positives to the total number of related comparisons.  The better an algorithm
 is at separating related from unrelated sequences the closer its curve will be
 to the bottom right corner of the ROC plots.  Since we are mostly interested
@@ -565,24 +606,17 @@ in the behaviour for a smallish number of false positives the y-axis is
 plotted with a log scale.
 
 In the first test, the population model is the simplest possible, a uniform
-model.  That is, each character occurs with a probability of 1/4.  The ROC in
-Figure~\ref{fig:roc_uni} show that \verb!prss! program, the raw Smith-Waterman
-score and the M-alignment algorithm perform similarly.  This test is
-relatively uninteresting and is only presented to show that for high entropy
-sequences the M-alignment algorithm performs like existing algorithms.  Recall
-that the M-alignment algorithm may take as a parameter the model for the
-sequences.  Except where noted otherwise, the M-alignment algorithm is told to
-fit a first order Markov Model to the sequences.
+model.  That is, each character occurs with a probability of 1/4.  The ROC
+plot in Figure~\ref{fig:roc_uni} shows that the \verb!prss! program, the raw
+Smith-Waterman score and the M-alignment algorithm perform similarly.  This
+test is relatively uninteresting and is only presented to show that for high
+entropy sequences M-alignment performs like existing algorithms.  Recall that
+M-alignment may take as a parameter the model for the sequences.  Except where
+noted otherwise, the M-alignment algorithm is told to fit a 1st order Markov
+Model to the sequences.
 
 
-\begin{figure}
-\centering
-\epsfig{file=roc_uni.eps, width=\plotwidth}
-\caption{\label{fig:roc_uni}ROC for a uniform sequence model.}
-\end{figure}
-
-
-The next test is for sequence with a biased composition, that is, sequence
+The next test is for sequences with a biased composition, that is, sequences
 from a 0th order Markov Model.  The model chosen has an entropy of 1.76 bits
 per character.  The shuffling method of the \verb!prss! algorithm is designed
 to account for this type of alphabet bias, and indeed, as seen in
@@ -593,12 +627,6 @@ from unrelated sequences in this case.  Since the alphabet is essentially less
 that 4 here, all algorithms have more difficulty in detecting relatedness than
 in the previous test.
 
-\begin{figure}
-\centering
-\epsfig{file=roc_0.eps, width=\plotwidth}
-\caption{\label{fig:roc_0}ROC for biased composition sequences.}
-\end{figure}
-
 
 Figure~\ref{fig:roc_uni_0} shows the results for the next test.  In a sense,
 this test is a combination of the previous two.  Instead of all 10 parent
@@ -606,45 +634,38 @@ sequences coming from the same population model, 5 come from a uniform model
 (like the first test), and 5 from a 0th order Markov Model (like the second
 test).  The shuffling of the \verb!prss! program does account for sequences
 with a biased composition, but as seen in this test it does not perform as
-well as new M-alignment method when there are different models in the
-population.  Similar behaviour has been seen when using a other combinations
-of models.
+well as M-alignment when there are different models in the population.
+Similar behaviour has been seen when using a other combinations of models.
 
 %It may be argued that in practice the \verb!prss! program wouldn't use
 %shuffling, but would use the results of all the database searches to fit the
 %extreme value distribution.  NOT SURE WHAT AFFECT IT WOULD HAVE ON THIS
 %TEST???
 
-\begin{figure}
-\centering
-\epsfig{file=roc_uni_0.eps, width=\plotwidth}
-\caption{\label{fig:roc_uni_0}ROC for a uniform sequence model and biased composition sequences.}
-\end{figure}
-
 The final test illustrates the benefits if one is able to better model the
 population.  The population model in this test is a little more complicated.
 This model consists of two sub-models.  One is a simple uniform model, and the
 other a very biased 1st order Markov Model that produces sequences of
 characters that are not unlike TATA boxes in DNA.  Sequences are generated by
-choosing one of these two sub-models at random using that sub-model to produce
-a random number of characters.  This is repeated a number of times to produce
-a sequence of sufficient length.  This model is, in a sense, a blend between a
-uniform model, with an entropy of 2 bits per character, and a 1st order model,
-with an entropy of 1.1 bits per character.  Figure~\ref{fig:roc_blend} shows
-the results of the different algorithms on sequences of this type.  Our
-algorithm is performing significantly better than the \verb!prss! program.
-The best performer in this figure is the M-alignment algorithm using the
-``blendModel''.  This blendModel was designed with some knowledge of the
-population model.  Specifically, the blendModel knows that the data is
-produced by a combination of a uniform model and also the exact 1st order
-model used.  It does not know the probability with which these sub-models are
-chosen, nor the length of the sequence produced by the sub-models.  As can be
-seen in the figure, having this extra knowledge about the population model
-allows for better separation of related and unrelated sequences.  The
-M-alignment algorithm is superior to the Smith-Waterman algorithms because an
-arbitrary left-to-right sequence model can be used.  Thus, more complex
-population models may be used with the M-alignment algorithm to allow better
-differentiation between related and unrelated sequences.
+choosing one of these two sub-models at random, then using that sub-model to
+produce a random number of characters.  This is repeated a number of times to
+produce a sequence of sufficient length.  This model is, in a sense, a blend
+between a uniform model, with an entropy of 2 bits per character, and a 1st
+order model, with an entropy of 1.1 bits per character.
+Figure~\ref{fig:roc_blend} shows the results of the different algorithms on
+sequences of this type.  Our algorithm is performing significantly better than
+the \verb!prss! program.  The best performer in this figure is the M-alignment
+algorithm using the ``blendModel''.  This blendModel was designed with some
+knowledge of the population model.  Specifically, the blendModel knows that
+the data is produced by a combination of a uniform model and also the exact
+1st order model used.  It does not know the probability with which these
+sub-models are chosen, nor the length of the sequences produced by the
+sub-models.  As can be seen in the figure, having this extra knowledge about
+the population model allows for better separation of related and unrelated
+sequences.  The M-alignment algorithm is superior to the Smith-Waterman
+algorithms because an arbitrary left-to-right sequence model can be used.
+Thus, more complex population models may be used with M-alignment to allow
+better differentiation between related and unrelated sequences.
 
 
 It may be argued that this test is unfair to the \verb!prss! program since it
@@ -655,55 +676,40 @@ related, just not as much information as high-complexity regions.
 
 %INTERESTING THAT WE DO \emph{SO} WELL IN THIS ONE COMPARED TO PREVIOUS TESTS???
 
-\begin{figure}
-\centering
-\epsfig{file=roc_blend.eps, width=\plotwidth}
-\caption{\label{fig:roc_blend}ROC for a blended model}
-\end{figure}
 
-
-It is clear from the ROC plots that the M-alignment algorithm is superior to
+It is clear from the ROC plots that M-alignment is superior to
 the \verb!prss! program when sequences are of low complexity.  Even when it is
-simply a fixture of uniform and biased composition sequences.  However, the
+simply a mixture of uniform and biased composition sequences.  However, the
 \verb!prss! program performs well on these types of sequence if the population
 is confined to one type.  This may be explained because the \verb!prss!
 program does not have a natural cut-off p-value, and indeed the best cut-off
-depends on the type of the population.  The M-alignment algorithm has a
-natural cut-off at a log-odds ratio of zero.  At zero, both the null model and
-the alignment model are equally good explanations of the data.  In practice, a
-cut-off of a few bits above zero would be used.  The table below summarises the
-true and false positive behaviour from the previous four figures.  A cut-off
-value of $p=10^{-5}$ is used for the \verb!prss! program, and 0 for the
-M-alignment algorithm.
+depends on the type of the population.  M-alignment has a natural cut-off at a
+log-odds ratio of zero.  At zero, both the null model and the alignment model
+are equally good explanations of the data.  In practice, a cut-off of a few
+bits above zero would be used.  
 
-One of the advantages of the M-alignment algorithm is the natural cut-off
-value at a log-odds ratio of zero.  The \verb!prss! program does not have such
-a natural cut-off and indeed the best value changes depending on the
-population of sequences.  This may explain the M-alignment algorithm performs
-better in Figure~\ref{fig:roc_uni_0}.  
-
-The table below summarise the performance of the algorithms for a fixed
+The table below summarises the performance of the algorithms for a fixed
 cut-off over the same data as the previous four tests.  The cut-off used for
-the M-alignment algorithm was 0, and for the \verb!prss! program $p=10^{-5}$
-was used as this seemed to do best over all.  In all cases the number of
-truly related sequence is 250, and of unrelated 2250.  The M-alignment
-algorithm performs in a similar manner as the \verb!prss! program in the first
-test, and performs better in the others.  The last test is interesting.
-Recall from Figure~\ref{fig:roc_blend} that the M-alignment algorithm achieves
-very good separation of the related and unrelated sequences.  However, the
-true versus false positives in the table below are not so good.  This is
-because the model used with the M-alignment algorithm is not the same as that
-used to generate the data.  In the case where the blendModel is used, the
-entropy of a sequence is over-estimated a little.  But when only 1st order
-Markov model is used, the entropy is largely over-estimate.  So, while the
-method does a good job of separating the true positives from false positives,
-a cut-off of 0 is not ideal.  This is because some of the apparent similarity
-between the sequences is really due to the population model, not to them being
-related.  This highlights the fact that one should use the best population
-model possible when aligning sequences.
+M-alignment was 0, and for the \verb!prss! program $p=10^{-5}$ was used as
+this seemed to do best over all.  In all cases the number of truly related
+sequences is 250, and of unrelated 2250.  M-alignment performs in a similar
+manner as the \verb!prss! program in the first test, and performs better in
+the others.  The last test is interesting.  Recall from
+Figure~\ref{fig:roc_blend} that the M-alignment algorithm achieves very good
+separation of the related and unrelated sequences.  However, the true versus
+false positives in the table below are not so good.  This is because the model
+used with M-alignment is not the same as that used to generate the data.  In
+the case where the blendModel is used, the entropy of a sequence is
+over-estimated a little.  But when only a 1st order Markov model is used, the
+entropy is largely over-estimated.  So, while the method does a good job of
+separating the true positives from false positives, a cut-off of 0 is not
+ideal.  This is because some of the apparent similarity between the sequences
+is really due to the population model, not to them being related.  This
+highlights the fact that one should use the best population model possible
+when aligning sequences.
 
 \begin{minipage}{\textwidth}
-\small
+\footnotesize
 \begin{tabular}{|l|c||c|c|} \hline
 Test set & Algorithm & true positives & false positives \\ \hline
 Uni &  prss & 195 & 0  \\ 
@@ -766,7 +772,9 @@ any false negatives.
 
 \bibliographystyle{abbrv}
 %\bibliographystyle{alpha}
+\small
 \bibliography{biblio}
+\normalsize
 
 
 \appendix
@@ -785,18 +793,19 @@ written $|A|$.  The sequence that results from making $x$ mutations to $A$
 shall be referred to as $A_x$.  We earlier described the motivation as wanting
 the mutated sequence to ``fit'' the population model.  To make this precise,
 what is desired is that as $x$ tends to infinity, the entropy of the mutated
-sequence, $M(A_x)$, will tend to the entropy of the population model itself.
+sequence, $M(A_x)$, will tend to the entropy of the population model, $M$,
+itself.
 
 The method used to mutate sequences was inspired by the Metropolis
 algorithm~\cite{metropolis53}.  Consider every possible sequence as having a
 node, $S_i$ in a graph.  An arc between two nodes, $S_i$ and $S_j$, implies
 that a single mutation relates the two corresponding sequences.  As we make
-mutations to a sequence, this corresponds to moving between nodes in the
-graph.  In the extreme case where many mutations are made, we want to visit
-each node with a frequency equal to probability $p$, where $p$ is probability
-of that node's sequence under the population model.  A sufficient condition
-for this is to have the probability of taking the arc from $S_i$ to $S_j$
-equal to the probability of taking the arc from $S_j$ to $S_i$.
+mutations to a sequence, we move between nodes in the graph.  In the extreme
+case where many mutations are made, we want to visit each node with a
+frequency equal to probability $p$, where $p$ is probability of that node's
+sequence under the population model.  A sufficient condition for this is to
+have the probability of taking the arc from $S_i$ to $S_j$ equal to the
+probability of taking the arc from $S_j$ to $S_i$.
 
 We will assume a point mutation model for simplicity.  That is, we consider
 making mutations of the form: delete a character, insert a character or change
@@ -816,26 +825,26 @@ $$P_{delete} = \frac{(1-P_{change})}{(5\times|A|+4)}$$
 
 When we mutate sequence $A$, a random choice is made whether to consider an
 insertion, a deletion or a change mutation using the three above probabilities
-(note they sum to one).  If a deletion is to be considered, then the position
-of the deletion is chosen uniform randomly over the length of the sequence.
-If a change, then the position and character are chosen randomly.  If an
-insertion, then the position and the character to be inserted are randomly
-selected.  The sequence that would result from this mutation is $A'$.  Let
-$q$ be the probability given to sequence $A$ by the population model, and $q'$
-the probability given to sequence $A'$.  If $q'$ is greater than $q$ then the
-mutation is accepted and $A'$ becomes $A_1$.  Otherwise, the mutation is
-accepted probability $q'/q$.  This process is repeated until the desired
+(note they sum to unity).  If a deletion is to be considered, then the
+position of the deletion is chosen uniform randomly over the length of the
+sequence.  If a change, then the position and character are chosen randomly.
+If an insertion, then the position and the character to be inserted are
+randomly selected.  The sequence that would result from this mutation is $A'$.
+Let $q$ be the probability given to sequence $A$ by the population model, and
+$q'$ the probability given to sequence $A'$.  If $q'$ is greater than $q$ then
+the mutation is accepted and $A'$ becomes $A_1$.  Otherwise, the mutation is
+accepted with probability $q'/q$.  This process is repeated until the desired
 number of mutations has been made.
 
 The process of calculating $q'$ from the potential mutation can be done
 efficiently if the population model $M$ is such that it operates on a local
-level.  That is, if $q'$ can be calculated $q$ and potential mutation in
-constant time.  This is true for fixed order Markov Models.
+level.  That is, if $q'$ can be calculated from $q$ and the potential mutation
+in constant time.  This is true for fixed order Markov Models.
 
 Since this method does not preclude a mutation ``undoing'' previous mutations,
 the resulting mutated sequence, $A_x$, may be more similar to $A$ than
-otherwise expected.  This tends to be more likely if $M$ has a very low
-entropy model.
+otherwise expected.  This tends to be more likely if $M$ is a very low entropy
+model.
 
 In the blendModel tests we make mutations as if the population model were a
 uniform model.  Thus the more a sequence is mutated the higher its entropy
