@@ -18,8 +18,8 @@ class Matches_Sparse extends FuzzyLZ.Matches {
     double beginCost;
 
     class Sparse_Fsm implements Sparse.Obj {
-	Mutation_FSM.With_Counts fsm;
-	Sparse_Fsm(Mutation_FSM.With_Counts fsm) {
+	Mutation_FSM fsm;
+	Sparse_Fsm(Mutation_FSM fsm) {
 	    this.fsm = fsm;
 	}
 
@@ -28,11 +28,11 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 	}
 
 	public Object clone() {
-	    return new Sparse_Fsm((Mutation_FSM.With_Counts)fsm.clone());
+	    return new Sparse_Fsm((Mutation_FSM)fsm.clone());
 	}
     }
 
-    Matches_Sparse(boolean fwd, Mutation_FSM.With_Counts fsm, Params p, int countIndex, char[] seq) {
+    Matches_Sparse(boolean fwd, Mutation_FSM fsm, Params p, int countIndex, char[] seq) {
         super(fsm,p,countIndex,seq);
 
 	this.fwd = fwd;
@@ -75,7 +75,7 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 	// Do begin links into b,  (startLen & startCounts)
 	if (debug>1) System.err.print("Active at ");
 	for (Sparse.Iterate iter = b.moveFwd(null); iter.o != null; iter = b.moveFwd(iter)) {
-	    Mutation_FSM.With_Counts cell = (Mutation_FSM.With_Counts)iter.o;
+	    Mutation_FSM cell = (Mutation_FSM)iter.o;
 	    cell.or(startLen, startCounts);
 
 	    if (plotActive) plot.putMax(i, iter.i, (fwd ? 0.5 : 0), (fwd ? 0 : 0.5), 0);
@@ -132,21 +132,21 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 
 	// Reset all 'e' cells.
 	for (Sparse.Iterate eIter=e.moveFwd(0, null); eIter.o!=null; eIter=e.moveFwd(eIter))
-	    ((Mutation_FSM.With_Counts)eIter.o).reset();
+	    ((Mutation_FSM)eIter.o).reset();
 
 	{
 	    // Compute 'e' from 'b' using FSM
 	    Sparse.Iterate eIter = null;
 	    Sparse.Iterate bIter = fwd ? b.moveFwd(null) : b.moveRev(null);
 	    while (bIter.o != null) {
-		Mutation_FSM.With_Counts cell,hcell,vcell,dcell;
+		Mutation_FSM cell,hcell,vcell,dcell;
 
-		cell  = (Mutation_FSM.With_Counts)bIter.o;
-		hcell = (Mutation_FSM.With_Counts)(fwd ? b.getNext(bIter) : b.getPrev(bIter));
+		cell  = (Mutation_FSM)bIter.o;
+		hcell = (Mutation_FSM)(fwd ? b.getNext(bIter) : b.getPrev(bIter));
 
 		eIter = fwd ? e.moveFwd(bIter.i, eIter, true) : e.moveRev(bIter.i, eIter, true);
-		vcell = (Mutation_FSM.With_Counts)eIter.o;
-		dcell = (Mutation_FSM.With_Counts)(fwd ? e.getNext(eIter) : e.getPrev(eIter));
+		vcell = (Mutation_FSM)eIter.o;
+		dcell = (Mutation_FSM)(fwd ? e.getNext(eIter) : e.getPrev(eIter));
 		
 		int j = bIter.i;
 		char bChar;
@@ -163,7 +163,7 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 	double ret_msgLen = Double.POSITIVE_INFINITY;
 	retCounts.zero();
 	for (Sparse.Iterate eIter=e.moveFwd(0, null); eIter.o!=null; eIter=e.moveFwd(eIter)) {
-	    Mutation_FSM.With_Counts cell  = (Mutation_FSM.With_Counts)eIter.o;
+	    Mutation_FSM cell  = (Mutation_FSM)eIter.o;
 
 	    double endLen = cell.get_val() + encEnd;
 
@@ -177,7 +177,7 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 
 	// Compute 'e' to include CONT_COPY
 	for (Sparse.Iterate eIter=e.moveFwd(0, null); eIter.o!=null; eIter=e.moveFwd(eIter)) {
-	    Mutation_FSM.With_Counts cell  = (Mutation_FSM.With_Counts)eIter.o;
+	    Mutation_FSM cell  = (Mutation_FSM)eIter.o;
 
 	    cell.add(encContinue, countIndex+contIndex);
 	}
@@ -196,7 +196,7 @@ class Matches_Sparse extends FuzzyLZ.Matches {
     public double msgLen() {
 	double res = Double.POSITIVE_INFINITY;
 	for (Sparse.Iterate bIter=b.moveFwd(0, null); bIter.o!=null; bIter=b.moveFwd(bIter)) {
-	    Mutation_FSM.With_Counts cell  = (Mutation_FSM.With_Counts)bIter.o;
+	    Mutation_FSM cell  = (Mutation_FSM)bIter.o;
 
 	    res = MyMath.logplus(res, cell.get_val());
 	}
@@ -208,7 +208,7 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 	//       Use the result of msgLen() or something less
 	double res = Double.POSITIVE_INFINITY;
 	for (Sparse.Iterate bIter=b.moveFwd(0, null); bIter.o!=null; bIter=b.moveFwd(bIter)) {
-	    Mutation_FSM.With_Counts cell  = (Mutation_FSM.With_Counts)bIter.o;
+	    Mutation_FSM cell  = (Mutation_FSM)bIter.o;
 	    cell.normalise(base);
 	    res = MyMath.logplus(res, cell.get_val());
 	}
@@ -219,7 +219,7 @@ class Matches_Sparse extends FuzzyLZ.Matches {
     public void plotVals(int i, double base) {
 	if (plotActive) return;
 	for (Sparse.Iterate bIter=b.moveFwd(0, null); bIter.o!=null; bIter=b.moveFwd(bIter)) {
-	    Mutation_FSM.With_Counts cell  = (Mutation_FSM.With_Counts)bIter.o;
+	    Mutation_FSM cell  = (Mutation_FSM)bIter.o;
 	    double v = MyMath.exp2(base-cell.get_val());
 	    v = Math.pow(v, plotBrightness);
  	    plot.putMax(i, bIter.i, (fwd ? v : 0), (fwd ? 0 : v), 0);
@@ -231,7 +231,7 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 	StringBuffer r = new StringBuffer();
 	r.append((fwd ? "fwd: " : "rev: "));
 	for (Sparse.Iterate bIter=b.moveFwd(0, null); bIter.o!=null; bIter=b.moveFwd(bIter)) {
-	    Mutation_FSM.With_Counts cell  = (Mutation_FSM.With_Counts)bIter.o; 
+	    Mutation_FSM cell  = (Mutation_FSM)bIter.o; 
 	    r.append(bIter.i + ": " + cell.get_val() + " ");
 	}
 	return r.toString();

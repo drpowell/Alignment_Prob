@@ -255,7 +255,7 @@ public class FuzzyLZ implements Seq_Model {
 	and to end a match (end_cost) 
     */
     static abstract class Matches implements Serializable {
-	Mutation_FSM.With_Counts fsmType;
+	Mutation_FSM fsmType;
 	Plot plot;
 
 	int seqLen;
@@ -265,7 +265,7 @@ public class FuzzyLZ implements Seq_Model {
 	int countIndex;
 	protected final int contIndex=0,endIndex=1;
 
-	Matches(Mutation_FSM.With_Counts fsm, Params p, int countIndex, char[] seq) {
+	Matches(Mutation_FSM fsm, Params p, int countIndex, char[] seq) {
 	    fsmType = fsm;
 	    this.countIndex = countIndex;
 	    sequence = seq;
@@ -367,7 +367,7 @@ public class FuzzyLZ implements Seq_Model {
 	
 
 	int mdlCounts = Model_SeqA.required_counts();
-        int fsmCounts = FSM_Prob.required_counts();
+        int fsmCounts = Mutation_1State.required_counts();
 	int matCounts = Matches.required_counts();
 	totCounts = myCounts+(numFwd+numRev)*(mdlCounts+fsmCounts+matCounts);
 	int countPos = myCounts;
@@ -391,7 +391,7 @@ public class FuzzyLZ implements Seq_Model {
 	    }
 	    Two_Seq_Model_Counts model = new Model_SeqA(p,alphaSize, countPos);
 	    countPos += mdlCounts;
-	    Mutation_FSM.With_Counts fsmType = new FSM_Prob(model, p, totCounts, countPos);
+	    Mutation_FSM fsmType = new Mutation_1State.All(model, p, totCounts, countPos);
 	    countPos += fsmCounts;
 	    machines[m] = new Matches_Sparse( (m<numFwd), fsmType, p, countPos, sequence);
 	    countPos += matCounts;
