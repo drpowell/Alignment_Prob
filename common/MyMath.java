@@ -27,6 +27,29 @@ public final class MyMath {
 	//return a-Math.log(1+Math.exp(a-b));
     }
 
+    // logstar(x) - a prior over integers 1..infinity
+    //              returns length in bits for encoding that integer
+    //              This is for integers only!
+    public static double logstar_discrete(int x) {
+	if (x > 1) {
+	    x = (int)log2(x);
+	    return 1 + x + logstar_discrete(x);
+	} else
+	    return 1;
+    }
+
+    // logstar(x) - a prior over integers 1..infinity
+    //              returns length in bits for encoding that integer
+    //              This is Rissanen's continuous approximation to logstar_discrete
+    //   according to Rissanen (1983)
+    public static double logstar_continuous(double x) {
+	if (x > 1) {
+	    x = log2(x);
+	    return x + logstar_continuous(x);
+	} else
+	    return log2(2.865);
+    }
+
     public static double factorial(int N) {
 	Misc.assert(N>=0, "Bad paramater to factorial");
 	double res = 1;
@@ -56,6 +79,23 @@ public final class MyMath {
 
     public static double min4(double a, double b, double c, double d) {
 	return min2(min3(a,b,c),d);
+    }
+
+    public static void main(String args[]) {
+	for (double i=1; i<4; i+=1) {
+	    double v1 = MyMath.logstar_continuous(i);
+	    System.out.println("logstar("+i+") = "+v1);
+	}
+
+
+	    /*	double s = Double.POSITIVE_INFINITY;
+		for (double i=1; i<400; i+=0.01) {
+		double v1 = MyMath.logstar_continuous(i);
+		double v2 = MyMath.logstar_discrete((int)i);
+		System.out.println(i+" "+v1+" "+v2);
+		//s = MyMath.logplus(v,s);
+		//System.out.println("i="+i+" v="+v+" sum="+s+" sum_p="+MyMath.exp2(-s));
+	    */
     }
 }
 

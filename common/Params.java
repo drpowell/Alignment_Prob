@@ -81,5 +81,36 @@ public final class Params {
 	return r.toString();
     }
 
+    public void fromString(String str) {
+	int s=0;
+	int e;
+	do {
+	    int p_comma, p_newline;
+	    p_comma   = str.indexOf(',', s);
+	    p_newline = str.indexOf('\n',s);
+	    
+	    if (p_comma   < 0) p_comma   = str.length();
+	    if (p_newline < 0) p_newline = str.length();
+
+	    e = (p_comma < p_newline ? p_comma : p_newline);
+	    
+	    int m = str.indexOf('=', s);
+	    if (s<m && m<e) {
+		String p = str.substring(s,m);
+		String v = str.substring(m+1,e);
+		double d = Double.parseDouble(v);
+
+		put(p, d);
+	    }
+	    s = e + 1;
+	} while (s < str.length());
+    }
+
+    public static void main(String args[]) {
+	Params p = new Params();
+	p.fromString(args[0]);
+	System.out.println("p="+p);
+    }
+
 }
 
