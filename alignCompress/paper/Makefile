@@ -2,8 +2,8 @@
 #TEXFILES=alignCompress.tex
 #PLOTFILES=p1.eps p2.eps p3.eps p4.eps p5.eps p6.eps p7.eps   r1.eps r2.eps r3.eps r4.eps
 
-FILENAME=recomb2003
-TEXFILES=recomb2003.tex
+FILENAME=ismb2003
+TEXFILES=ismb2003.tex
 PLOTFILES=roc_uni.eps roc_0.eps roc_uni_0.eps roc_blend.eps
 POP_CONV_SCRIPT=../testRuns/populationPlot.pl
 POP_CONV_SCRIPT2=../testRuns/populationPlot2.pl
