@@ -121,7 +121,7 @@ public class FSM_3State extends Mutation_FSM.With_Counts {
 	h_counts.zero();
 	v_counts.zero();
 
-	counts = null;
+	//counts = null;
     }
 
 

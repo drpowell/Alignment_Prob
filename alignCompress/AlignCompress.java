@@ -221,6 +221,7 @@ class AlignCompress {
 	    // EncEndAlign  - (local alignments) encode no more of the alignment to follow
 	    //        The use of these corresponds to encoding the lengths using a geometric distribution.
 	    //        This 'aint ideal but it's a start.  The values here seem reasonable.
+	    //                                         (should they be estimated as well?)
 	    double EncNonAlignChar, EncEndNonAlign;
 	    double EncAlignChar, EncEndAlign;
 
@@ -253,9 +254,8 @@ class AlignCompress {
 	    
 	    
 	    // Setup the DPA matrix
-	    Mutation_FSM.With_Counts D[][] = 
-		new Mutation_FSM.With_Counts[seqA.length()+1][seqB.length()+1];
-	    for (int i=0; i<seqA.length()+1; i++) {
+	    Mutation_FSM.With_Counts D[][] = new Mutation_FSM.With_Counts[2][seqB.length()+1];
+	    for (int i=0; i<2; i++) {
 		for (int j=0; j<seqB.length()+1; j++) {
 		    D[i][j] = (Mutation_FSM.With_Counts)fsmType.clone();
 		}
@@ -276,10 +276,16 @@ class AlignCompress {
 	    //     on the three neighbouring cell.  This is the reverse of the way the
 	    //     DPA is usually expressed.
 	    for (int i=0; i<seqA.length()+1; i++) {
+
+		// Reset the next row of the DPA matrix
 		for (int j=0; j<seqB.length()+1; j++) {
-		    Mutation_FSM v = (i==seqA.length() ? null : D[i+1][j]);
-		    Mutation_FSM h = (j==seqB.length() ? null : D[i][j+1]);
-		    Mutation_FSM d = (i==seqA.length() || j==seqB.length() ? null : D[i+1][j+1]);
+		    D[(i+1)%2][j].reset();
+		}
+
+		for (int j=0; j<seqB.length()+1; j++) {
+		    Mutation_FSM v = (i==seqA.length() ? null : D[(i+1)%2][j]);
+		    Mutation_FSM h = (j==seqB.length() ? null : D[ i   %2][j+1]);
+		    Mutation_FSM d = (i==seqA.length() || j==seqB.length() ? null : D[(i+1)%2][j+1]);
 		    char aChar = (i==seqA.length() ? '-' : seqA.charAt(i));
 		    char bChar = (j==seqB.length() ? '-' : seqB.charAt(j));
 
@@ -288,23 +294,23 @@ class AlignCompress {
 			double val = modelA.encodeCumulative(i) +  modelB.encodeCumulative(j);
 			val += i*EncNonAlignChar + EncEndNonAlign;
 			val += j*EncNonAlignChar + EncEndNonAlign;
-			D[i][j].or(val, emptyCounts);
+			D[i%2][j].or(val, emptyCounts);
 
 			// Encode that an alignment character is coming next
-			D[i][j].add(EncAlignChar, -1);
+			D[i%2][j].add(EncAlignChar, -1);
 		    }
 
 		    if (verbose>=3) {
 			System.err.println("Calc outputs from D["+i+"]["+j+"]");
-			System.err.println(D[i][j]);
+			System.err.println(D[i%2][j]);
 		    }
 
 		    
-		    D[i][j].calc(h, v, d, aChar, bChar, i, j);
+		    D[i%2][j].calc(h, v, d, aChar, bChar, i, j);
 
 		    if (localAlign) {
 			// Compute contribution of a local alignment that ends at (i,j)
-			double val = D[i][j].get_val() +
+			double val = D[i%2][j].get_val() +
 			    (modelA.encodeCumulative( seqA.length() ) - modelA.encodeCumulative(i)) +
 			    (modelB.encodeCumulative( seqB.length() ) - modelB.encodeCumulative(j));
 
@@ -315,13 +321,13 @@ class AlignCompress {
 
 			val += (seqA.length()-i)*EncNonAlignChar + EncEndNonAlign;
 			val += (seqB.length()-j)*EncNonAlignChar + EncEndNonAlign;
-			D[seqA.length()][seqB.length()].or(val, D[i][j].get_counts());
+			D[seqA.length()%2][seqB.length()].or(val, D[i%2][j].get_counts());
 		    }
 		}
 	    }
 
-	    double encAlignModel = D[seqA.length()][seqB.length()].encode_params();
-	    double encAlignment = encAlignModel + D[seqA.length()][seqB.length()].get_val();
+	    double encAlignModel = D[seqA.length()%2][seqB.length()].encode_params();
+	    double encAlignment = encAlignModel + D[seqA.length()%2][seqB.length()].get_val();
 
 	    double encA = modelA.encodeCumulative( seqA.length() );
 	    double encB = modelB.encodeCumulative( seqB.length() );
@@ -332,7 +338,7 @@ class AlignCompress {
 	    if (bestDiff < encNull-encAlignment) bestDiff = encNull-encAlignment;
 
 	    // Get new parameters for next iteration
-	    p = fsmType.counts_to_params(D[seqA.length()][seqB.length()].get_counts());
+	    p = fsmType.counts_to_params(D[seqA.length()%2][seqB.length()].get_counts());
 
 	    if (verbose>=2) {
 		System.out.println("encA="+encA+" encB="+encB+" encNull="+(encNull));
@@ -342,9 +348,9 @@ class AlignCompress {
 		System.out.println((encAlignment < encNull ? 
 				    "related" : "unrelated") + " ("+(encNull-encAlignment)+")");
 	    
-		System.out.println("\nCounts:\n"+D[seqA.length()][seqB.length()].get_counts());
+		System.out.println("\nCounts:\n"+D[seqA.length()%2][seqB.length()].get_counts());
 		System.out.println("\nEstimated Parameters:\n"+
-				   fsmType.counts_to_params(D[seqA.length()][seqB.length()].get_counts()));
+				   fsmType.counts_to_params(D[seqA.length()%2][seqB.length()].get_counts()));
 	    }
 	} // End iterations
 
@@ -377,7 +383,7 @@ class AlignCompress {
 	a.seqB = args[1];
 	a.alphabet = new char[] {'a', 't', 'g', 'c'};
 
-	System.out.println("-log odd ratio = " + a.doAlign() + " bits");
+	System.out.println("-log odds ratio = " + a.doAlign() + " bits");
 
     } // End main()
 }
