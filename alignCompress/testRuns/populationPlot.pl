@@ -66,5 +66,9 @@ if ($toFile) {
   close(F);
 } else {
   $cmd .= "pause -1\n";
-  print $cmd;
+  open(F, "| gnuplot -") or (die "Can't run gnuplot");
+  { my $oldfh = select F; $|=1; select $oldfh; }
+  print F $cmd;
+  <STDIN>;
+  close(F);
 }
