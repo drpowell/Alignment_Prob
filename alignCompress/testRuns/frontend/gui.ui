@@ -11,15 +11,15 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>670</width>
-            <height>499</height>
+            <width>871</width>
+            <height>534</height>
         </rect>
     </property>
     <property stdset="1">
         <name>caption</name>
         <string>Form1</string>
     </property>
-    <vbox>
+    <grid>
         <property stdset="1">
             <name>margin</name>
             <number>11</number>
@@ -28,33 +28,20 @@
             <name>spacing</name>
             <number>6</number>
         </property>
-        <widget>
-            <class>QMultiLineEdit</class>
+        <widget row="2"  column="0" >
+            <class>QProgressBar</class>
             <property stdset="1">
                 <name>name</name>
-                <cstring>Status</cstring>
+                <cstring>ProgressBar1</cstring>
             </property>
             <property stdset="1">
                 <name>font</name>
                 <font>
-                    <family>Courier New</family>
-                    <pointsize>12</pointsize>
+                    <pointsize>16</pointsize>
                 </font>
             </property>
-            <property stdset="1">
-                <name>acceptDrops</name>
-                <bool>false</bool>
-            </property>
-            <property stdset="1">
-                <name>undoEnabled</name>
-                <bool>false</bool>
-            </property>
-            <property stdset="1">
-                <name>readOnly</name>
-                <bool>true</bool>
-            </property>
         </widget>
-        <widget>
+        <widget row="1"  column="0" >
             <class>QLayoutWidget</class>
             <property stdset="1">
                 <name>name</name>
@@ -360,75 +347,151 @@
                 </widget>
             </hbox>
         </widget>
-        <widget>
-            <class>QLayoutWidget</class>
+        <widget row="0"  column="0" >
+            <class>QTabWidget</class>
             <property stdset="1">
                 <name>name</name>
-                <cstring>Layout4</cstring>
+                <cstring>Tab</cstring>
             </property>
-            <hbox>
+            <widget>
+                <class>QWidget</class>
                 <property stdset="1">
-                    <name>margin</name>
-                    <number>0</number>
+                    <name>name</name>
+                    <cstring>tab</cstring>
                 </property>
+                <attribute>
+                    <name>title</name>
+                    <string>Output</string>
+                </attribute>
+                <grid>
+                    <property stdset="1">
+                        <name>margin</name>
+                        <number>11</number>
+                    </property>
+                    <property stdset="1">
+                        <name>spacing</name>
+                        <number>6</number>
+                    </property>
+                    <widget row="0"  column="0" >
+                        <class>QMultiLineEdit</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>Status</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>font</name>
+                            <font>
+                                <family>Courier New</family>
+                                <pointsize>12</pointsize>
+                            </font>
+                        </property>
+                        <property stdset="1">
+                            <name>acceptDrops</name>
+                            <bool>false</bool>
+                        </property>
+                        <property stdset="1">
+                            <name>undoEnabled</name>
+                            <bool>false</bool>
+                        </property>
+                        <property stdset="1">
+                            <name>readOnly</name>
+                            <bool>true</bool>
+                        </property>
+                    </widget>
+                    <widget row="1"  column="0" >
+                        <class>QLayoutWidget</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>Layout4</cstring>
+                        </property>
+                        <hbox>
+                            <property stdset="1">
+                                <name>margin</name>
+                                <number>0</number>
+                            </property>
+                            <property stdset="1">
+                                <name>spacing</name>
+                                <number>6</number>
+                            </property>
+                            <widget>
+                                <class>QPushButton</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>PlotButton</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>font</name>
+                                    <font>
+                                        <family>Times New Roman</family>
+                                        <pointsize>14</pointsize>
+                                    </font>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Plot</string>
+                                </property>
+                            </widget>
+                            <spacer>
+                                <property>
+                                    <name>name</name>
+                                    <cstring>Spacer2</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>orientation</name>
+                                    <enum>Horizontal</enum>
+                                </property>
+                                <property stdset="1">
+                                    <name>sizeType</name>
+                                    <enum>Expanding</enum>
+                                </property>
+                                <property>
+                                    <name>sizeHint</name>
+                                    <size>
+                                        <width>20</width>
+                                        <height>20</height>
+                                    </size>
+                                </property>
+                            </spacer>
+                        </hbox>
+                    </widget>
+                </grid>
+            </widget>
+            <widget>
+                <class>QWidget</class>
                 <property stdset="1">
-                    <name>spacing</name>
-                    <number>6</number>
+                    <name>name</name>
+                    <cstring>tab</cstring>
                 </property>
-                <widget>
-                    <class>QPushButton</class>
+                <attribute>
+                    <name>title</name>
+                    <string>Sequences</string>
+                </attribute>
+                <grid>
                     <property stdset="1">
-                        <name>name</name>
-                        <cstring>PlotButton</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>font</name>
-                        <font>
-                            <family>Times New Roman</family>
-                            <pointsize>14</pointsize>
-                        </font>
+                        <name>margin</name>
+                        <number>11</number>
                     </property>
                     <property stdset="1">
-                        <name>text</name>
-                        <string>Plot</string>
+                        <name>spacing</name>
+                        <number>6</number>
                     </property>
-                </widget>
-                <spacer>
-                    <property>
-                        <name>name</name>
-                        <cstring>Spacer2</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>orientation</name>
-                        <enum>Horizontal</enum>
-                    </property>
-                    <property stdset="1">
-                        <name>sizeType</name>
-                        <enum>Expanding</enum>
-                    </property>
-                    <property>
-                        <name>sizeHint</name>
-                        <size>
-                            <width>20</width>
-                            <height>20</height>
-                        </size>
-                    </property>
-                </spacer>
-            </hbox>
+                    <widget row="0"  column="0" >
+                        <class>QMultiLineEdit</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>Sequences</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>font</name>
+                            <font>
+                                <family>Courier New</family>
+                                <pointsize>12</pointsize>
+                            </font>
+                        </property>
+                    </widget>
+                </grid>
+            </widget>
         </widget>
-        <widget>
-            <class>QProgressBar</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>ProgressBar1</cstring>
-            </property>
-            <property stdset="1">
-                <name>font</name>
-                <font>
-                    <pointsize>16</pointsize>
-                </font>
-            </property>
-        </widget>
-    </vbox>
+    </grid>
 </widget>
 </UI>

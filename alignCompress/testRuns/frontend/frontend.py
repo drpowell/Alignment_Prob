@@ -46,7 +46,7 @@ def pollFile():
 
 def readLogFile(fname):
     #print "read "+fname
-    global numArch,numPop, startTime
+    global numArch, numPop, startTime
     try:
         f = open(fname)
     except IOError:
@@ -57,8 +57,27 @@ def readLogFile(fname):
         return
     s = f.read()
     strs = re.split(r"];", s, 2)
-    numArch = len( re.findall(r"'SEQ' =>", strs[0]) )
-    numPop  = len( re.findall(r"'SEQ' =>", strs[1]) )
+
+    numArch = 0
+    numPop = 0
+    for which in [0,1]:
+        for l in re.split(r"}", strs[which]):
+            l = re.sub(r"^(.|\n)*?{", "{", l)
+            if l[0] != '{': continue
+            l = re.sub(r"=>", r":", l)
+            l = 'info = ' + l + '}'
+            exec(l)
+            sub_pos = info['S_LEN']
+            e_pos = info['S_LEN'] + info['SUB_LEN']
+            seq = info['SEQ'][0:sub_pos-1] + ' ### ' + info['SEQ'][sub_pos:e_pos-1] + ' ### ' + info['SEQ'][e_pos:]
+
+            if which==0:
+                mainForm.Sequences.append("Parent %03d: %s"%(numArch,seq))
+                numArch = numArch + 1
+            else:
+                mainForm.Sequences.append("Child %03d: %s"%(numPop,seq))
+                numPop = numPop + 1
+        
     m = re.search(r"STDERR:(\d+):", s)
     startTime = int(m.group(1))
 
@@ -115,7 +134,7 @@ def plotProg():
     if pid:
         #parent
         return
-    prog = os.path.dirname(resFile) + '/populationPlot' + ('.pl','2.pl')[type-1]
+    prog = (os.path.dirname(resFile) or '.') + '/populationPlot' + ('.pl','2.pl')[type-1]
 #    os.close(1)                     # No stdout for sub-process
     os.execv(prog, [prog, resFile])
     sys.exit(1)._exit()
@@ -155,7 +174,8 @@ def main(argv):
     else:
         type = 1
 
-    readLogFile( os.path.dirname(resFile) + '/' + 'popLog' + ( ('.','2.')[type-1]) + pid )
+    d = os.path.dirname(resFile) or "."
+    readLogFile( d + '/' + 'popLog' + ( ('.','2.')[type-1]) + pid )
 
     
 
