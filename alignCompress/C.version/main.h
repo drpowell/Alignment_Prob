@@ -13,11 +13,11 @@
 
 #define INFINITY    1E20
 
-inline DOUBLE log2(DOUBLE a) {
+static inline DOUBLE log2(DOUBLE a) {
   return log(a) * log2e;
 }
 
-inline DOUBLE exp2(DOUBLE a) {
+static inline DOUBLE exp2(DOUBLE a) {
   return exp(a * loge2);
 }
 #endif

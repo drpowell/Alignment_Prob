@@ -43,9 +43,10 @@ inline int char2int(char c)
 // -----------------------------------------------------------------------------------
 
 static DOUBLE factorial(int N) {
-  assert(N>=0);
   DOUBLE res = 1;
-  for (int i=2; i<=N; i++) res *= i;
+  int i;
+  assert(N>=0);
+  for (i=2; i<=N; i++) res *= i;
   return res;
 }
 
@@ -56,11 +57,13 @@ static DOUBLE MMLparameter_cost(DOUBLE *p, int numProbs, DOUBLE N)
 {
   DOUBLE h = factorial(numProbs-1); // h(theta) - prior probabilty density = (K-1)!
   DOUBLE F = 1.0/p[0];	// F will be the Fischer = N^(K-1)/(p1*p2*...*pk)
-  for (int i=1; i < numProbs-1; i++) {
+  DOUBLE cost;
+  int i;
+  for (i=1; i < numProbs-1; i++) {
     F *= N / p[i];
   }
 
-  DOUBLE cost = 0.5 * log2(1 + F/(h*h*pow(12, numProbs-1)));
+  cost = 0.5 * log2(1 + F/(h*h*pow(12, numProbs-1)));
   
   cost += 0.5 * (numProbs-1) * log2e;
   
@@ -75,8 +78,8 @@ static DOUBLE MMLparameter_cost(DOUBLE *p, int numProbs, DOUBLE N)
 //  This is far from the best strategy, but probably sufficient if they are few and far between
 void strict_DNA_seq(char *str, int len)
 {
-  srandom(time(0));
   int i;
+  srandom(time(0));
   for (i=0; i<len; i++) 
     switch (tolower(str[i])) {
     case 'a': case 't':
@@ -271,6 +274,8 @@ DOUBLE doAlign(unsigned char *seqA, unsigned char *seqB, int lenA, int lenB,
   int i,j;
 
   struct val_counts empty, final;
+
+  DOUBLE mdlCost;
   
 #ifdef DO_COUNTS
   init_counts(empty.counts);
@@ -381,7 +386,7 @@ DOUBLE doAlign(unsigned char *seqA, unsigned char *seqB, int lenA, int lenB,
     final.val += log2(l2);
   }
 
-  DOUBLE mdlCost = calcModel(&final);
+  mdlCost = calcModel(&final);
   printf("Aligment Encoding = %f bits    (model=%f data=%f)\n", mdlCost+final.val, mdlCost, final.val);
 
 #ifdef DO_COUNTS
@@ -407,6 +412,7 @@ DOUBLE doAlign(unsigned char *seqA, unsigned char *seqB, int lenA, int lenB,
 // -----------------------------------------------------------------------------------
 DOUBLE alignDriver(int maxIterations, char *seqA, char *seqB)
 {
+  DOUBLE lastDiff;
   int i;
   int lenA = strlen(seqA);
   int lenB = strlen(seqB);
@@ -460,7 +466,8 @@ DOUBLE alignDriver(int maxIterations, char *seqA, char *seqB)
 
   printf("Null mdl=%f bits (str1=%f bits  str2=%f bits)\n", 
 	 seqA_cum[lenA]+seqB_cum[lenB], seqA_cum[lenA], seqB_cum[lenB]);
-  DOUBLE lastDiff = -INFINITY;
+
+  lastDiff = -INFINITY;
 
   while (maxIterations--) {
     DOUBLE counts[num_counts];
