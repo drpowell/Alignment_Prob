@@ -4,8 +4,8 @@ JAVAC_FLAGS = -g -classpath .:hb15.zip
 
 PACKAGES = \
 	common \
-	fuzzyLZ \
-	alignCompress
+	alignCompress \
+	fuzzyLZ
 
 JAVA_DIRS       := $(subst .,/,$(PACKAGES))
 JAVA_SRC        := $(foreach dir, $(JAVA_DIRS), $(wildcard $(dir)/*.java))
