@@ -6,7 +6,7 @@ use Markov_gen;
 
 my $timeProg = '/usr/bin/time';
 my $compProg = 'java -Xmx512m -cp ../..:../../hb15.zip alignCompress/AlignCompress';
-my $compProgOpt = ' --markov=0 --verbose=1 --maxIterations=20 --linear=true --local=true';
+my $compProgOpt = ' --markov=1 --verbose=1 --maxIterations=20 --linear=true --local=true';
 my $prssProg = './prss33 -b 200 -n -q';
 
 use IPC::Open3;
@@ -21,8 +21,8 @@ my $log = new IO::File "> outLog.$$";
 (defined $log) || die "Can't open output log";
 $log->autoflush(1);
 
-my $model = new Markov_gen(-1, [qw(a t g c)]);
-#$model->model_power(2);
+my $model = new Markov_gen(1, [qw(a t g c)]);
+$model->model_power(2);
 
 my $str  = "";
 $str .= `hostname`."\n";
@@ -31,25 +31,30 @@ $str .= `free`."\n";
 $str .= `date`."\n";
 $str .= "pid=$$\n";
 $str .= "\nProgs to use:\n$compProg$compProgOpt\n$prssProg\n";
-$str .= "\nSequences are unrelated both of length exactly 400 characters\n\n";
+#$str .= "\nSequences are unrelated both of length exactly 400 characters\n\n";
+$str .= "\nSequences are related.\n";
+$str .= "subseq1 = gen(100)\n";
+$str .= "subseq2 = mutate(subseq1, n_times)\n";
+$str .= "s1 = gen(200) . subseq1 . gen(100)\n";
+$str .= "s2 = gen(100) . subseq2 . gen(200)\n\n";
 $str .= $model->as_string();
 
 $str =~ s/^/#/gm;
 print $str;
 
-my $numRuns = 100;
+my $numRuns = 10;
 
 my @to_delete;
 
-#for my $numMutations (0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 300) {
+for my $numMutations (0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 300) {
   for my $runNum (1..$numRuns) {
-#    my $subseq = $model->gen_sequence(100);
-#    my $str1 = $model->gen_sequence(200) . $subseq . $model->gen_sequence(100);
-#    my $str2 = $model->gen_sequence(100) . $model->mutate($subseq, $numMutations) .
-#     $model->gen_sequence(200);
-    my $str1 = $model->gen_sequence(400);
-    my $str2 = $model->gen_sequence(400);
-    my $numMutations = -1; # Use -1 to denote unrelated sequences
+    my $subseq = $model->gen_sequence(100);
+    my $str1 = $model->gen_sequence(200) . $subseq . $model->gen_sequence(100);
+    my $str2 = $model->gen_sequence(100) . $model->mutate($subseq, $numMutations) .
+     $model->gen_sequence(200);
+#    my $str1 = $model->gen_sequence(400);
+#    my $str2 = $model->gen_sequence(400);
+#    my $numMutations = -1; # Use -1 to denote unrelated sequences
 
     print $log "s1=$str1\ns2=$str2\n";
 
@@ -66,7 +71,7 @@ my @to_delete;
 
     printf $log "\nDONE\n\n";
   }
-#}
+}
 
 
 sub runProg {
