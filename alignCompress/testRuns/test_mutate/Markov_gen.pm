@@ -245,6 +245,7 @@ sub model_entropy {
       $sum += $m->{$k1}{$k2} * -log2($m->{$k1}{$k2});
     }
   }
+  $sum /= (scalar keys %$m);
   return $sum;
 }
 
