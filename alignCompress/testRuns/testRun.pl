@@ -109,7 +109,7 @@ sub runProg {
         (!defined($_ = <$err>)) && do {$s->remove($err); next};
 
 	print "STDERR: $_" if (/^NON-CONVERGENCE/);
-        printf $log "STDERR: %s",$_;
+        printf $log "STDERR:%s: %s",time(),$_;
         if (/^([^\s]*?)user/) { $uTime = $1 };
         if (/\s([^\s]*?)system/) { $sTime = $1 };
         if (/\s([^\s]*?)elapsed/)  { $rTime = $1 };
@@ -179,7 +179,7 @@ sub runFastaProg {
       ($fh == $err) && do {
         (!defined($_ = <$err>)) && do {$s->remove($err); next};
 
-        printf $log "STDERR: %s",$_;
+        printf $log "STDERR:%s: %s",time(),$_;
         if (/^([^\s]*?)user/) { $uTime = $1 };
         if (/\s([^\s]*?)system/) { $sTime = $1 };
         if (/\s([^\s]*?)elapsed/)  { $rTime = $1 };
