@@ -8,6 +8,7 @@ $myLoc ||= '.';
 my $fname = shift;
 my $MMorder="unknown";
 my $entropy="unknown";
+my $uni0 = 0;
 
 open (F, "< $fname") or die "Unable to read $fname";
 while (<F>) {
@@ -15,6 +16,11 @@ while (<F>) {
     $MMorder=$1;
     $entropy=$2;
   }
+
+  if (/^\#Note the model has biased 1st order stats, _but_ uniform 0 order stats$/) {
+    $uni0 = 1;
+  }
+
 }
 
 my $cmd = "";
@@ -30,12 +36,13 @@ if (defined($ARGV[0])) {
 }
 
 $cmd .= "set key right\n";
-$cmd .= sprintf("set title 'Log-odds for MM order=$MMorder entropy=$entropy%s'\n");
+$cmd .= sprintf("set title 'Log-odds for MM order=$MMorder entropy=$entropy%s'\n",
+		$uni0 ? " (uniform 0 order stats)" : "");
 $cmd .= "set xlabel 'No. mutates'\n";
 $cmd .= "set ylabel 'bits'\n";
 
 
-$cmd .= "plot '< $myLoc/extractData.pl prss $fname' thru -log(x/(1-x))/log(2) title 'PRSS -log(p/1-p)' with linespoints";
+$cmd .= "plot '< $myLoc/extractData.pl prss $fname' thru -log(x)/log(2) title 'PRSS -log(p)' with linespoints";
 $cmd .= ",'< $myLoc/extractData.pl al_one $fname' title 'Optimal Alignment' with linespoints";
 $cmd .= ",'< $myLoc/extractData.pl al_all $fname' title 'Average Alignment' with linespoints";
 $cmd .= ",0 notitle";

@@ -6,7 +6,7 @@ use Markov_gen;
 
 my $timeProg = '/usr/bin/time';
 my $compProg = 'java -Xmx512m -cp ../..:../../hb15.zip alignCompress/AlignCompress';
-my $compProgOpt = ' --markov=-1 --verbose=1 --maxIterations=20 --linear=true --local=true';
+my $compProgOpt = ' --markov=-1 --verbose=2 --maxIterations=20 --linear=true --local=true';
 my $prssProg = './prss33 -b 200 -n -q';
 
 use Data::Dumper;
@@ -100,24 +100,17 @@ for my $i (0 .. $numArchetypes-1) {
     $SIG{CHLD} = 'IGNORE';
 
     for my $sum (qw(true false)) {
-      my($r, $rTime1, $uTime1, $sTime1, $swaps1) = 
+      my($r, $a_len, $d_len, $rTime1, $uTime1, $sTime1, $swaps1) = 
 	runProg($compProg . $compProgOpt . " --sum=$sum", $str1, $str2);
 
-      printf("AlignCompress (sum=$sum): s1=%d s2=%d parent=%d mutates=%d r=%f uTime=%f\n",
+      printf("AlignCompress (sum=$sum): s1=%d s2=%d parent=%d mutates=%d r=%f al=%f dl=%f uTime=%f\n",
 	     $i, $j,
 	     $population[$j]{PARENT},
 	     $population[$j]{MUTATES},
-	     $r->[-1],$uTime1);
+	     $r->[-1],
+	     $a_len->[-1], $d_len->[-1],
+	     $uTime1);
     }
-
-    my($r, $rTime1, $uTime1, $sTime1, $swaps1) = 
-	runProg($compProg . $compProgOpt . " --sum=true --doSW=true", $str1, $str2);
-
-      printf("AlignCompress (SW): s1=%d s2=%d parent=%d mutates=%d r=%f uTime=%f\n",
-	     $i, $j,
-	     $population[$j]{PARENT},
-	     $population[$j]{MUTATES},
-	     $r->[-1],$uTime1);
 
     my($prob,$score,$expect,$num, $rTime2, $uTime2, $sTime2, $swaps2) = 
       runFastaProg($prssProg, $str1, $str2);
@@ -154,7 +147,7 @@ sub runProg {
   my $s = new IO::Select;
   $s->add($rdr, $err);
 
-  my(@odds_ratio);
+  my(@odds_ratio, @total_len, @data_len);
   my($rTime,$uTime,$sTime) = (-1,-1,-1);
   my($swaps)               = (-1);
 
@@ -164,7 +157,11 @@ sub runProg {
         (!defined($_ = <$rdr>)) && do {$s->remove($rdr); next;};
 
 #        printf $log "STDOUT: %s",$_;
-        if (/log odds ratio = (\S+)/) { push(@odds_ratio,$1);}
+        if (/log odds ratio = (\S+)/)  { push(@odds_ratio,$1);}
+	if (/Mutual Encoding = ([.\d]+).*data=([.\d]+)/) {
+	  push(@total_len, $1);
+	  push(@data_len, $2);
+	}
         next;
       };
       ($fh == $err) && do {
@@ -186,7 +183,7 @@ sub runProg {
 
   (!@odds_ratio) && (die "Unable to find 'log odds ratio'!\n");
 
-  return (\@odds_ratio, $rTime, $uTime, $sTime, $swaps);
+  return (\@odds_ratio, \@total_len, \@data_len, $rTime, $uTime, $sTime, $swaps);
 }
 
 sub runFastaProg {

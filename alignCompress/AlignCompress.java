@@ -298,8 +298,8 @@ class AlignCompress {
 	int fsmCounts = -1;
 	if (!linearCosts && !sumAlignments) fsmCounts = Mutation_1State.One.required_counts();
 	if (!linearCosts &&  sumAlignments) fsmCounts = Mutation_1State.All.required_counts();
-	if ( linearCosts && !sumAlignments) fsmCounts = Mutation_3State_2.One.required_counts();
-	if ( linearCosts &&  sumAlignments) fsmCounts = Mutation_3State_2.All.required_counts();
+	if ( linearCosts && !sumAlignments) fsmCounts = Mutation_3State.One.required_counts();
+	if ( linearCosts &&  sumAlignments) fsmCounts = Mutation_3State.All.required_counts();
 	if ( doSmithWaterman) fsmCounts = Mutation_SW.One.required_counts();
 
 	Misc.assert(fsmCounts>=0, "Bad number of fsmCounts");
@@ -322,9 +322,9 @@ class AlignCompress {
 	    if (!linearCosts &&  sumAlignments) 
 		fsmType = new Mutation_1State.All(model, p, totCounts, countPos);
 	    if ( linearCosts && !sumAlignments) 
-		fsmType = new Mutation_3State_2.One(model, p, totCounts, countPos);
+		fsmType = new Mutation_3State.One(model, p, totCounts, countPos);
 	    if ( linearCosts &&  sumAlignments) 
-		fsmType = new Mutation_3State_2.All(model, p, totCounts, countPos);
+		fsmType = new Mutation_3State.All(model, p, totCounts, countPos);
 	    if (doSmithWaterman)
 		fsmType = new Mutation_SW.One(model, p, totCounts, countPos);
 
@@ -512,7 +512,7 @@ class AlignCompress {
 		System.err.println("NON-CONVERGENCE: this="+encAlignment+" last="+lastAlignment);
 	    }
 
-	    // Done we little change in alignment length
+	    // Done we change little in alignment length?
 	    if (iter>0 && lastAlignment-encAlignment < 0.5)
 		break;
 

@@ -28,7 +28,7 @@ while (<F>) {
   }
 
   if (/^AlignCompress \(SW\)/) {
-    $haveSW = 1;
+#    $haveSW = 1;
   }
 }
 
@@ -45,6 +45,7 @@ if (defined($ARGV[0])) {
 }
 
 $cmd .= "set key left\n";
+$cmd .= "set logscale y\n";
 $cmd .= sprintf("set title 'ROC for MM order=$MMorder entropy=$entropy%s'\n",
 		$uni0 ? " (uniform 0 order stats)" : "");
 $cmd .= "set xlabel 'Coverage'\n";

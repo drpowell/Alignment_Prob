@@ -14,17 +14,22 @@ if (defined($ARGV[0]) && (
 my(@prss, @al_all, @al_one);
 
 while (<>) {
+	next if (/^#/);
 	if (/^PRSS:\s+mutates=(-?\d+) p=(\S+)/) {
 		push(@prss,[$1,$2]);
+		next;
 	}
 	
 	if (/^AlignCompress \(sum=true\): mutates=(-?\d+) r=(\S+)/) {
 		push(@al_all,[$1,$2]);
+		next;
 	}
 	
 	if (/^AlignCompress \(sum=false\): mutates=(-?\d+) r=(\S+)/) {
 		push(@al_one,[$1,$2]);
+		next;
 	}
+	print STDERR "Unknown line: $_";
 }
 
 my $arr;

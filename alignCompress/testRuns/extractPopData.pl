@@ -40,6 +40,8 @@ while (<>) {
     push(@al_sw,{S1=>$1, S2=>$2, PARENT=>$3, MUTATES=>$4, VAL=>$5});
     next;
   }
+
+  print STDERR "Unknown line: $_";
 }
 
 my $arr;

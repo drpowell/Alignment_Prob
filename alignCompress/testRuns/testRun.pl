@@ -6,7 +6,7 @@ use Markov_gen;
 
 my $timeProg = '/usr/bin/time';
 my $compProg = 'java -Xmx512m -cp ../..:../../hb15.zip alignCompress/AlignCompress';
-my $compProgOpt = ' --markov=1 --verbose=1 --maxIterations=20 --linear=true --local=true';
+my $compProgOpt = ' --markov=0 --verbose=1 --maxIterations=20 --linear=true --local=true';
 my $prssProg = './prss33 -b 200 -n -q';
 
 use IPC::Open3;
@@ -21,8 +21,9 @@ my $log = new IO::File "> outLog.$$";
 (defined $log) || die "Can't open output log";
 $log->autoflush(1);
 
-my $model = new Markov_gen(1, [qw(a t g c)]);
-$model->model_power(2);
+my $model = new Markov_gen(-1, [qw(a t g c)]);
+#$model->model_power(2);
+#$model->makeUniModel(2);
 
 my $str  = "";
 $str .= `hostname`."\n";
@@ -37,6 +38,7 @@ $str .= "subseq1 = gen(100)\n";
 $str .= "subseq2 = mutate(subseq1, n_times)\n";
 $str .= "s1 = gen(200) . subseq1 . gen(100)\n";
 $str .= "s2 = gen(100) . subseq2 . gen(200)\n\n";
+#$str .= "Note the model has biased 1st order stats, _but_ uniform 0 order stats\n";
 $str .= $model->as_string();
 
 $str =~ s/^/#/gm;

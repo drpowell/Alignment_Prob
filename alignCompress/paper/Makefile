@@ -1,6 +1,6 @@
 FILENAME=alignCompress
 TEXFILES=alignCompress.tex
-PLOTFILES=p1.eps p2.eps p3.eps p4.eps p5.eps r1.eps r2.eps r3.eps
+PLOTFILES=p1.eps p2.eps p3.eps p4.eps p5.eps r1.eps r2.eps r3.eps r4.eps
 POP_CONV_SCRIPT=../testRuns/populationPlot.pl
 REL_CONV_SCRIPT=../testRuns/relatedPlot.pl
 
@@ -40,6 +40,9 @@ r2.eps: ../testRuns/res.related_20020827_2.txt $(REL_CONV_SCRIPT)
 	$(REL_CONV_SCRIPT) $< $@
 
 r3.eps: ../testRuns/res.related_20020902.txt $(REL_CONV_SCRIPT)
+	$(REL_CONV_SCRIPT) $< $@
+
+r4.eps: ../testRuns/res.related_20020903.txt $(REL_CONV_SCRIPT)
 	$(REL_CONV_SCRIPT) $< $@
 
 clean:
