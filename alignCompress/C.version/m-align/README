@@ -1,4 +1,4 @@
-Copyright (c) 2002 David Powell
+Copyright (c) 2002 David Powell <david@drp.id.au>
 
   M-align aligns two sequences using the M-alignment algorithm.
 
@@ -7,6 +7,22 @@ Please cite:
   "Compression and Approximate Matching"
   The Computer Journal, 1999 42:1 pp1-10
 
+----------------------------------------------------------------------
+
+This code is known to compile under Linux using gcc versions
+3.x and 2.95.  It should be as simple as running 'make'.
+
+The programs in this package were specifically written for
+DNA sequences.  It should be a relatively simple to modify
+the code to handle different alphabets.  Simply edit
+'common.h' and change 'ALPHA_SIZE' to the number of characters
+in the alphabet, and change the array 'alphabet' to the
+actual characters in the alphabet.
+
+Good luck!
+
+
+----------------------------------------------------------------------
 
 This implementation of the M-alignment algorithm is specifically for
 testing the relatedness of two DNA sequences.  It also differs from
@@ -18,16 +34,19 @@ the description abovementioned paper in the following ways:
 
 
 
-The key idea to m-alignment to incorporate a model of each sequence
+The key idea to m-alignment is to incorporate a model of each sequence
 into the alignment process.  This program comes with code to model
 sequence by a fixed order Markov Model.  But it is possible to use any
 sequence model that gives a probabilistic prediction for each
 character in the sequences.
 
-This implementation does sums over all possible alignment to calculate
+This implementation sums over all possible alignments to calculate
 how "related" the sequences are.  So, it does not produce an actual
 alignment.  The algorithm is iterated to find a (possibly local)
 optimum for the alignment parameters.
+
+----------------------------------------------------------------------
+  PROGRAM: m-align
 
 
 USAGE
@@ -45,12 +64,12 @@ Usage: m-align [-mfiabh] <seqA> <seqB>
 
 
 The program takes two files on the commandline.  These two files
-contain the two sequences to be tested for relatedness and must
-be in FASTA format.
+each contain one sequence.  The two sequences are to be
+tested for relatedness and must be in FASTA format.
 
 By default m-align fits a fixed order Markov Model to the sequences.
 The order of this Markov Model may be set using the '-m' option, the
-default value is 1.  To use a uniform model (ie. 2 bits per DNA
+default value is 0.  To use a uniform model (ie. 2 bits per DNA
 character), specify the Markov Model order as -1.
 
 
@@ -64,4 +83,38 @@ option.  A value of -1 means unlimited iterations, that is, iterate to
 convergence.
 
 
+----------------------------------------------------------------------
+  PROGRAM: markov_pred
+
+This program is a utility to fit a fixed order markov model
+to a sequence.  It will outputs a probabilistic prediction
+for each alphabet character at every position along the
+sequence.  The format of the output is directly readable by
+the 'm-align' program using the '-a' or '-b' options.
+
+
+USAGE
+------
+
+Usage: ./markov_pred [-mfh] <seq>
+  Where <seq> is a sequence file in FASTA format.
+       -m <n>     Use a n'th order Markov Model
+       -f <file>  Read the Markov Model parameters from <file>
+       -s <file>  Save the Markov Model parameters to <file>
+       -h         This help
+
+
+The sequence must be in the file <seq> yin FASTA format.
+
+The desired order of the markov model can be specified using
+the '-m' option.
+
+Instead of fitting the markov model to the sequence, the
+markov model counts can be loaded from a file using the '-f'
+option.
+
+After fitting the markov model to the sequence, it is
+possible to save the markov model counts to a file using the
+'-s' option.  This file can then be read by either the
+'markov_pred' or 'm-align' programs with the '-f' option.
 
