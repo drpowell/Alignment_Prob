@@ -2,7 +2,7 @@
 alignCompress - align compressible sequences
 
 Run using:
-java -cp .:hb15.zip alignCompress/AlignCompress  atagt gctct
+java -Xmx512m -cp .:hb15.zip alignCompress/AlignCompress
 
 
 fuzzyLZ - a compression model using a fuzzy model of repeats

@@ -192,8 +192,6 @@ class AlignCompress {
 
     boolean doTraceBack;
 
-    //  static final double PcharEncode = 1.0/170;
-
     // Encode length l: 0..infinity
     static private double encode_length(double l) {
 	Misc.assert(l>=0, "Bad length to encode:"+l);
@@ -292,7 +290,6 @@ class AlignCompress {
 	//System.err.println("modelA\n"+modelA+"\n");
 	//System.err.println("modelB\n"+modelB+"\n");
 
-	int myCounts  = (localAlign ? 1 : 0);
 	int mdlCounts = Model_SeqAB.required_counts();
 
 	int fsmCounts = -1;
@@ -303,17 +300,15 @@ class AlignCompress {
 
 	Misc.assert(fsmCounts>=0, "Bad number of fsmCounts");
 
-	int totCounts = myCounts + mdlCounts + fsmCounts;
+	int totCounts = mdlCounts + fsmCounts;
 
 	double bestDiff = Double.NEGATIVE_INFINITY;
 	double lastAlignment = 0;
 
 	int iter=0;
 	while (  maxIterations<0 || iter<maxIterations ) {
-	    //double PalignChar = 0.9;
-	    //if (p.exists("PalignChar")) PalignChar = p.get("PalignChar");
 
-	    int countPos = myCounts;
+	    int countPos = 0;
 	    Two_Seq_Model_Counts model = new Model_SeqAB(p, modelA, modelB, countPos);
 	    countPos += mdlCounts;
 	    Mutation_FSM fsmType=null;
@@ -382,7 +377,6 @@ class AlignCompress {
 		System.out.println("\n\nIteration: " + iter);
 		System.out.println(model);
 		System.out.println(cell(D,0,0).paramsToString());
-		//				   (localAlign ? "PalignChar="+PalignChar : ""));
 	    }
 
 	    // Do the DPA!
@@ -422,8 +416,6 @@ class AlignCompress {
 			//val += encode_length(seqA.length()-i);
 			//val += encode_length(seqB.length()-j);
 
-			//val += -MyMath.log2(1-PalignChar); // No more alignment characters
-			//val += -MyMath.log2(1-PcharEncode); // No more alignment characters
 
 			if (doTraceBack)
 			    ((Mutation_FSM.TraceBack_Info)final_cell).or(val, 
@@ -431,10 +423,6 @@ class AlignCompress {
 									 cell(D,i,j));
 			else
 			    final_cell.or(val, cell(D,i,j).get_counts());
-
-
-			//cell(D,i,j).add(-MyMath.log2(PalignChar), 0); // Count 0 is count for Palign
-			//cell(D,i,j).add(-MyMath.log2(PcharEncode), 0); // Count 0 is count for Palign
 		    }
 
 		    cell(D,i,j).calc(h, v, d, aChar, bChar, i, j);
@@ -448,21 +436,9 @@ class AlignCompress {
 	    }
 
 
+	    // If global alignment, then the final cell is really the bottom right of D[][]
 	    if (!localAlign)
 		final_cell = cell(D, seqA.length(),seqB.length());
-	    else {
-		// Must be some _ends_ if there it is local alignment.
-		/*
-		if (!doTraceBack) 
-		    final_cell.or(cell(D, seqA.length(), seqB.length()).get_val(), 
-				  cell(D, seqA.length(), seqB.length()).get_counts());
-		else
-		    ((Mutation_FSM.TraceBack_Info)
-		     final_cell).or(cell(D, seqA.length(), seqB.length()).get_val(), 
-				    cell(D, seqA.length(), seqB.length()).get_counts(),
-				    cell(D, seqA.length(), seqB.length()));
-		*/
-	    }
 	    
 	    double encAlignModel = final_cell.encode_params();
 	    double encAlignment = encAlignModel + final_cell.get_val();
@@ -537,7 +513,7 @@ class AlignCompress {
     public static void main(String args[]) {
 	CommandLine cmdLine = new CommandLine();
 	cmdLine.addInt("markov", -1, "Order of Markov Model to use for sequence models.");
-	cmdLine.addInt("iterations", -1, "Maximum number of iterations.");
+	cmdLine.addInt("maxIterations", -1, "Maximum number of iterations.");
 	cmdLine.addBoolean("linearCosts", true, "Use linear gap costs.");
 	cmdLine.addBoolean("sumAlignments", true, "Sum over all alignments.");
 	cmdLine.addBoolean("local", false, "Compute using local alignments.");
@@ -582,7 +558,7 @@ class AlignCompress {
 	}
 
 	a.markovOrder     = cmdLine.getIntVal("markov");
-	a.maxIterations   = cmdLine.getIntVal("iterations");
+	a.maxIterations   = cmdLine.getIntVal("maxIterations");
 	a.linearCosts     = cmdLine.getBooleanVal("linearCosts");
 	a.sumAlignments   = cmdLine.getBooleanVal("sumAlignments");
 	a.localAlign      = cmdLine.getBooleanVal("local");
