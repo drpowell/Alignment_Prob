@@ -23,7 +23,26 @@ public class CommandLine {
 	numOptions = 0;
     }
 
+    private String spaces(int num) {
+	char[] s = new char[num];
+	for (int j=0; j<num; j++)
+	    s[j] = ' ';
+	return new String(s);
+    }
+
+    private String indentLines(String s, int indent) {
+	String[] lines = s.split("\n");
+	StringBuffer res = new StringBuffer();
+	for (int i=0; i<lines.length; i++) {
+	    if (i>0)
+		res.append("\n" + spaces(indent));
+	    res.append(lines[i]);
+	}
+	return res.toString();
+    }
+
     public String usage() {
+	int indent = 20;
 	StringBuffer res = new StringBuffer();
 	for (int i=0; i<numOptions; i++) {
 	    res.append("  --" + opts[i]);
@@ -45,11 +64,10 @@ public class CommandLine {
 		break;
 	    }
 
-	    for (int j=0; j<20-len; j++)
-		res.append(" ");
-	    res.append(helps[i]);
-	    //res.append(" (default='"+defaults[i]+"')");
-	    res.append("\n                        (default='"+defaults[i]+"')");
+	    res.append(spaces(indent-len-4));
+
+	    res.append( indentLines(helps[i], indent));
+	    res.append("\n" + spaces(indent) + "(default='"+defaults[i]+"')");
 	    res.append("\n");
 	}
 

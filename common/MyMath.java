@@ -8,12 +8,12 @@ public final class MyMath {
     public static final double log2e = 1.0/loge2;
 
     public static double log2(double a) {
-	//return Math.log(a) / loge2;
+        //return Math.log(a);
 	return Math.log(a) * log2e;
     }
 
     public static double exp2(double a) {
-	//return Math.exp(a);
+        //return Math.exp(a);
 	return Math.exp(a * loge2);
     }
 

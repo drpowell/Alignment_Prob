@@ -2,6 +2,7 @@
 package fuzzyLZ;
 
 import java.io.*;
+import java.lang.reflect.*;
 
 import common.*;
 
@@ -258,6 +259,8 @@ public class FuzzyLZ implements Seq_Model {
     static abstract class Matches implements Serializable {
 	Mutation_FSM fsmType;
 	Plot plot;
+	Plot plotActive;
+	Plot plotHits;
 
 	int seqLen;
 	char[] sequence;
@@ -289,6 +292,8 @@ public class FuzzyLZ implements Seq_Model {
 	ExactMatches getHash() { return null; }
 
 	void setPlot(Plot p) { plot = p; };
+	void setPlotActive(Plot p) { plotActive = p; };
+	void setPlotHits(Plot p)   { plotHits = p; };
 	public void plotVals(int i, double base) { return; };
 	
 
@@ -328,7 +333,8 @@ public class FuzzyLZ implements Seq_Model {
 
 
     static int img_width = 800, img_height = 800;
-
+    static String[] MutationModels = {"common.Mutation_3State$All"};
+    static int def_numFwd=1, def_numRev=1;
 
     Seq_Model seqModel;
     int seqLen, alphaSize, totCounts;
@@ -352,27 +358,55 @@ public class FuzzyLZ implements Seq_Model {
     private int myCounts=1;
 
     public Plot plot;
+    public Plot plotActive;
+    public Plot plotHits;
 
-    FuzzyLZ(Params params, Seq_Model seqModel, char[] sequence, int alphaSize) {
+    FuzzyLZ(Params params, Seq_Model seqModel, char[] sequence, int alphaSize, int plotStart) {
         this.seqModel  = seqModel;
         this.sequence  = sequence;
         this.alphaSize = alphaSize;
 	seqLen = sequence.length;
+	numFwd = def_numFwd;
+	numRev = def_numRev;
 
-	numFwd = 1;
-	numRev = 1;
-	myCounts += numFwd+numRev;
-
+	Class[] M_class     = new Class[numFwd+numRev];
+	Method[] M_counts   = new Method[numFwd+numRev];
+	Constructor[] M_new = new Constructor[numFwd+numRev];
+	for (int i=0; i<M_class.length; i++) {
+	    try {
+		M_class[i]  = Class.forName(MutationModels[i%MutationModels.length]);
+		M_counts[i] = M_class[i].getMethod("required_counts", null );
+		M_new[i]    = M_class[i].getConstructor(new Class[] {Class.forName("common.Two_Seq_Model_Counts"),
+								     Class.forName("common.Params"),
+								     Integer.TYPE,
+								     Integer.TYPE});
+	    } catch (Exception e) {
+		System.err.println("Error finding class/method for class '"+MutationModels[i%MutationModels.length]+
+				   "' : "+e);
+		System.exit(1);
+	    }
+	}
+	    
 	encStartMachines = new double [numFwd + numRev];
 	machines         = new Matches[numFwd + numRev];
 
-	plot = new Plot(seqLen+1, seqLen+1, img_width, img_height);
+
+	myCounts += numFwd+numRev;
+	int countPos = myCounts;
 
 	int mdlCounts = Model_SeqA.required_counts();
-        int fsmCounts = Mutation_1State.required_counts();
 	int matCounts = Matches.required_counts();
-	totCounts = myCounts+(numFwd+numRev)*(mdlCounts+fsmCounts+matCounts);
-	int countPos = myCounts;
+	totCounts = myCounts;
+
+	int fsmCounts[] = new int[numFwd+numRev];
+
+	for (int i=0; i<numFwd+numRev; i++) {
+	    try {
+		fsmCounts[i] = ((Integer)M_counts[i].invoke(null, null)).intValue();
+	    } catch (Exception e) { System.err.println("required_counts Exception : "+e);   }
+	    totCounts += (mdlCounts+fsmCounts[i]+matCounts);
+	}
+
 
 	if (!params.exists("nostart_cost")) {
 	    set_default_costs();
@@ -382,6 +416,10 @@ public class FuzzyLZ implements Seq_Model {
 		encStartMachines[i] = params.get("start"+i+"_cost");
 	}
 	normalize_costs();
+
+	plot = new Plot(seqLen+1, seqLen+1, img_width, img_height, plotStart);
+	plotActive = new Plot(seqLen+1, seqLen+1, img_width, img_height, plotStart);
+	plotHits   = new Plot(seqLen+1, seqLen+1, img_width, img_height, plotStart);
 
 	// Now initialise the various mutation machines
 	for (int m=0; m < numFwd + numRev; m++) {
@@ -393,8 +431,15 @@ public class FuzzyLZ implements Seq_Model {
 	    }
 	    Two_Seq_Model_Counts model = new Model_SeqA(p,alphaSize, countPos);
 	    countPos += mdlCounts;
-	    Mutation_FSM fsmType = new Mutation_1State.All(model, p, totCounts, countPos);
-	    countPos += fsmCounts;
+	    Mutation_FSM fsmType = null;
+	    try {
+		fsmType = (Mutation_FSM)M_new[m].newInstance( new Object[] { model, p, 
+									     new Integer(totCounts), 
+									     new Integer(countPos) });
+	    } catch (Exception e) {
+		System.err.println("newInstance Exception : "+e);
+	    }
+	    countPos += fsmCounts[m];
 	    machines[m] = new Matches_Sparse( (m<numFwd), fsmType, p, countPos, sequence);
 	    countPos += matCounts;
 
@@ -404,6 +449,8 @@ public class FuzzyLZ implements Seq_Model {
 		machines[m].setHash(machines[0].getHash());
 
 	    machines[m].setPlot(plot);
+	    machines[m].setPlotActive(plotActive);
+	    machines[m].setPlotHits(plotHits);
 
 	    //Misc.printf("Starting costs:\n%s:\n", fsmType.paramsToString());
 	}
@@ -477,6 +524,8 @@ public class FuzzyLZ implements Seq_Model {
 	double p = MyMath.exp2(msgLen-base[1]);
 	p = Math.pow(p, 0.3);
 	plot.putMax(i+1, i+1, p, p, p);
+	plotActive.putMax(i+1, i+1, p, p, p);
+	plotHits.putMax(i+1, i+1, p, p, p);
 	for (int m=0; m < numFwd+numRev; m++) {
 	    machines[m].plotVals(i+1, msgLen);
 	    if (DEBUG>=4)

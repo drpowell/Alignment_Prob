@@ -61,7 +61,11 @@ public final class Misc {
 	num = Math.round(num * mul)/mul;
 
 	long i = (long)num;
-	StringBuffer res = new StringBuffer(Long.toString(i));
+	StringBuffer res;
+        if (i==0 && num<0)
+            res = new StringBuffer("-0");
+        else
+            res = new StringBuffer(Long.toString(i));
 	if (prec==0)
 	    return pad(res.toString(), width, pre0, right);
 

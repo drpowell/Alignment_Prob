@@ -7,32 +7,41 @@ import common.*;
 
 class Plot implements Serializable {
     int img[][];
-    double xscale, yscale;
-    int w,h;
+    double scale;
+    int numRows,numCols;
+    int startRow;
 
-    Plot(int width, int height, int maxWidth, int maxHeight) {
-	w = MyMath.min2(width, maxWidth);
-	h = MyMath.min2(height, maxHeight);
-	img = new int[w][h];
-	xscale = 1.0*w/width;
-	yscale = 1.0*h/height;
+    Plot(int rows, int columns, int maxColumns, int maxRows) {
+	this(rows, columns, maxColumns, maxRows, 0);
     }
 
-    void put(int x, int y, double r, double g, double b) {
-	x = (int)(xscale*x);
-	y = (int)(yscale*y);
-	img[x][y] = ((byte)(r*255))<<16 | ((byte)(g*255))<<8 | ((byte)(b*255));
+    Plot(int rows, int columns, int maxColumns, int maxRows, int startRow) {
+	this.startRow = startRow;
+
+	scale = MyMath.min2( 1.0*MyMath.min2(columns, maxColumns)/columns,
+			     1.0*MyMath.min2(rows-startRow, maxRows)/rows);
+
+	numRows = (int)(scale*(rows-startRow));
+	numCols = (int)(scale*columns);
+	img = new int[numRows+1][numCols];
+
     }
 
-    void putMax(int x, int y, double r, double g, double b) {
-	x = (int)(xscale*x);
-	y = (int)(yscale*y);
+    void put(int row, int col, double r, double g, double b) {
+	row = (int)(scale*(row-startRow));
+	col = (int)(scale*col);
+	img[row][col] = ((byte)(r*255))<<16 | ((byte)(g*255))<<8 | ((byte)(b*255));
+    }
 
-	byte r1 = (byte)MyMath.max2((img[x][y]>>16)&255, r*255);
-	byte g1 = (byte)MyMath.max2((img[x][y]>> 8)&255, g*255);
-	byte b1 = (byte)MyMath.max2((img[x][y]    )&255, b*255);
+    void putMax(int row, int col, double r, double g, double b) {
+	row = (int)(scale*(row-startRow));
+	col = (int)(scale*col);
+
+	byte r1 = (byte)MyMath.max2((img[row][col]>>16)&255, r*255);
+	byte g1 = (byte)MyMath.max2((img[row][col]>> 8)&255, g*255);
+	byte b1 = (byte)MyMath.max2((img[row][col]    )&255, b*255);
 	
-	img[x][y] = (r1)<<16 | (g1)<<8 | (b1);
+	img[row][col] = (r1)<<16 | (g1)<<8 | (b1);
     }
 
     void save(String fname, String comments) {
@@ -46,14 +55,14 @@ class Plot implements Serializable {
 	    out.writeBytes("#Created by FuzzyLZ\n");
 	    if (comments.length()>0) 
 		out.writeBytes("#"+comments+"\n");
-	    out.writeBytes(w + " " + h + "\n");
+	    out.writeBytes(numCols + " " + numRows + "\n");
 	    out.writeBytes("255\n");
 
-	    for (int i=0; i<w; i++) {
-		for (int j=0; j<h; j++) {
-		    out.writeByte( (img[i][j]>>16)&255 );
-		    out.writeByte( (img[i][j]>> 8)&255 );
-		    out.writeByte( (img[i][j]    )&255 );
+	    for (int r=0; r<numRows; r++) {
+		for (int c=0; c<numCols; c++) {
+		    out.writeByte( (img[r][c]>>16)&255 );
+		    out.writeByte( (img[r][c]>> 8)&255 );
+		    out.writeByte( (img[r][c]    )&255 );
 		}
 	    }
 

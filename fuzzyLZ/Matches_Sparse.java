@@ -7,7 +7,6 @@ class Matches_Sparse extends FuzzyLZ.Matches {
     static int def_winSize    = 25;
     static int def_computeWin = 10;
     static int def_cutML      = 4;
-    static boolean def_plotActive = false;
    
 
     Sparse b,e;
@@ -17,7 +16,6 @@ class Matches_Sparse extends FuzzyLZ.Matches {
     int computeWin;		// How many cells do we activate on a hashtable hit
     double cutML;		// At what message length to we kill active cells
     boolean fullN2;		// Do the full N^2 algorithm
-    boolean plotActive;		// If true we plot active cells, if false we plot cell values
 
     int debug;
     boolean fwd;
@@ -43,7 +41,6 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 	plotBrightness = 0.5;
 	
 	fullN2     = (winSize == 0);
-	plotActive = def_plotActive;
 
 	converter = (fwd ? new ExactMatches.Convert() : new ExactMatches.Reverse_Complement_DNA());
 
@@ -80,7 +77,8 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 	    Mutation_FSM cell = (Mutation_FSM)(iter.o);
 	    cell.or(startLen, startCounts);
 
-	    if (plotActive) plot.putMax(i, iter.i, (fwd ? 0.5 : 0), (fwd ? 0 : 0.5), 0);
+	    if (plotActive != null) 
+		plotActive.putMax(i, iter.i, (fwd ? 0.5 : 0), (fwd ? 0 : 0.5), 0);
 
 	    if (debug>1) System.err.print("("+i+","+iter.i+") ");
 	}
@@ -112,9 +110,10 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 		    int n2  = MyMath.min2(i, hit+1+computeWin);
 		    e.add(n1, n2);
 
-		    if (plotActive) 
-			for (int j=n1; j<n1+1; j++) 
-			    plot.putMax(i, j, (fwd ? 1 : 0), (fwd ? 0 : 1), 0);
+		    if (plotActive!=null) 
+			for (int j=n1; j<n1+1; j++) plotActive.putMax(i, j, (fwd ? 1 : 0), (fwd ? 0 : 1), 0);
+		    if (plotHits!=null) 
+			for (int j=n1; j<n1+1; j++) plotHits.putMax(i, j, (fwd ? 1 : 0), (fwd ? 0 : 1), 0);
 		    if (debug>0) System.err.println("New hash "+i+" = "+hit+" ("+n1+","+n2+")");
 
 		    hashHits++;
@@ -170,9 +169,10 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 	    double endLen = cell.get_val() + encEnd;
 
 	    // Hack: Increment the endCopy count in the _cell_  (will undo after next statement)
-	    cell.get_counts().inc(countIndex + endIndex, 1);
-	    retCounts.combine_with_lens(ret_msgLen, cell.get_counts(), endLen);
-	    cell.get_counts().inc(countIndex + endIndex, -1);
+	    Counts c = cell.get_counts();
+	    c.inc(countIndex + endIndex, 1);
+	    retCounts.combine_with_lens(ret_msgLen, c, endLen);
+	    c.inc(countIndex + endIndex, -1);
 
 	    ret_msgLen = MyMath.logplus(ret_msgLen, endLen);
 	}
@@ -219,7 +219,6 @@ class Matches_Sparse extends FuzzyLZ.Matches {
 
 
     public void plotVals(int i, double base) {
-	if (plotActive) return;
 	for (Sparse.Iterate bIter=b.moveFwd(0, null); bIter.o!=null; bIter=b.moveFwd(bIter)) {
 	    Mutation_FSM cell  = (Mutation_FSM)bIter.o;
 	    double v = MyMath.exp2(base-cell.get_val());

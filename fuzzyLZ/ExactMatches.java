@@ -14,7 +14,7 @@ import java.io.*;
 public class ExactMatches implements Serializable {
 
     //    public static class Convert implements Serializable {
-   public static class Convert {
+   public static class Convert implements Serializable {
         public String conv(String s) { return s; }
     }
 
