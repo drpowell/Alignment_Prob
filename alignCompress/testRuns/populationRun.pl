@@ -31,10 +31,11 @@ my $model = new Markov_gen(-1, [qw(a t g c)]);
 #			   });
 #$model->model_power(2);
 #$model->makeUniModel(2);
+$model->{PCHANGE} = 0.4;
 
 my $numArchetypes = 10;
 my $numEachMutations = 4;
-my @numMutation = (10, 30, 50, 80, 100);
+my @numMutation = (10, 30, 50, 60, 80);
 my ($l_sub, $l_sub_range) = (120, 30);
 my ($l1_s, $l1_e) = (50, 100);
 my ($l2_s, $l2_e) = (100, 50);
@@ -87,7 +88,7 @@ for my $i (0 .. $numArchetypes-1) {
 
 my @to_delete;
 
-my $numToRun = 1;
+my $numToRun = num_processors();
 my $numRunning = 0;
 
 $SIG{CHLD} = sub { my $pid=wait;
@@ -315,3 +316,13 @@ sub rand_length {
   return $mid + int(rand($range*2+1))-$range;
 }
 
+sub num_processors {
+  open(F, "< /proc/cpuinfo") or do { print STDERR "Can't read /proc/cpuinfo\n"; return 1; };
+  my(@l) = <F>;
+  my $num = grep (/^processor/, @l);
+  if ($num<=0) {
+    print STDERR "Bad number of processors: $num\n";
+    return 1;
+  }
+  return $num;
+}
