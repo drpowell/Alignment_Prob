@@ -32,24 +32,29 @@ use Data::Dumper;
 }
 
 sub MAIN_TEST {
-  my $t = new Markov_gen(0, [qw(a t g c)]);
-  $t->model_power(0.0010);
+  my $t = new Markov_gen(-1, [qw(a t g c)]);
+  my $s1 = $t->gen_sequence(100);
+  my $s2 = $t->mutate($s1, 50);
+  print $t->gen_sequence(10) . $s1 . "\n";
+  print $s2 . $t->gen_sequence(10) . "\n";
+  #my $t = new Markov_gen(0, [qw(a t g c)]);
+  #$t->model_power(3);
   #$t->makeUniModel(5);
-  my $t2 = $t->copy_model();
-  $t2->negate_model();
+  #my $t2 = $t->copy_model();
+  #$t2->negate_model();
 
-  print $t->as_string(),"\n";
-  print $t2->as_string(),"\n";
+  #print $t->as_string(),"\n";
+  #print $t2->as_string(),"\n";
 
-  my $s1 = $t->gen_sequence(10);
-  my $s2 = $t2->gen_sequence(10);
+  #my $s1 = $t->gen_sequence(10);
+  #my $s2 = $t2->gen_sequence(10);
 
-  print "s1=$s1\ns2=$s2\n";
+  #print "s1=$s1\ns2=$s2\n";
 
-  printf "s1 under t  = %f\n",$t->entropy($s1);
-  printf "s1 under t2 = %f\n",$t2->entropy($s1);
-  printf "s2 under t  = %f\n",$t->entropy($s2);
-  printf "s2 under t2 = %f\n",$t2->entropy($s2);
+  #printf "s1 under t  = %f\n",$t->entropy($s1);
+  #printf "s1 under t2 = %f\n",$t2->entropy($s1);
+  #printf "s2 under t  = %f\n",$t->entropy($s2);
+  #printf "s2 under t2 = %f\n",$t2->entropy($s2);
 }
 
 sub new {
@@ -102,7 +107,11 @@ sub mutate_entropy {
   ($s->{ORDER} == -1) && (return mutate_entropy_order0(@_));
   ($s->{ORDER} ==  0) && (return mutate_entropy_order0(@_));
   ($s->{ORDER} ==  1) && (return mutate_entropy_order1(@_));
-  ($s->{ORDER} ==  2) && (die "mutate_entropy not implemented for 2nd order");
+  ($s->{ORDER} ==  2) && do {
+    print STDERR "mutate_entropy not implemented for 2nd order. Using 0-order mutate\n";
+    return mutate_entropy_order_uni(@_);
+  };
+    
   die "Bad order";
 }
 
@@ -112,6 +121,7 @@ sub as_string {
   my $s;
   $s .= "Model order=$self->{ORDER}";
   $s .= sprintf " entropy=%.4f", $self->model_entropy();
+  $s .= sprintf " Pchange=%.2f", $self->{PCHANGE};
   my $d = Data::Dumper->new([ $self->{PROBS} ]);
   $s .= sprintf "  probs=%s\n", $d->Terse(1)->Indent(2)->Dump();
 }
@@ -362,6 +372,14 @@ sub gen_sequence {		# Generate a sequence from 2st order markov
 # Works as follows:
 #    Generate sequence s1 using MM.
 #
+
+
+
+# Entropy doesn't change under a uniform model (I think)
+sub mutate_entropy_order_uni {
+  my($s, $entropy, $str, $len, $op) = @_;
+  return $entropy;
+}
 
 sub mutate_entropy_order0 {
   # This is for 0th order MMs only!
