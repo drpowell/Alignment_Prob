@@ -26,9 +26,10 @@ while (<>) {
     next;
   }
 
-  if (/^AlignCompress \(sum=(true|false)\): s1=(\d+) s2=(\d+) parent=(\d+) mutates=(\d+) r=(\S+).*dl=\S+ \(([\d.]+)\)/) {
-#    my $d = {S1=>$2, S2=>$3, PARENT=>$4, MUTATES=>$5, VAL=>-$7};
-    my $d = {S1=>$2, S2=>$3, PARENT=>$4, MUTATES=>$5, VAL=>$6};
+  if (/^AlignCompress \(sum=(true|false)\): s1=(\d+) s2=(\d+) parent=(\d+) mutates=(\d+) r=(\S+) \(([\d.]+)\).*dl=\S+ \(([\d.]+)\)/) {
+#    my $d = {S1=>$2, S2=>$3, PARENT=>$4, MUTATES=>$5, VAL=>-$8};
+    my $d = {S1=>$2, S2=>$3, PARENT=>$4, MUTATES=>$5, VAL=>$7};
+#    my $d = {S1=>$2, S2=>$3, PARENT=>$4, MUTATES=>$5, VAL=>$6};
     if ($1 eq 'true') {
       push(@al_all,$d);
     } else {
