@@ -98,7 +98,8 @@ class AlignCompress {
 	Misc.assert(l>=0, "Bad length to encode:"+l);
 	//return MyMath.logstar_continuous(l+1);
 	//return -(l*MyMath.log2(PcharEncode) + MyMath.log2(1-PcharEncode)); // Geometric distribution
-	return 0.104808 * l;	// This is to match SW costs. (TESTING!)
+	//return 0.104808 * l;	// This is to match SW costs. (TESTING!)
+	return 0;
     }
 
     public AlignCompress() {

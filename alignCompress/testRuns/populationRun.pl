@@ -6,7 +6,7 @@ use Markov_gen;
 
 my $timeProg = '/usr/bin/time';
 my $compProg = 'java -Xmx512m -cp ../..:../../hb15.zip alignCompress/AlignCompress';
-my $compProgOpt = ' --markov=-1 --verbose=2 --maxIterations=20 --linear=true --local=true';
+my $compProgOpt = ' --markov=0 --verbose=2 --maxIterations=20 --linear=true --local=true';
 my $prssProg = './prss33 -b 200 -n -q';
 
 use Data::Dumper;
@@ -22,7 +22,8 @@ my $log = new IO::File "> popLog.$$";
 (defined $log) || die "Can't open output log";
 $log->autoflush(1);
 
-my $model = new Markov_gen(-1, [qw(a t g c)]);
+my $model = new Markov_gen(0, [qw(a t g c)],
+			   { '' => {a=>0.2, t=>0.1, g=>0.5, c=>0.2}} );
 #$model->model_power(2);
 #$model->makeUniModel(2);
 
