@@ -190,6 +190,8 @@ class AlignCompress {
     boolean localAlign;
     boolean sumAlignments;
 
+    boolean doSmithWaterman;
+
     boolean doTraceBack;
 
     // Encode length l: 0..infinity
@@ -276,6 +278,7 @@ class AlignCompress {
 			   "\n# sumAlignments="+sumAlignments+
 			   "\n# local Alignment="+localAlign+
 			   "\n# verbosity="+verbose+
+			   "\n# doSmithWaterman="+doSmithWaterman+
 			   "\n# params="+paramString+
 			   "\n");
 
@@ -297,6 +300,7 @@ class AlignCompress {
 	if (!linearCosts &&  sumAlignments) fsmCounts = Mutation_1State.All.required_counts();
 	if ( linearCosts && !sumAlignments) fsmCounts = Mutation_3State.One.required_counts();
 	if ( linearCosts &&  sumAlignments) fsmCounts = Mutation_3State.All.required_counts();
+	if ( doSmithWaterman) fsmCounts = Mutation_SW.One.required_counts();
 
 	Misc.assert(fsmCounts>=0, "Bad number of fsmCounts");
 
@@ -321,6 +325,8 @@ class AlignCompress {
 		fsmType = new Mutation_3State.One(model, p, totCounts, countPos);
 	    if ( linearCosts &&  sumAlignments) 
 		fsmType = new Mutation_3State.All(model, p, totCounts, countPos);
+	    if (doSmithWaterman)
+		fsmType = new Mutation_SW.One(model, p, totCounts, countPos);
 
 	    Misc.assert(fsmType!=null, "Unable to construct fsmType");
 
@@ -405,7 +411,10 @@ class AlignCompress {
 			val = modelA.encodeCumulative(i) +  modelB.encodeCumulative(j);
 			//val += encode_length(i);
 			//val += encode_length(j);
-			cell(D,i,j).or(val, initialCounts);
+			if (doSmithWaterman)
+			    cell(D,i,j).or(0, initialCounts);
+			else
+			    cell(D,i,j).or(val, initialCounts);
 
 
 			// Compute contribution of a local alignment that ends at (i,j)
@@ -416,6 +425,8 @@ class AlignCompress {
 			//val += encode_length(seqA.length()-i);
 			//val += encode_length(seqB.length()-j);
 
+			if (doSmithWaterman)
+			    val = cell(D,i,j).get_val();
 
 			if (doTraceBack)
 			    ((Mutation_FSM.TraceBack_Info)final_cell).or(val, 
@@ -440,9 +451,9 @@ class AlignCompress {
 	    if (!localAlign)
 		final_cell = cell(D, seqA.length(),seqB.length());
 	    
-	    double encAlignModel = final_cell.encode_params();
+	    double encAlignModel = (doSmithWaterman ? 0 : final_cell.encode_params());
 	    double encAlignment = encAlignModel + final_cell.get_val();
-	    if (localAlign) {
+	    if (localAlign && !doSmithWaterman) {
 		// Add a cost for the length of the alignment.
 		// Assume we know the length of the sequences. Need to encode the start and end
 		// of the alignment.  Assume uniform over all positions.  Have 4 cut-points to
@@ -519,6 +530,7 @@ class AlignCompress {
 	cmdLine.addBoolean("local", true, "Compute using local alignments.");
 	cmdLine.addInt("verbose", 0, "Display verbose output (larger num means more verbosity).");
 	cmdLine.addBoolean("file", false, "Read sequences from file(s) on command line");
+	cmdLine.addBoolean("doSW", false, "Do a Smith-Waterman cost alignment");
 	cmdLine.addString("params", "", "Params to pass to all classes (comma separated)");
 
 	args = cmdLine.parseLine(args);
@@ -574,6 +586,7 @@ class AlignCompress {
 	a.sumAlignments   = cmdLine.getBooleanVal("sumAlignments");
 	a.localAlign      = cmdLine.getBooleanVal("local");
 	a.verbose         = cmdLine.getIntVal("verbose");
+	a.doSmithWaterman = cmdLine.getBooleanVal("doSW");
 	a.paramString     = cmdLine.getStringVal("params");
 
 	a.alphabet = new char[] {'a', 't', 'g', 'c'};
