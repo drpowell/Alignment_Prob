@@ -70,14 +70,14 @@ my @population;
 for my $i (0 .. $numArchetypes-1) {
   my $m = ($i < $numArchetypes/2 ? $model : $model2);
   my $subseq = $m->gen_sequence(rand_length($l_sub, $l_sub_range));
-  my $s1 = (rand>0.5 ? $model : $model2)->gen_sequence(rand_length($l1_s, $l_range));
-  my $e1 = (rand>0.5 ? $model : $model2)->gen_sequence(rand_length($l1_e, $l_range));
+  my $s1 = $m->gen_sequence(rand_length($l1_s, $l_range));
+  my $e1 = $m->gen_sequence(rand_length($l1_e, $l_range));
   my $str1 = $s1 . $subseq . $e1;
   $archetypes[$i] = {SEQ => $str1, S_LEN=>length($s1), E_LEN=>length($e1), SUB_LEN=>length($subseq)};
   for my $numMutations (@numMutation) {
     for my $j (1 .. $numEachMutations) {
-      my $s2 = (rand>0.5 ? $model : $model2)->gen_sequence(rand_length($l2_s, $l_range));
-      my $e2 = (rand>0.5 ? $model : $model2)->gen_sequence(rand_length($l2_e, $l_range));
+      my $s2 = $m->gen_sequence(rand_length($l2_s, $l_range));
+      my $e2 = $m->gen_sequence(rand_length($l2_e, $l_range));
       my $subseq2 = $m->mutate($subseq, $numMutations);
       my $str2 = $s2 . $subseq2 . $e2;
       push( @population, {SEQ => $str2, PARENT=>$i, MUTATES=>$numMutations,
