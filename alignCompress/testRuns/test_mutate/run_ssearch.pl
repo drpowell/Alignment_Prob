@@ -3,7 +3,7 @@
 # Run the prss program that comes with fasta
 
 my $timeProg = '/usr/bin/time';
-my $prssProg = './ssearch33 -q';
+my $prssProg = 'ssearch33 -q';
 
 use strict;
 use IPC::Open3;
@@ -11,10 +11,17 @@ use IO::Handle;
 use IO::Select;
 use IO::File;
 
+my($runDir) = ($0 =~ m{(^.*/)});
+$runDir ||= "./";
+$prssProg = $runDir . $prssProg;
+
 my(@to_delete);
 my($s1,$s2);
 $s1 = <>;
 $s2 = <>;
+
+$s1 =~ s/^.*?=//;
+$s2 =~ s/^.*?=//;
 
 runFastaProg($s1,$s2, $prssProg);
 
