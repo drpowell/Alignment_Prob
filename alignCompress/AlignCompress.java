@@ -192,11 +192,13 @@ class AlignCompress {
 
     boolean doTraceBack;
 
+    //static final double PcharEncode = 1.0/300;
+
     // Encode length l: 0..infinity
     static private double encode_length(double l) {
 	Misc.assert(l>=0, "Bad length to encode:"+l);
 	return MyMath.logstar_continuous(l+1);
-	//return -(l*MyMath.log2(0.9) + MyMath.log2(0.1)); // Geometric distribution
+	//return -(l*MyMath.log2(PcharEncode) + MyMath.log2(1-PcharEncode)); // Geometric distribution
     }
 
     public AlignCompress() {
@@ -406,8 +408,8 @@ class AlignCompress {
 
 			// Compute contribution of a local alignment that starts at (i,j)
 			val = modelA.encodeCumulative(i) +  modelB.encodeCumulative(j);
-			//			val += encode_length(i);
-			//			val += encode_length(j);
+			val += encode_length(i);
+			val += encode_length(j);
 			cell(D,i,j).or(val, initialCounts);
 
 
@@ -416,10 +418,11 @@ class AlignCompress {
 			    (modelA.encodeCumulative( seqA.length() ) - modelA.encodeCumulative(i)) +
 			    (modelB.encodeCumulative( seqB.length() ) - modelB.encodeCumulative(j));
 
-			//			val += encode_length(seqA.length()-i);
-			//			val += encode_length(seqB.length()-j);
+			val += encode_length(seqA.length()-i);
+			val += encode_length(seqB.length()-j);
 
 			val += -MyMath.log2(1-PalignChar); // No more alignment characters
+			//val += -MyMath.log2(1-PcharEncode); // No more alignment characters
 
 			if (doTraceBack)
 			    ((Mutation_FSM.TraceBack_Info)final_cell).or(val, 
@@ -430,6 +433,7 @@ class AlignCompress {
 
 
 			cell(D,i,j).add(-MyMath.log2(PalignChar), 0); // Count 0 is count for Palign
+			//cell(D,i,j).add(-MyMath.log2(PcharEncode), 0); // Count 0 is count for Palign
 		    }
 
 		    cell(D,i,j).calc(h, v, d, aChar, bChar, i, j);
@@ -467,10 +471,10 @@ class AlignCompress {
 	    double encNull = encA + encB;
 
 	    if (localAlign) {
-		// Encode lengths for the null theory as sum and difference of lengths.
+		// Encode lengths for the null theory
 		// Note that global alignments ignore lengths, ignore for null when doing global.
-		//		encNull += encode_length(seqA.length()+seqB.length());
-		//		encNull += encode_length(Math.abs(seqA.length()-seqB.length()));
+		encNull += encode_length(seqA.length());
+		encNull += encode_length(seqB.length());
 	    }
 
 	    if (doTraceBack) {
