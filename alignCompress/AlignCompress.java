@@ -4,13 +4,69 @@ package alignCompress;
 import java.io.*;
 import common.*;
 
+
+class BlendModel implements Seq_Model {
+    Seq_Model models[];
+    double m_lens[];
+
+    public BlendModel(char[] alpha) {
+	MarkovN_exact m0 = new MarkovN_exact(-1, alpha);
+	MarkovN_exact m1 = new MarkovN_exact(1, alpha);
+
+	m1.setProb("aa", 0.28);m1.setProb("at", 0.7);
+	m1.setProb("ag", 0.01);m1.setProb("ac", 0.01);
+
+	m1.setProb("ta", 0.7); m1.setProb("tt", 0.28);
+	m1.setProb("tg", 0.01);m1.setProb("tc", 0.01);
+
+	m1.setProb("ga", 0.49);m1.setProb("gt", 0.49);
+	m1.setProb("gg", 0.01);m1.setProb("gc", 0.01);
+
+	m1.setProb("ca", 0.49);m1.setProb("ct", 0.49);
+	m1.setProb("cg", 0.01);m1.setProb("cc", 0.01);
+
+	models = new Seq_Model[2];
+	m_lens = new double[2];
+	models[0] = m0;
+	models[1] = m1;
+	m_lens[0] = 1;
+	m_lens[1] = 1;
+    }
+
+    public double encodeLen(char a, int i) {
+	double sum=Double.POSITIVE_INFINITY;
+	double weights[] = new double[models.length];
+	
+	for (int j=0; j<models.length; j++)
+	    sum = MyMath.logplus(sum, m_lens[j]);
+
+	for (int j=0; j<models.length; j++)
+	    weights[j] = MyMath.exp2(sum - m_lens[j]);
+
+	double p=0;
+	for (int j=0; j<models.length; j++)
+	    p += weights[j] * MyMath.exp2(-models[j].encodeLen(a, i));
+
+	return -MyMath.log2(p);
+    }
+
+    public double update(char a, int i) {
+	double res = encodeLen(a, i);
+
+	for (int j=0; j<models.length; j++) {
+	    m_lens[j] += models[j].update(a, i);
+	    m_lens[j] /= 1.5;
+	}
+
+	return res;
+    }
+}
+
 /** BufferModel takes a model and a sequence and the sequence alphabet.
     It precomputes the encoding length of every alphabet character for every 
     position in the sequence.
     The cumulative encoding length is also computed along the sequence.
 
-    This is class probably not practical for large sequences with
-    large alphabets.
 **/
 class BufferModel implements Seq_Model {
     String str;
@@ -87,6 +143,7 @@ class AlignCompress {
     int markovOrder;
     int maxIterations;
     int verbose;
+    boolean useBlendModel;
     boolean linearCosts;
     boolean localAlign;
     boolean sumAlignments;
@@ -129,6 +186,8 @@ class AlignCompress {
 	    j = d.j;
 	}
 
+	int end_i = i, end_j=j;
+
 	String endA = seqA.substring(i);
 	String endB = seqB.substring(j);
 	
@@ -145,6 +204,8 @@ class AlignCompress {
 	    i=d.i;
 	    j=d.j;
 	}
+
+	System.out.println("ALIGNMENT CUTS: A["+i+".."+end_i+"] B["+j+".."+end_j+"]");
 
 	resA.reverse();
 	resB.reverse();
@@ -173,7 +234,8 @@ class AlignCompress {
 
     public double doAlign() {
 	System.out.println("# SeqA = "+seqA+"\n# SeqB = "+seqB+
-			   "\n# markov order="+markovOrder+
+			   "\n# seq model = "+
+			   (useBlendModel ? "blend model" : "markov order "+markovOrder)+
 			   "\n# max iterations="+maxIterations+
 			   "\n# linearCosts="+linearCosts+
 			   "\n# sumAlignments="+sumAlignments+
@@ -184,11 +246,21 @@ class AlignCompress {
 
 	Params p = new Params();
 	p.fromString(paramString);
+	
+	BufferModel modelA, modelB;
+	{
+	    Seq_Model mdlA, mdlB;
+	    if (useBlendModel) {
+		mdlA = new BlendModel(alphabet);
+		mdlB = new BlendModel(alphabet);
+	    } else {
+		mdlA = new MarkovN_fitted(markovOrder, alphabet, seqA);
+		mdlB = new MarkovN_fitted(markovOrder, alphabet, seqB);
+	    }
 
-	BufferModel modelA = new BufferModel( new MarkovN_fitted(markovOrder, alphabet, seqA), 
-					      seqA, alphabet );
-	BufferModel modelB = new BufferModel( new MarkovN_fitted(markovOrder, alphabet, seqB), 
-					      seqB, alphabet );
+	    modelA = new BufferModel( mdlA, seqA, alphabet);
+	    modelB = new BufferModel( mdlB, seqB, alphabet);
+	}
 
 	//System.err.println("modelA\n"+modelA+"\n");
 	//System.err.println("modelB\n"+modelB+"\n");
@@ -416,6 +488,7 @@ class AlignCompress {
 	CommandLine cmdLine = new CommandLine();
 	cmdLine.addInt("markov", 0, "Order of Markov Model to use for sequence models.");
 	cmdLine.addInt("maxIterations", -1, "Maximum number of iterations.");
+	cmdLine.addBoolean("blendModel", false, "Use blend model (a fixed model).");
 	cmdLine.addBoolean("linearCosts", true, "Use linear gap costs.");
 	cmdLine.addBoolean("sumAlignments", false, "Sum over all alignments.");
 	cmdLine.addBoolean("local", true, "Compute using local alignments.");
@@ -472,6 +545,7 @@ class AlignCompress {
 
 	a.markovOrder     = cmdLine.getIntVal("markov");
 	a.maxIterations   = cmdLine.getIntVal("maxIterations");
+	a.useBlendModel   = cmdLine.getBooleanVal("blendModel");
 	a.linearCosts     = cmdLine.getBooleanVal("linearCosts");
 	a.sumAlignments   = cmdLine.getBooleanVal("sumAlignments");
 	a.localAlign      = cmdLine.getBooleanVal("local");
