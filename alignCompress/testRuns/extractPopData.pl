@@ -26,13 +26,13 @@ while (<>) {
     next;
   }
 
-  if (/^AlignCompress \(sum=true\): s1=(\d+) s2=(\d+) parent=(\d+) mutates=(\d+) r=(\S+)/) {
-    push(@al_all,{S1=>$1, S2=>$2, PARENT=>$3, MUTATES=>$4, VAL=>$5});
-    next;
-  }
-
-  if (/^AlignCompress \(sum=false\): s1=(\d+) s2=(\d+) parent=(\d+) mutates=(\d+) r=(\S+)/) {
-    push(@al_one,{S1=>$1, S2=>$2, PARENT=>$3, MUTATES=>$4, VAL=>$5});
+  if (/^AlignCompress \(sum=(true|false)\): s1=(\d+) s2=(\d+) parent=(\d+) mutates=(\d+) r=(\S+).*dl=\S+ \(([\d.]+)\)/) {
+    my $d = {S1=>$2, S2=>$3, PARENT=>$4, MUTATES=>$5, VAL=>-$7};
+    if ($1 eq 'true') {
+      push(@al_all,$d);
+    } else {
+      push(@al_one,$d);
+    }
     next;
   }
 
