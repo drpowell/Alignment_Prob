@@ -6,7 +6,7 @@ use Markov_gen;
 
 my $timeProg = '/usr/bin/time';
 my $compProg = 'java -Xmx512m -cp ../..:../../hb15.zip alignCompress/AlignCompress';
-my $compProgOpt = ' --markov=0 --verbose=1 --maxIterations=20 --linear=true --local=true';
+my $compProgOpt = ' --markov=-1 --verbose=1 --maxIterations=20 --linear=true --local=true';
 my $prssProg = './prss33 -b 200 -n -q';
 
 use Data::Dumper;
@@ -17,7 +17,7 @@ use IO::File;
 
 $|=1;        # Flush stdout
 
-my $log = new IO::File "> outLog.$$";
+my $log = new IO::File "> popLog.$$";
 #my $log = new IO::File "> /dev/null";
 (defined $log) || die "Can't open output log";
 $log->autoflush(1);
@@ -87,6 +87,15 @@ for my $i (0 .. $numArchetypes-1) {
 	     $population[$j]{MUTATES},
 	     $r->[-1],$uTime1);
     }
+
+    my($r, $rTime1, $uTime1, $sTime1, $swaps1) = 
+	runProg($compProg . $compProgOpt . " --sum=true --doSW=true", $str1, $str2);
+
+      printf("AlignCompress (SW): s1=%d s2=%d parent=%d mutates=%d r=%f uTime=%f\n",
+	     $i, $j,
+	     $population[$j]{PARENT},
+	     $population[$j]{MUTATES},
+	     $r->[-1],$uTime1);
 
     my($prob,$score,$expect,$num, $rTime2, $uTime2, $sTime2, $swaps2) = 
       runFastaProg($prssProg, $str1, $str2);
