@@ -6,7 +6,7 @@ use Markov_gen;
 
 my $timeProg = '/usr/bin/time';
 my $compProg = 'java -Xmx512m -cp ../..:../../hb15.zip alignCompress/AlignCompress';
-my $compProgOpt = ' --markov=0 --verbose=2 --maxIterations=20 --linear=true --local=true';
+my $compProgOpt = ' --markov=-1 --verbose=2 --maxIterations=20 --linear=true --local=true';
 my $prssProg = './prss33 -b 200 -n -q';
 
 use Data::Dumper;
@@ -22,8 +22,13 @@ my $log = new IO::File "> popLog.$$";
 (defined $log) || die "Can't open output log";
 $log->autoflush(1);
 
-my $model = new Markov_gen(0, [qw(a t g c)],
-			   { '' => {a=>0.2, t=>0.1, g=>0.5, c=>0.2}} );
+my $model = new Markov_gen(-1, [qw(a t g c)]);
+#			   {
+#			    'a' => {a=>0.2, t=>0.1, g=>0.5, c=>0.2},
+#			    't' => {a=>0.2, t=>0.5, g=>0.1, c=>0.2},
+#			    'g' => {a=>0.3, t=>0.3, g=>0.2, c=>0.2},
+#			    'c' => {a=>0.1, t=>0.2, g=>0.2, c=>0.5}
+#			   });
 #$model->model_power(2);
 #$model->makeUniModel(2);
 
@@ -33,7 +38,7 @@ my @numMutation = (10, 30, 50, 80, 100);
 my ($l_sub, $l_sub_range) = (120, 30);
 my ($l1_s, $l1_e) = (50, 100);
 my ($l2_s, $l2_e) = (100, 50);
-my ($l_range) = 20;
+my ($l_range) = 50;
 
 my $str  = "";
 $str .= `hostname`."\n";
@@ -75,14 +80,14 @@ for my $i (0 .. $numArchetypes-1) {
 
 {
   local $Data::Dumper::Indent=3;
-  print $log (Data::Dumper->Dump([\@archetypes],['@archetype']));
-  print $log (Data::Dumper->Dump([\@population],['@population']));
+  print $log (Data::Dumper->Dump([\@archetypes],['$archetype']));
+  print $log (Data::Dumper->Dump([\@population],['$population']));
   print $log "\n\n";
 }
 
 my @to_delete;
 
-my $numToRun = 2;
+my $numToRun = 1;
 my $numRunning = 0;
 
 $SIG{CHLD} = sub { my $pid=wait;
@@ -112,15 +117,16 @@ for my $i (0 .. $numArchetypes-1) {
     $SIG{CHLD} = 'IGNORE';
 
     for my $sum (qw(false true)) {
-      my($r, $a_len, $d_len, $params, $rTime1, $uTime1, $sTime1, $swaps1) = 
+      my($r, $a_len, $m_len, $d_len, $params, $rTime1, $uTime1, $sTime1, $swaps1) = 
 	runProg($compProg . $compProgOpt . " --sum=$sum", $str1, $str2);
 
-      printf("AlignCompress (sum=$sum): s1=%d s2=%d parent=%d mutates=%d r=%f (%f) al=%f (%f) dl=%f (%f) uTime=%f params:%s\n",
+      printf("AlignCompress (sum=$sum): s1=%d s2=%d parent=%d mutates=%d r=%f (%f) al=%f (%f) ml=%f (%f) dl=%f (%f) uTime=%f params:%s\n",
 	     $i, $j,
 	     $population[$j]{PARENT},
 	     $population[$j]{MUTATES},
 	     $r->[-1], $r->[0],
 	     $a_len->[-1], $a_len->[0],
+	     $m_len->[-1], $m_len->[0],
 	     $d_len->[-1], $d_len->[0],
 	     $uTime1,
 	     join " ", map { "$_=$params->{$_} " } sort keys %$params,
@@ -167,7 +173,7 @@ sub runProg {
   my $s = new IO::Select;
   $s->add($rdr, $err);
 
-  my(@odds_ratio, @total_len, @data_len);
+  my(@odds_ratio, @total_len, @model_len, @data_len);
   my(%params);
   my($rTime,$uTime,$sTime) = (-1,-1,-1);
   my($swaps)               = (-1);
@@ -179,9 +185,10 @@ sub runProg {
 
 #        printf $log "STDOUT: %s",$_;
         if (/log odds ratio = (\S+)/)  { push(@odds_ratio,$1);}
-	if (/Mutual Encoding = ([.\d]+).*data=([.\d]+)/) {
+	if (/Mutual Encoding = ([.\d]+).*model=([.\d]+) data=([.\d]+)/) {
 	  push(@total_len, $1);
-	  push(@data_len, $2);
+	  push(@model_len, $2);
+	  push(@data_len,  $3);
 	}
 
 	if (/^(diag_fromD   |
@@ -215,7 +222,7 @@ sub runProg {
 
   (!@odds_ratio) && (die "Unable to find 'log odds ratio'!\n");
 
-  return (\@odds_ratio, \@total_len, \@data_len, \%params, $rTime, $uTime, $sTime, $swaps);
+  return (\@odds_ratio, \@total_len, \@model_len, \@data_len, \%params, $rTime, $uTime, $sTime, $swaps);
 }
 
 sub runFastaProg {
