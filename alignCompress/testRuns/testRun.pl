@@ -49,7 +49,7 @@ my @to_delete;
 #     $model->gen_sequence(200);
     my $str1 = $model->gen_sequence(400);
     my $str2 = $model->gen_sequence(400);
-    my $numMutations = 200**200; # Infinity
+    my $numMutations = -1; # Use -1 to denote unrelated sequences
 
     print $log "s1=$str1\ns2=$str2\n";
 

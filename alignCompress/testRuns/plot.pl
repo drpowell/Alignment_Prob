@@ -14,15 +14,15 @@ if (defined($ARGV[0]) && (
 my(@prss, @al_all, @al_one);
 
 while (<>) {
-	if (/^PRSS:\s+mutates=(\d+) p=(\S+)/) {
+	if (/^PRSS:\s+mutates=(-?\d+) p=(\S+)/) {
 		push(@prss,[$1,$2]);
 	}
 	
-	if (/^AlignCompress \(sum=true\): mutates=(\d+) r=(\S+)/) {
+	if (/^AlignCompress \(sum=true\): mutates=(-?\d+) r=(\S+)/) {
 		push(@al_all,[$1,$2]);
 	}
 	
-	if (/^AlignCompress \(sum=false\): mutates=(\d+) r=(\S+)/) {
+	if (/^AlignCompress \(sum=false\): mutates=(-?\d+) r=(\S+)/) {
 		push(@al_one,[$1,$2]);
 	}
 }
@@ -37,8 +37,8 @@ my $last;
 my $sum = 0;
 my $num = 0;
 for my $i (0..$#$arr) {
-	#print $arr->[$i][0], " ", $arr->[$i][1], "\n";
-	#next;
+	print $arr->[$i][0], " ", $arr->[$i][1], "\n";
+	next;
 
 	if (defined($last) && $last != $arr->[$i][0]) {
 		print $last, " ", $sum/$num, "\n";
