@@ -1,0 +1,99 @@
+\documentclass[a4paper,10pt,oneside]{article}
+ 
+\usepackage{times}
+\usepackage{epsfig}
+ 
+\usepackage{verbatim}
+ 
+\usepackage[none,bottom,dark,english]{draftcopy}
+\draftcopyName{ DRAFT \number\day\/\number\month\/\number\year}
+ 
+\usepackage[verbose,a4paper]{geometry}
+%\geometry{top=2cm,bottom=2cm,left=1.5cm,right=1.5cm,nohead}
+%\geometry{top=1.5cm,bottom=1.5cm,left=4cm,right=1.5cm,nohead}
+
+
+
+
+\begin{document}
+
+\title{Aligning Compressible Sequences.}
+
+\author{
+  David R. Powell, Lloyd Allison and Trevor I. Dix \\
+%  Department of Computer Science, \\
+%  Monash University, \\
+%  Australia 3168.
+}
+
+\date{}
+\maketitle
+
+
+\section{ROC Plots}
+
+For the ROC plots, first generated 10 parent sequences of the form $gen(100)
++ subseq(100) + gen(200)$.  For each parent children were generated having
+only the subsequence in common with differing number of mutations.  Every parent
+had 20 children generated; 4 with 10 mutations, 4 with 30 mutations, 4 with 50
+mutations, 4 with 80 mutations and 4 with 100 mutations.  Each parent was then
+tested against all children.
+
+\begin{figure}[htb]
+\centerline{\epsfig{file=p1.eps,width=0.7\textwidth}}
+%\caption{\label{fig:} The caption}
+\end{figure}
+
+\begin{figure}[htb]
+\centerline{\epsfig{file=p2.eps,width=0.7\textwidth}}
+%\caption{\label{fig:} The caption}
+\end{figure}
+
+\begin{figure}[htb]
+\centerline{\epsfig{file=p3.eps,width=0.7\textwidth}}
+%\caption{\label{fig:} The caption}
+\end{figure}
+
+\begin{figure}[htb]
+\centerline{\epsfig{file=p4.eps,width=0.7\textwidth}}
+%\caption{\label{fig:} The caption}
+\end{figure}
+
+\begin{figure}[htb]
+\centerline{\epsfig{file=p5.eps,width=0.7\textwidth}}
+%\caption{\label{fig:} The caption}
+\end{figure}
+
+\clearpage
+
+\section{Log-odds plots}
+
+The first sequence was generated of the form $gen(100) + subseq(100) +
+gen(200)$.  The second of the form $gen(200) + mutate(subseq, ntimes) +
+gen(100)$.  The number of mutations `ntimes' was varied between 0 and 300.
+The two sequences were then compared with our program and with prss.  For our
+program we simply plot the log-odds ratio.  For the prss program we plot
+$-log(p/(1-p))$.  This seems a reasonable comparison.  The 0 line is a natural
+cut-off for the log-odds comparison, but the PRSS program is typically used
+with a cutoff around $10^-3$ which corresponds to about 9 on our graphs.
+Each data point on the graph is the average of 10 such comparisons.
+
+\begin{figure}[htb]
+\centerline{\epsfig{file=r1.eps,width=0.7\textwidth}}
+%\caption{\label{fig:} The caption}
+\end{figure}
+
+\begin{figure}[htb]
+\centerline{\epsfig{file=r2.eps,width=0.7\textwidth}}
+%\caption{\label{fig:} The caption}
+\end{figure}
+
+\begin{figure}[htb]
+\centerline{\epsfig{file=r3.eps,width=0.7\textwidth}}
+%\caption{\label{fig:} The caption}
+\end{figure}
+
+
+
+
+\end{document} 
