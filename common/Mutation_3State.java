@@ -50,12 +50,28 @@ public abstract class Mutation_3State extends Mutation_FSM {
 	}
 
 	void set_default_costs() {
-	    diag_fromD  = 0;
-	    start_fromD = 3;
+	    /*	    diag_fromD  = 0;
+		    start_fromD = 3;
 
-	    diag_fromI  = 0;
-	    start_fromI = 3;
-	    cont_fromI  = 1;
+		    diag_fromI  = 0;
+		    start_fromI = 3;
+		    cont_fromI  = 1;
+	    */
+	    
+	    // These costs are equivalent to SW scores (provided local char cost = 0.104808)
+	    // Provided we are using DNA at 2 bits per char
+	    diag_fromD  = MyMath.logplus(0.709616, 1.824653);
+	    start_fromD = 4.235037;
+
+	    diag_fromI  = MyMath.logplus(1.379387, 2.494424);
+	    start_fromI = 4.904808;
+	    cont_fromI  = 1.304808;
+
+	    if (s instanceof Model_SeqAB) {
+		((Model_SeqAB)s).match_cost = 0.709616;
+		((Model_SeqAB)s).change_cost = 1.824653;
+		((Model_SeqAB)s).normalize_costs();
+	    }
 
 	    normalize_costs();
 	}
