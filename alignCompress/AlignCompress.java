@@ -1,6 +1,7 @@
 
 package alignCompress;
 
+import java.io.*;
 import common.*;
 
 /**
@@ -202,8 +203,10 @@ class AlignCompress {
 	Params p = new Params();
 
 
-	BufferModel modelA = new BufferModel( new MarkovN(markovOrder, alphabet), seqA, alphabet );
-	BufferModel modelB = new BufferModel( new MarkovN(markovOrder, alphabet), seqB, alphabet );
+	BufferModel modelA = new BufferModel( new MarkovN_fitted(markovOrder, alphabet, seqA), 
+					      seqA, alphabet );
+	BufferModel modelB = new BufferModel( new MarkovN_fitted(markovOrder, alphabet, seqB), 
+					      seqB, alphabet );
 
 	//System.err.println("modelA\n"+modelA+"\n");
 	//System.err.println("modelB\n"+modelB+"\n");
@@ -333,7 +336,7 @@ class AlignCompress {
 	    double encB = modelB.encodeCumulative( seqB.length() );
 	    double encNull = encA + encB;
 
-	    if (localAlign) encNull += (seqA.length()+seqB.length())*EncNonAlignChar + EncEndNonAlign;
+	    //	    if (localAlign) encNull += (seqA.length()+seqB.length())*EncNonAlignChar + EncEndNonAlign;
 
 	    if (bestDiff < encNull-encAlignment) bestDiff = encNull-encAlignment;
 
@@ -345,13 +348,14 @@ class AlignCompress {
 
 		System.out.print("Mutual Encoding = " + encAlignment + " bits");
 		System.out.println(" (model=" + encAlignModel + " data="+(encAlignment-encAlignModel)+")");
-		System.out.println((encAlignment < encNull ? 
-				    "related" : "unrelated") + " ("+(encNull-encAlignment)+")");
-	    
 		System.out.println("\nCounts:\n"+D[seqA.length()%2][seqB.length()].get_counts());
 		System.out.println("\nEstimated Parameters:\n"+
 				   fsmType.counts_to_params(D[seqA.length()%2][seqB.length()].get_counts()));
 	    }
+	    System.out.println((encAlignment < encNull ? 
+				"related" : "unrelated") + " ("+(encNull-encAlignment)+")" +
+			       "  log odds ratio = "+(encNull-encAlignment)+" bits");
+	    
 	} // End iterations
 
 	return bestDiff;
@@ -366,12 +370,41 @@ class AlignCompress {
 	cmdLine.addInt("verbose", 0, "Display verbose output (larger num means more verbosity).");
 
 	args = cmdLine.parseLine(args);
-	if (args == null || args.length != 2) {
-	    System.err.println("Usage: java AlignCompress [options] seqA seqB\n" + cmdLine.usage());
-	    System.exit(1);
-	}
 
 	AlignCompress a = new AlignCompress();
+
+	if (args==null || args.length > 2) {
+	    System.err.println("Usage: java AlignCompress [options]\n" + cmdLine.usage());
+	    System.err.println("       sequences can be provided on the commandline, or from stdin");
+	    System.exit(1);
+	} else if (args.length == 2) {
+	    // Two strings on commandline, assume they are sequences
+	    a.seqA = args[0];
+	    a.seqB = args[1];
+	} else if (args.length == 1) {
+	    // One arg, assume it is a filename to read the sequences from
+	    try {
+		BufferedReader in = new BufferedReader(new FileReader(args[0]));
+		a.seqA = in.readLine();
+		a.seqB = in.readLine();
+	    } catch (Exception e) {
+		System.err.println("Error reading '"+args[0]+"': "+e);
+	    }
+	} else if (args.length == 0) {
+	    // No args, read sequence from stdin.
+	    try {
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		a.seqA = in.readLine();
+		a.seqB = in.readLine();
+	    } catch (Exception e) {
+		System.err.println("Error stdin: "+e);
+	    }
+	}
+
+	if (a.seqA==null || a.seqB==null) {
+	    System.err.println("Unable to read both sequences");
+	    System.exit(1);
+	}
 
 	a.markovOrder     = cmdLine.getIntVal("markov");
 	a.numIterations   = cmdLine.getIntVal("iterations");
@@ -379,8 +412,6 @@ class AlignCompress {
 	a.localAlign  = cmdLine.getBooleanVal("local");
 	a.verbose     = cmdLine.getIntVal("verbose");
 
-	a.seqA = args[0];
-	a.seqB = args[1];
 	a.alphabet = new char[] {'a', 't', 'g', 'c'};
 
 	System.out.println("-log odds ratio = " + a.doAlign() + " bits");
