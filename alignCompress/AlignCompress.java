@@ -415,7 +415,7 @@ class AlignCompress {
 	    }
 
 	    // Done we change little in alignment length?
-	    if (iter>0 && lastAlignment-encAlignment < 0.5)
+	    if (iter>0 && encAlignment<=lastAlignment && lastAlignment-encAlignment < 0.5)
 		break;
 
 	    lastAlignment = encAlignment;
