@@ -3,10 +3,11 @@ package common;
 
 public class CommandLine {
     int maxOptions = 100;
-    String[] opts;
-    char[]   types;
-    Object[] defaults;
-    String[] helps;
+    String[]  opts;
+    char[]    types;
+    Object[]  defaults;
+    String[]  helps;
+    boolean[] option_set;
     int numOptions;
 
     Object[] values;
@@ -17,6 +18,7 @@ public class CommandLine {
 	defaults = new Object[maxOptions];
 	helps    = new String[maxOptions];
 
+	option_set = new boolean[maxOptions];
 	values   = new Object[maxOptions];
 	numOptions = 0;
     }
@@ -46,7 +48,8 @@ public class CommandLine {
 	    for (int j=0; j<20-len; j++)
 		res.append(" ");
 	    res.append(helps[i]);
-	    res.append(" (default='"+defaults[i]+"')");
+	    //res.append(" (default='"+defaults[i]+"')");
+	    res.append("\n                        (default='"+defaults[i]+"')");
 	    res.append("\n");
 	}
 
@@ -58,12 +61,13 @@ public class CommandLine {
 	    System.err.println("Too many options to CommandLine class");
 	    System.exit(1);
 	}
-	opts[numOptions]     = opt;
-	types[numOptions]    = type;
-	defaults[numOptions] = def;
-	helps[numOptions]    = help; 
+	opts[numOptions]       = opt;
+	types[numOptions]      = type;
+	defaults[numOptions]   = def;
+	helps[numOptions]      = help; 
+	option_set[numOptions] = false;
 	numOptions++;
-   }
+    }
 
     public void addBoolean(String opt, boolean def, String help) {	
 	addOption(opt, 'b', new Boolean(def), help); 
@@ -79,6 +83,15 @@ public class CommandLine {
 
     public void addString(String opt, String def, String help) { 
 	addOption(opt, 's', def, help); 
+    }
+
+    public boolean optionSet(String opt) {
+	int o = isOption(opt, 1);
+	if (o<0) {
+	    System.err.println("Attempt to lookup non-defined option '"+opt+"'");
+	    return false;
+	}
+	return option_set[o];
     }
 
     Object getVal(String opt) {
@@ -195,6 +208,8 @@ public class CommandLine {
 	    }
 
 	    if (o>=0) {
+		option_set[o] = true;
+
 		try {
 		    switch (types[o]) {
 		    case 'b':

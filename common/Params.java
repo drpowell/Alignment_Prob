@@ -1,7 +1,9 @@
 
 package common;
 
-public final class Params {
+import java.io.Serializable;
+
+public final class Params implements Serializable {
     private String names[];
     private double vals[];
     private int num,room;
@@ -58,7 +60,7 @@ public final class Params {
     
     public double get(String s) {
 	int id = get_id(s);
-	Misc.assert(id>=0, "Attempt Params.get() with non-existent key");
+	Misc.my_assert(id>=0, "Attempt Params.get() with non-existent key");
 	return vals[id];
     }
 

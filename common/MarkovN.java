@@ -15,7 +15,7 @@ public class MarkovN implements Seq_Model {
     StringBuffer past;
 
     public MarkovN(int order, char[] chars) {
-	Misc.assert(order>=-1, "Bad order="+order);
+	Misc.my_assert(order>=-1, "Bad order="+order);
 
 	this.chars = chars;
 	this.order = order;
@@ -36,7 +36,7 @@ public class MarkovN implements Seq_Model {
 	    int j;
 	    for (j=0; j<chars.length; j++)
 		if (chars[j] == c.charAt(i)) break;
-	    Misc.assert(j<chars.length, "Character '"+c.charAt(i)+"' is unexpected");
+	    Misc.my_assert(j<chars.length, "Character '"+c.charAt(i)+"' is unexpected");
 	    res = (res*chars.length) + j;
 	}
 	//	System.out.println("char2Num("+c+")="+res);

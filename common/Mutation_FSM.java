@@ -5,7 +5,7 @@ import java.io.*;
 import java.util.*;
 
 
-public abstract class Mutation_FSM implements Serializable {
+public abstract class Mutation_FSM implements Has_Value, Serializable {
     Counts counts;
     int numCounts;
     int countIndex;
@@ -15,7 +15,11 @@ public abstract class Mutation_FSM implements Serializable {
 	FSM_Params(Two_Seq_Model s) { this.s = s; };
     }
     
-    Mutation_FSM(int numCounts, int countIndex) {
+    public Mutation_FSM() { 
+        this(0,0);
+    }
+
+    public Mutation_FSM(int numCounts, int countIndex) {
 	this.numCounts = numCounts;
 	counts = new Counts(numCounts);
 	this.countIndex = countIndex;

@@ -55,6 +55,7 @@ public class DNA {
 
     public static DNA guess_format(String filename) {
 	BufferedReader in = openFile(filename);
+	if (in==null) return null;
 
 	try {
 	    in.mark(10);

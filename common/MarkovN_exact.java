@@ -16,7 +16,7 @@ public class MarkovN_exact implements Seq_Model {
     StringBuffer past;
 
     public MarkovN_exact(int order, char[] chars) {
-        Misc.assert(order>=-1, "Bad order="+order);
+        Misc.my_assert(order>=-1, "Bad order="+order);
 
         this.chars = chars;
         this.order = order;
@@ -44,7 +44,7 @@ public class MarkovN_exact implements Seq_Model {
             int j;
             for (j=0; j<chars.length; j++)
                 if (chars[j] == c.charAt(i)) break;
-            Misc.assert(j<chars.length, "Character '"+c.charAt(i)+"' is unexpected");
+            Misc.my_assert(j<chars.length, "Character '"+c.charAt(i)+"' is unexpected");
             res = (res*chars.length) + j;
         }
         //      System.out.println("char2Num("+c+")="+res);
@@ -52,7 +52,7 @@ public class MarkovN_exact implements Seq_Model {
     }
 
     public void setProb(String c, double p) {
-	Misc.assert(c.length()-1 == order, "Bad length of chars passed to setProb: c="+c);
+	Misc.my_assert(c.length()-1 == order, "Bad length of chars passed to setProb: c="+c);
 	if (order<0) return;
 	probs[ chars2Num( c ) ] = p;
     }

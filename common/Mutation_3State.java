@@ -3,8 +3,6 @@ package common;
 
 import java.io.*;
 
-import com.braju.format.*; // in hb15.zip  provides the Format.printf routines.
-
 /** Despite its name, this class does _not_ implement a full 3 state FSM.
     It implements a 3 state FSM for the purpose of Linear gapped costs for
     a DPA.  There are therefore 5 parameters: 
@@ -270,19 +268,19 @@ public abstract class Mutation_3State extends Mutation_FSM {
 	    } else if (hval <= dval && hval <= vval) {
 		return h_id;
 	    }
-	    Misc.assert(false, "Bad vals");
+	    Misc.my_assert(false, "Bad vals");
 	    return null;    
 	}
 	
 	public TraceBack_Data get_from(TraceBack_Data td) { 
 	    TB_Data t = (TB_Data)td;
-	    Misc.assert(t.i==d_id.i && t.j==d_id.j, "Not my traceback data!");
+	    Misc.my_assert(t.i==d_id.i && t.j==d_id.j, "Not my traceback data!");
 	    switch(t.state) {
 	    case 0: return d_from;
 	    case 1: return v_from;
 	    case 2: return h_from;
 	    default:
-		Misc.assert(false, "Bad trackback data. t.state="+t.state);
+		Misc.my_assert(false, "Bad trackback data. t.state="+t.state);
 	    }
 	    return null;
 	}
@@ -306,7 +304,7 @@ public abstract class Mutation_3State extends Mutation_FSM {
 	    if (hval <= dval && hval <= vval)
 		return h_counts;
 
-	    Misc.assert(false, "Bad vals!");
+	    Misc.my_assert(false, "Bad vals!");
 	    return null;
 	};
 

@@ -3,8 +3,6 @@ package common;
 
 import java.io.*;
 
-import com.braju.format.*; // in hb15.zip  provides the Format.printf routines.
-
 public final class Counts implements Serializable {
     public double counts[];
     public int num;
@@ -58,7 +56,7 @@ public final class Counts implements Serializable {
     public String toString() {
 	String r = new String("");
 	for (int i=0; i<num; i++) {
-	    r = Format.sprintf("%s %d:%.3f", new Parameters(r).add(i).add(counts[i]));
+	    r = Misc.sprintf("%s %d:%.3f", new Object[] {r, new Integer(i), new Double(counts[i])});
 	}
 	return r;
     }

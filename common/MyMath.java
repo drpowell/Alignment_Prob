@@ -51,7 +51,7 @@ public final class MyMath {
     }
 
     public static double factorial(int N) {
-	Misc.assert(N>=0, "Bad paramater to factorial");
+	Misc.my_assert(N>=0, "Bad paramater to factorial");
 	double res = 1;
 	for (int i=2; i<=N; i++) res *= i;
 	return res;

@@ -3,8 +3,6 @@ package common;
 
 import java.io.*;
 
-import com.braju.format.*; // in hb15.zip  provides the Format.printf routines.
-
 abstract public class Mutation_1State extends Mutation_FSM {
 
     private class FSM_Params implements Serializable {
@@ -41,8 +39,8 @@ abstract public class Mutation_1State extends Mutation_FSM {
 	    double sum = 2*MyMath.exp2(-indel_cost) + MyMath.exp2(-diag_cost);
 	    indel_cost  = indel_cost+MyMath.log2( sum );
 	    diag_cost = diag_cost+MyMath.log2( sum );
-	    //	    Format.printf("ins_cost=%.5f del_cost=%.5f diag_cost=%.5f\n", 
-	    //			  new Parameters(ins_cost).add(del_cost).add(diag_cost));
+	    //	    Misc.printf("ins_cost=%.5f del_cost=%.5f diag_cost=%.5f\n", 
+	    //			  ins_cost, del_cost, diag_cost);
 	}
 
         public String toString() {
@@ -161,7 +159,7 @@ abstract public class Mutation_1State extends Mutation_FSM {
 	public TraceBack_Data get_tbdata()        {  return id; } 
 	
 	public TraceBack_Data get_from(TraceBack_Data td) {
-	    Misc.assert(td.i==id.i && td.j==id.j, "Not my traceback data!");
+	    Misc.my_assert(td.i==id.i && td.j==id.j, "Not my traceback data!");
 	    return from;
 	}
 
