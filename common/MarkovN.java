@@ -65,11 +65,15 @@ public class MarkovN implements Seq_Model {
     public static void main(String args[]) {
 	String s = args[0];
 	char[] a = {'a','t','g','c'};
-	MarkovN m = new MarkovN(1, a);
+	MarkovN m = new MarkovN(0, a);
 
+	double tot = 0;
 	for (int i=0; i<s.length(); i++) {
-	    System.out.println(m.update(s.charAt(i), i));
+	    double r = m.update(s.charAt(i), i);
+	    tot += r;
+	    System.out.println(r);
 	}
+	System.out.println("Total entropy = "+tot+" bits/ch");
     }
 }
 
