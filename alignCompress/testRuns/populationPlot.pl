@@ -40,6 +40,8 @@ my $arr;
 ($prss eq 'al_all') && ($arr = \@al_all);
 ($prss eq 'al_one') && ($arr = \@al_one);
 
+#$arr = [ grep { $_->{MUTATES}>80 } @$arr];
+
 $arr = [sort { $b->{VAL} <=> $a->{VAL} } @$arr];
 
 my $errors = 0;
