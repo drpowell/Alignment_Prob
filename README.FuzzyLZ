@@ -1,0 +1,216 @@
+Copyright (c) David Powell <david@drp.id.au>
+
+  FuzzyLZ attempts to compress a (DNA) sequence using an
+  inexact repeats model.
+
+
+FuzzyLZ is the implementation of an idea for compression
+using inexact repeats.  The inexact repeats are modelled
+using an alignment model.
+
+The most relevant paper is:
+  L. Allison, T. Edgoose and T. I. Dix
+  "Compression of strings with approximate repeats."
+  Intell. Sys. in Mol. Biol. 1998, pp8-16
+
+
+This implementation allows for any number of forward and
+backward "machines".  Here a "machine" is a FSA used to
+model sequences with inserts, delete, matches or
+mismatches.  The machines may be either 1 state or 3 state
+machines - corresponding to simple of linear gap costs in
+the alignment of the approximate repeats.
+
+
+RUNNING
+-------
+
+The code is known to compile and run with JDK1.4.1.  I have
+not tested with any other versions of the JDK.
+
+If you are using Sun's JDK with large sequences, I recommend
+the -Xmx option be used to increase the amount of memory
+available to the java program.  eg. to allow 512MB use:
+    java -Xmx512m -jar fuzzyLZ.jar
+
+
+USAGE
+-----
+
+Usage: java -jar fuzzyLZ.jar [options] <seqFile|checkpointFile>
+
+<seqFile> is the sequence to be compressed in FASTA format.
+
+If the input file is 'foo.fa' the files output are:
+
+  foo.fa-msglen.txt - Contains the number of bits taken to
+                      encode each chracter along the sequence.
+
+  foo.fa-final-iterXX.ppm - An image for the end of
+                            iteration XX showing the
+                            probability over the matrix with
+                            brighter colours representing
+                            better matches.  Red is used for
+                            forward matches, and green of
+                            reverse.  
+
+  foo.fa-finalActive-iterXX.ppm - an image show which cells
+                                  were part of the
+                                  computation.  Again red for
+                                  forward, green for reverse.  
+
+  foo.fa-finalHits-iterXX.ppm - an image showing where on
+                                the matrix there was an hash
+                                table hit for the heuristic.
+
+
+
+
+Options:
+  --iterations=i    Number of iterations
+                    (default='1')
+                    
+        The number times to run the algorithm re-estimating
+        the parameters each time.
+                    
+
+  --preFile=s       Prepend 'preFile' to sequence.
+                    (default='')
+
+        's' must be a file in FASTA format.  This option
+        "prepends" the sequence in 's' to the sequence to be
+        compressed.  This has the effect of seeing how well a
+        sequence can be compressed in the presence of
+        another sequence.
+
+
+
+  --alphabet=s      Alphabet used by the sequence.
+                    (default='atgc')
+
+        The alphabet used in the sequence.
+
+
+
+  --fwdMach=s       Comma separated list of machines to use for forward matches.
+                    (Use an empty string '' for no forward machines.)
+                    Supported: 1state,3state
+                    (default='1state')
+
+         A list of the forward machines to use.
+                    
+
+
+  --revMach=s       Comma separated list of machines to use for reverse matches.
+                    (Use an empty string '' for no reverse machines.)
+                    Supported: 1state,3state
+                    (default='1state')
+
+         A list of the reverse machines to use.
+
+
+
+  --debug=i         Debug level (higher gives more verbose output)
+                    (default='2')
+
+  --imageSize=i     Maximum Image size in pixels
+                    (default='1024')
+
+  --imageFreq=i     Save an image every <n> seconds.  (0 - to disable)
+                    (default='0')
+
+         How often, in seconds, to save an image of the
+         current state of computation.  An image is always
+         saved at the end of every iteration.
+
+
+  --checkFreq=i     Save a checkpoint every <n> seconds.  (0 - to disable)
+                    (default='300')
+ 
+          How often, in seconds, to save a checkpoint of
+          the current state of computation.  This can be
+          used to resume computation, and even to change
+          some of the parameters.
+
+
+
+  --statsFreq=i     Display some stats every <n> seconds.  (0 - to disable)
+                    (default='300')
+
+          Print out some statistics every so many seconds.
+
+
+  --msgFile=s       Output file for encode length of each character.
+                    (The default is based on the input file name)
+                    (default='')
+
+          Output filename.  The default is the name of the
+          input file with '-msglen.txt' appended.
+
+
+                    
+  --hashSize=i      Window size to use for constructing hashtable (0 - for full N^2 algorithm)
+                    (default='20')
+
+          The window size to use for the speed-up heuristic.
+          An exact match of this many characters is required
+          before algorithm is "activated" in this area.
+
+
+
+  --computeWin=i    Number of cells to activate on a hashtable hit
+                    (default='10')
+
+          This specifies how closely the algorithms "looks"
+          around an exact match.
+
+
+
+  --cutML=i         When (cell_value - base_cell > cutML) then cell is killed. (in bits)
+                    (default='4')
+
+          This specifies how bad the algorithm has to be
+          doing compared to the base states before the cells
+          are de-activated. (In bits)
+
+  --resume          Resume from a checkpoint
+                    (default='false')
+
+          Continue computation from a previously saved
+          checkpoint.  The checkpoint file must be given on
+          the command line _instead_ of the sequence file.
+
+
+
+
+
+The parameters that can be changed when resuming from a
+checkpoint are:  --iterations --imageFreq --checkFreq
+                 --statsFreq  --imageSize --debug
+
+
+The model used for the "base" state cannot currently be set
+from the command-line.  It is currently set to a 0th order
+Markov Model.  This can be changing line 418 of
+fuzzyLZ/FuzzyDriver.java.  Any model that inherets from
+'common.Seq_Model' can be used.  There is class implementing
+an arbitrary order markov model that could be used instead
+(common.MarkovN).  The DNA specific model has been used
+because it is significantly faster than a generic model.
+Making this configurable from the command-line is at the top
+of my TODO list ;)
+
+
+
+It is possible to define the starting parameters for the
+machines and for the base state model.  But this is not
+documented at this time :(
+
+
+
+
+Good luck!
+
+-- David Powell <david@drp.id.au>
+
+

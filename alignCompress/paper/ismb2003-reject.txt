@@ -1,0 +1,207 @@
+From ismb2003-papers-admin@borbala.com Fri Feb 21 02:33:50 2003
+Received: from ALPHA8.ITS.MONASH.EDU.AU (alpha8.its.monash.edu.au [130.194.1.8])
+	by nexus.csse.monash.edu.au (8.12.2+Sun/8.12.2) with ESMTP id h1L2X9gU001953
+	for <powell@mail.csse.monash.edu.au>; Fri, 21 Feb 2003 13:33:11 +1100 (EST)
+Received: from name-router by vaxh.its.monash.edu.au (PMDF V5.2-31 #39306)
+ id <01KSP9J2L5409BVOKK@vaxh.its.monash.edu.au> for
+ powell@mail.csse.monash.edu.au; Fri, 21 Feb 2003 13:32:54 +1100
+Received: from blammo.its.monash.edu.au ([130.194.1.74])
+ by vaxh.its.monash.edu.au (PMDF V5.2-31 #39306)
+ with ESMTP id <01KSP9J0R12W9BVOKC@vaxh.its.monash.edu.au> for
+ powell@csse.monash.edu.au; Fri, 21 Feb 2003 13:32:52 +1100
+Received: from blammo.its.monash.edu.au (localhost [127.0.0.1])
+ by localhost (Postfix) with ESMTP id 0ADF112C009	for
+ <powell@csse.monash.edu.au>; Fri, 21 Feb 2003 13:32:52 +1100 (EST)
+Received: from postal.sdsc.edu (postal.sdsc.edu [132.249.20.114])
+ by blammo.its.monash.edu.au (Postfix) with ESMTP id CBA0B12C008	for
+ <powell@csse.monash.edu.au>; Fri, 21 Feb 2003 13:32:50 +1100 (EST)
+Received: from multivac.sdsc.edu
+ (IDENT:bRWmtm8sRQlzDUBDN+iCSbVH8LreTDa8@multivac.sdsc.edu [132.249.20.57])
+ by postal.sdsc.edu (8.11.6/8.11.6/server/53) with ESMTP id h1L2WnU20773; Thu,
+ 20 Feb 2003 18:32:49 -0800 (PST)
+Date: Thu, 20 Feb 2003 18:32:48 -0800 (PST)
+From: ISMB 2003 - CyberChair <ismb2003-papers-admin@borbala.com>
+Subject: ISMB 2003 Notification
+To: powell@csse.monash.edu.au
+Cc: papers03@ismbconf.org, ismb2003-papers-admin@borbala.com
+Reply-to: ismb2003-papers-admin@borbala.com
+Message-id: <200302210232.h1L2WnU20773@postal.sdsc.edu>
+X-Mailer: Python smtplib
+Content-transfer-encoding: 7BIT
+X-Spam-Status: No, hits=-0.5 required=5.0 tests=DEAR_SOMEBODY version=2.20
+X-Spam-Level: 
+Status: RO
+Content-Length: 7437
+Lines: 170
+
+Dear David Powell,
+
+I regret to inform you that your submission entitled
+
+"Modelling and Shuffling: The significance of alignments and matches for medium
+or low information sequences"
+
+has not been accepted to ISMB 2003. The competition was
+very tough this year, with only 35 out of 242 long manuscripts
+being accepted, and 13 out of 100 short manuscripts being
+accepted. We do thank you for your submission to the
+conference.
+  
+A copy of the referees comments is included below.
+
+Best regards,
+
+  The ISMB03 PC Committee.
+
+*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=
+
+First reviewer's review:
+
+          >>> Summary of the submission <<<
+
+Adds the idea of using the left-context of each sequence
+position in score computation during sequence alignment by
+DP.
+
+ =*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=
+
+
+          >>> Evaluation <<<
+
+This is a nice paper. The idea of using the left-context of
+the sequence positions being aligned when calculating the match
+probability is very nice. Intuitively, this should reduce the
+tendency of low-information artifacts in sequences getting large
+alignment scores (or probabilities). This should lead to improved
+sequence database search accuracy, by avoiding such false positives.
+
+The paper, unfortunately, fails to establish this intution as fact.
+The experimental results section compares using their algorithm
+in total probability mode with Smith-Waterman and PRSS, both of which
+only consider the score of the optimal alignment. As the authors
+of this paper state, summing over all alignments is a better test
+of sequence relatedness than simply using the optimal alignment.
+It is not clear, therefore, whether the improved search accuracy
+is coming from the new alignment algorithm, or from using total
+probability instead of Viterbi. To know which is true, the authors
+should compare their total probability scores with total
+probability using a standard left-to-right HMM (using HMMER, for example).
+Alternatively, they could compare the probability of the optimal
+(Viterbi) path using their algorithm with SW and PRSS.
+
+The match-mismatch update formulas: are they arbitrary? The
+authors should explain what probability their score function is
+actually calculating.
+
+The paper defines the conditional probabilities of sequence 
+characters, but where does it define Pr(match), Pr(mismatch),
+Pr(Delete) etc? Explain how and why these are set.
+
+On p6, what does the notation "x<>y" mean? (Use the "not equals"
+notation, please.) 
+
+Typos:
+p2 Constant 'a' should be Constant 'b'
+
+Important:
+If accepted, you must ensure that the paper is 10 pages maximum,
+not 12! 
+
+ =*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=
+
+Second reviewer's review:
+
+          >>> Summary of the submission <<<
+
+This paper takes sequence alignment by dynamic programming and applies
+population models. This allows better modelling of different types of sequence
+characteristics. This can be used in order to detect true and false positive
+matches in data base searches or to produce better alignments between 2
+sequences. It naturally allows easy significance testing.
+
+ =*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=
+
+
+          >>> Evaluation <<<
+
+This paper has good points and bad points.
+The good points seem very clear. The approach certainly could be of great
+benefit in helping to do better similarity searches of databases. The
+applications are enormous and this paper describes what genuinely seem to be
+useful developments. What I found hard was that the manuscript was perhaps
+hastily put together (if not, I apologise). I found it hard work to understand.
+The figures were cryptic and badly placed (e.g. no legends or legends with no
+details). The test cases were few and did not give much idea as to exactly how
+generally useful this is. The ms. was too long and had too many references
+(guidelines 10 pages total??). It may seem unfair to criticise the paper
+because of the manuscript but I had to read this very quickly and I found it
+hard to understand.
+
+trivial points:
+1) figure 1 is nice as a summary but it has no explanation of symbols. Some are
+obvious but many are not. It is also in the text 3 pages after it is first
+mentioned. 
+2) on page 7 it was not clear if DNA or protein was being considered (it later
+becoems clear that it is DNA).
+3) the examples on page 9 are interesting but there is little detail. These
+look quite convincing. It would help if there were more examples or more
+details. The exact reasons why these pieces were chosen are not explained
+(although, I can guess some of the reasons). 
+
+ =*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=
+
+Third reviewer's review:
+
+          >>> Summary of the submission <<<
+
+The authors present a new local pairwise alignment algorithm that takes into
+account the information content of the sequences to be aligned. Low-complexity
+regions are automatically down-weighted. This way an explicit masking
+of repeat regions becomes unnecessary.
+In the end of the paper, results on artificially generated and real
+sequences are presented.
+
+ =*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=
+
+
+          >>> Evaluation <<<
+
+The contents of the paper are very interesting. The general approach
+seems to make very much sense, and an implementation of the algorithm
+could be very useful.
+
+The style of the paper, however, is very confusing: It is difficult to
+see a logical order in the write-up. Rather, some sections seem to be
+collections of several independent paragraphs. The authors should try to
+concentrate on the important messages of the paper, and omit repetitions
+and uninformative side remarks.
+
+More specific suggestions:
+* The recurrences in Figure 1 should be explained somewhere.
+* Several important notions are used without proper definition,
+e.g. "rank-order", "probability of an alignment", "population model".
+* Some propositions are made several times in the paper, e.g. the criticism
+of Z-scores as proposed by Needleman and Wunsch or the (important)
+point that low complexity regions give some information but not as much
+as high-complexity regions.
+* The paper contains empty phrases like "... can, and should, ..."
+* The language should be simplified where possible, e.g. the sentence
+"The ratio in these probabilities ..." on p.4.
+* The notation <> (meaning unequality?) is not standard.
+* In Section 7.1, what is meant by "-16 and -4 for the first and subsequent
+characters in a sequence"? (Gap penalties?)
+* In Section 7.1, 3rd paragraph, is ".." denoting concatenation?
+* If the exact method used for mutations is "intereting in itself, but
+distracting at this point", it could maybe be put in an appendix or be cited
+from a technical report if such exists.
+* In Figure 6 (headline), what is the meaning of "MM order = -1"?
+* I am not sure if the "real" data set (157 bases, partly intron, partly
+exon) is a realistic database query sequence. In the last experiment,
+what can be said about the 240 database sequences that rank higher than
+the fragment from PFB0045c? A more realistic experiment would be to
+"hide" the whole pseudo-gene in the database and then test if the
+related fragment is found by the (local!) M-alignment algorithm.
+
+ =*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=
+
+

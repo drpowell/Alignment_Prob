@@ -1,0 +1,127 @@
+From bioinformatics@editorialoffice.co.uk Mon Jan  5 22:38:33 2004
+Received: from ALPHA1.ITS.MONASH.EDU.AU (alpha1.its.monash.edu.au [130.194.1.1])
+	by nexus.csse.monash.edu.au (8.12.8+Sun/8.12.8) with ESMTP id i05BcWsQ025912
+	for <powell@mail.csse.monash.edu.au>; Mon, 5 Jan 2004 22:38:33 +1100 (EST)
+Received: from localhost ([130.194.13.85]) by vaxc.its.monash.edu.au
+ (PMDF V6.1 #39306) with ESMTP id <01L5218XBQ5E9BW2EX@vaxc.its.monash.edu.au>
+ for powell@mail.csse.monash.edu.au (ORCPT powell@csse.monash.edu.au); Mon,
+ 05 Jan 2004 22:38:10 +1100
+Received: by localhost (Postfix, from userid 510)	id 557E3158002; Mon,
+ 05 Jan 2004 22:38:10 +1100 (EST)
+Received: from uranus.scholarone.com (uranus.scholarone.com [12.5.59.5])
+	(using TLSv1 with cipher EDH-RSA-DES-CBC3-SHA (168/168 bits))
+	(No client certificate requested)	by broink.its.monash.edu.au (Postfix)
+ with ESMTP id 40D89120002	for <powell@csse.monash.edu.au>; Mon,
+ 05 Jan 2004 22:38:09 +1100 (EST)
+Received: from prometheus.blue.knownspace
+ (prometheus.blue.knownspace [10.10.30.7])
+	by uranus.scholarone.com (8.12.3/8.12.3/SuSE Linux 0.6)
+ with ESMTP id i05Bc5cO019841; Mon, 05 Jan 2004 06:38:06 -0500
+Received: by prometheus.blue.knownspace (Postfix, from userid 30)
+	id 6924627101; Mon, 05 Jan 2004 06:38:06 -0500 (EST)
+Date: Mon, 05 Jan 2004 06:38:06 -0500 (EST)
+From: bioinformatics@editorialoffice.co.uk
+Subject: Bioinformatics -  BIOINF-2003-0678
+To: powell@csse.monash.edu.au
+Cc: 
+Message-id: <20040105063806.MCcircinus668966@gemini.scholarone.com>
+Content-transfer-encoding: 7BIT
+X-Spam-Checker-Version: SpamAssassin 2.60 (1.212-2003-09-23-exp)
+X-Spam-Level: 
+Status: RO
+Content-Length: 3814
+Lines: 92
+
+5 Jan 2004  
+Manuscript ID: BIOINF-2003-0678
+Title: Modelling-Alignment for Sequences of Mixed or of Medium
+to Low Information-Content  
+
+Dear Dr. Powell
+
+The reviews of your manuscript are now in hand.  Both reviewers
+had substantial concerns about the manuscript and the Associate
+Editor concurs with their opinion.  As the journal receives more
+publishable manuscripts than its space will accommodate,
+acceptance must be limited to manuscripts receiving the most
+favourable recommendations from reviewers.  Unfortunately, I
+must decline your request to have the manuscript published in
+Bioinformatics.  
+
+On behalf of the Executive Editor, I want to thank you for
+considering Bioinformatics to present your work.  I look forward
+to the possibility of receiving other manuscripts from you in
+the future.
+
+Yours sincerely
+
+Ms. Annette Aylward
+Editorial Office, Bioinformatics
+
+
+Here are the comments of the reviewers:
+----------------------------------------
+Reviewer 1 Comments:
+     This paper describes the use of a pair HMM for sequence
+alignment, where the probability of indel sequences is given by
+an order-k Markov model.
+
+The authors include no reference to the extensive use of pair
+HMMs in bioinformatics over the past 10 years (see, for example,
+the book by Durbin, Eddy, Krogh and Mitchison). Instead they
+introduce new terminology that I found confusing and
+unnecessary. For example, their "M-alignment" algorithm could
+have been greatly simplified by being described as a pair HMM. I
+also found the term "population model" an awkward complication
+of the concept of a probabilistic model for sequence data.
+
+The idea of using an order-k Markov model to build a
+low-complexity filter into pairwise alignment is a reasonable
+one (if rather basic). However, the tests on "real data" (some
+pseudogenes and stretches of Plasmodium DNA) that are presented
+here do not give such astoundingly good results that they
+compensate for the paucity of references in the work.
+
+
+Reviewer 2 Comments:
+     The authors presented a new method to incorporate
+population models into the alignment process. The new method was
+tested on both the artificial data and real DNA sequences. As
+reported by the authors there are less errors using M-alignment
+on complicated population models, compared with sequence
+shuffling, a standard significance test. The developed algorithm
+and its analysis have some scientific
+values to the bioinformatics community.
+
+However, the proposed method does not represent an advance in
+bioinformatics. Or practically, the work is not enough as a full
+paper in the journal. Modelling the alignment of protein
+sequences could be more interesting, but it is not implemented
+and there is no data analysis. If protein alignment can be done
+in the some way as DNA sequence, even on simple population
+models, I am happy to reconsider my recommendation.
+
+
+Further comments:
+
+(1) On real data comparison between prss and M-alignment, there
+is a huge difference in the number of sequences with a
+significant score. Out of 60765, prss found more than 10000
+sequences, while this number is only 1300 for M-alignment! This
+does concern me. Sensitivity and specificity are not directly
+related. BLAST and FASTA have been used for so many years. There
+might be problems, but not in this scale, just
+assuming M-alignment order is correct. It would be good if the
+authors can provide more examples. There must be cases in which
+sequences are related and picked up by BLAST but missed in the
+M-alignment list.
+
+(2) It seems to me that all the authors are from computer
+science background. The terms used in the paper are not always
+familiar by bioinformatician. I would suggest that the authors
+ask a non-computer biologist to read the paper and get some
+feedbacks.
+
+
+----------------------------------------
+

@@ -1,0 +1,118 @@
+Copyright (c) David Powell <david@drp.id.au>
+
+  AlignCompress aligns two sequences using the M-alignment algorithm.
+
+  AlignCompress is provided under he GNU Public License v2 and
+  comes with ABSOLUTELY NO WARRANTY, or details see file COPYRIGHT
+
+Please cite:
+  L. Allison, D. R. Powell and T. I. Dix
+  "Compression and Approximate Matching"
+  The Computer Journal, 1999 42:1 pp1-10
+
+
+The Algorithm
+-------------
+
+This implementation of the M-alignment algorithm supports simple gap costs or
+linear gap costs, and local or global alignment.  Currently, only fixed order
+markov models may be used to model the sequences.  It would be relatively simple
+to add a java class defining a new model.
+
+The key idea to m-alignment is to incorporate a model of each sequence into the
+alignment process.  This program comes with code to model each sequence by a
+fixed order Markov Model.  Currently, a separate markov model is fitted to each
+sequence at the start of the program.
+
+In this implementation it is possible to sums over all alignments to calculate
+how "related" the sequences are which does not produce an actual alignment.
+Alternativelt it is possible to find the "best" alignment.
+
+
+RUNNING
+-------
+
+The code is known to compile and run with JDK1.4.1.  I have not tested with any
+other versions of the JDK.
+
+If you are using Sun's JDK with large sequences, I recommend the -Xmx option be
+used to increase the amount of memory available to the java program.  eg. to
+allow 512MB use:
+    java -Xmx512m -jar alignCompress.jar
+
+
+----------------------------------------------------------------------
+  PROGRAM: AlignCompress
+
+USAGE
+-----
+
+Usage: java -jar alignCompress.jar [options] <seqA> <seqB>
+
+ Where <seqA> and <seqB> are filenames in fasta, genbank or raw format.
+
+
+  --markov=i        Order of Markov Model to use for sequence models.
+                    (default='0')
+  --maxIterations=i Maximum number of iterations.
+                    (default='-1')
+  --blendModel      Use blend model (a fixed model).
+                    (default='false')
+  --linearCosts     Use linear gap costs.
+                    (default='true')
+  --sumAlignments   Sum over all alignments.
+                    (default='false')
+  --local           Compute using local alignments.
+                    (default='true')
+  --verbose=i       Display verbose output (larger num means more verbosity).
+                    (default='0')
+  --exSeq           Command line options are explicit sequence, not filenames
+                    (default='false')
+  --protein         Sequences are protein data
+                    (default='false')
+  --params=s        Params to pass to all classes (comma separated)
+                    (default='')
+
+The program takes two files on the commandline.  These two files each contain
+one sequence.  The two sequences must be in FASTA, Genbank, or raw format.
+
+--markov=i  Uses a fixed order markov model to compress the sequences. <i> is an
+            integer designating the order of the markov model to use.
+
+--maxIterations=i   Specifies the maximum number of iterations to use to
+                    estimate the parameters via expectation maximisation.  A
+                    negative value means to iterate to convergence.
+
+--blendModel   Uses a special hard-coded model.  Useful for debugging only.
+
+--linearCosts   Cost alignment gaps of length x using a linear function a*x+b,
+                where a, and b are floating point numbers estimated by the
+                algorithm.
+
+--sumAlignments   Causes the algorithm to sum over all possible alignments.
+                  This does _not_ infer a best alignment, but is used when one
+                  wishes to know only if two sequence are related, not how they
+                  are related.
+
+--local   Use the local alignment version, as opposed to global alignment.
+
+--verbose=i  Specifies the verbosity level.
+
+--exSeq   Specifies that the two parameters, seqA and seqB are actual sequence
+          data, not filenames to be loaded.
+
+--protein   Designates that an alphabet for proteins should be used.  This is
+            not very useful at this point because a scoring matrix is not used,
+            only simple match/mismatch score.
+
+--params=s   's' is a string used to set various parameters for the first
+             iteration of the algorithm.  Running the program with a -verbose=2
+             will print a section 'Estimated Parameters:' of names/value pairs.
+             This section gives an example of the format for string 's'.
+
+
+Good luck!
+
+-- David Powell <david@drp.id.au>
+
+

@@ -1,0 +1,10 @@
+*.class
+.classpath
+.project
+*.jar
+*.tar.gz
+dna.1
+dna.2
+AE010301.gbk
+PFB0125c
+ProteinCorpus

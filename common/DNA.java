@@ -1,271 +1,283 @@
-/*  
- *  Copyright (c) David Powell <david@drp.id.au>
- *
+/*
+ * Copyright (c) David Powell <david@drp.id.au>
+ * 
  * 
  * This file is used by both FuzzyLZ and AlignCompress
-
-  This program is free software; you can redistribute it and/or
-  modify it under the terms of the GNU General Public License
-  as published by the Free Software Foundation; either version 2
-  of the License, or (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-
+ * 
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+ * Place - Suite 330, Boston, MA 02111-1307, USA.
+ * 
+ *  
  */
 
-
 // DNA - read DNA sequence from a file in either raw format
-// or genbank format.  Note, it guesses the format in a
+// or genbank format. Note, it guesses the format in a
 // pretty stupid manner.
-
 package common;
 
-import java.io.*;
-import java.util.*;
-import java.util.zip.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.zip.GZIPInputStream;
 
 public class DNA {
     BufferedReader in;
+
     String filename;
+
     char[] seq;
 
     DNA(String fname) {
-	filename = fname;
-	in = null;
+        filename = fname;
+        in = null;
     }
 
     DNA(BufferedReader r) {
-	in = r;
-	filename = null;
+        in = r;
+        filename = null;
     }
 
     public char[] sequence() {
-	return seq;
+        return seq;
     }
 
     public String toString() {
-	return new String(seq);
+        return new String(seq);
     }
 
     protected static BufferedReader openFile(String fname) {
-	BufferedReader in = null;
-	try {
-	    int magic;
-	    InputStream is = new BufferedInputStream(new FileInputStream(fname));
+        BufferedReader in = null;
+        try {
+            int magic;
+            InputStream is = new BufferedInputStream(new FileInputStream(fname));
 
-	    is.mark(4);
-	    magic = is.read();
-	    magic += is.read()*256;
-	    is.reset();
+            is.mark(4);
+            magic = is.read();
+            magic += is.read() * 256;
+            is.reset();
 
-	    if (magic == GZIPInputStream.GZIP_MAGIC)
-		is = new GZIPInputStream(is);
+            if (magic == GZIPInputStream.GZIP_MAGIC)
+                is = new GZIPInputStream(is);
 
-	    in = new BufferedReader(new InputStreamReader(is));
-	} catch (IOException e) {
-	    System.err.println("Error reading '"+fname+"' "+e);
-	}
-	return in;
+            in = new BufferedReader(new InputStreamReader(is));
+        } catch (IOException e) {
+            System.err.println("Error reading '" + fname + "' " + e);
+        }
+        return in;
     }
 
     public static DNA guess_format(String filename) {
-	BufferedReader in = openFile(filename);
-	if (in==null) return null;
+        BufferedReader in = openFile(filename);
+        if (in == null)
+            return null;
 
-	try {
-	    in.mark(10);
-	    char[] buf = new char[10];
-	    in.read(buf, 0, 10);
-	    in.reset();
+        try {
+            in.mark(10);
+            char[] buf = new char[10];
+            in.read(buf, 0, 10);
+            in.reset();
 
-	    if (new String(buf).startsWith("LOCUS"))
-		return new DNA.Genbank(in);
-	    else if (new String(buf).startsWith(">"))
-		return new DNA.FASTA(in);
-	    else
-		return new DNA.Raw(in);
+            if (new String(buf).startsWith("LOCUS"))
+                return new DNA.Genbank(in);
+            else if (new String(buf).startsWith(">"))
+                return new DNA.FASTA(in);
+            else
+                return new DNA.Raw(in);
 
-	} catch (IOException e) {
-	    System.err.println("Error reading '"+filename+"' "+e);
-	}
-	return null;
+        } catch (IOException e) {
+            System.err.println("Error reading '" + filename + "' " + e);
+        }
+        return null;
     }
 
-
-
-
     static class Raw extends DNA {
-	Raw(BufferedReader r) {
-	    super(r);
-	    read(r);
-	}
+        Raw(BufferedReader r) {
+            super(r);
+            read(r);
+        }
 
-	Raw(String fname) {
-	    super(fname);
-	    
-	    read(openFile(fname));
-	}
+        Raw(String fname) {
+            super(fname);
 
-	private void read(BufferedReader in) {
-	    System.err.println("Try to read as raw");
-	    try {
-		StringBuffer seqBuf = new StringBuffer();
-		char[] buf = new char[1024];
-		int n;
-		while( (n=in.read(buf))>=0) {
-		    for (int i=0; i<n; i++) {
-			char c = buf[i];
-			if (Character.isWhitespace(c) || Character.isDigit(c)) continue;	
-			seqBuf.append(c);
-		    }
-		}
-		seq = new char[seqBuf.length()];
-		seqBuf.getChars(0, seqBuf.length(), seq, 0);
-	    } catch (IOException e) {
-		System.err.println("Error reading '"+filename+"' "+e);
-	    }
-	}
+            read(openFile(fname));
+        }
+
+        private void read(BufferedReader in) {
+            System.err.println("Try to read as raw");
+            try {
+                StringBuffer seqBuf = new StringBuffer();
+                char[] buf = new char[1024];
+                int n;
+                while ((n = in.read(buf)) >= 0) {
+                    for (int i = 0; i < n; i++) {
+                        char c = buf[i];
+                        if (Character.isWhitespace(c) || Character.isDigit(c))
+                            continue;
+                        seqBuf.append(c);
+                    }
+                }
+                seq = new char[seqBuf.length()];
+                seqBuf.getChars(0, seqBuf.length(), seq, 0);
+            } catch (IOException e) {
+                System.err.println("Error reading '" + filename + "' " + e);
+            }
+        }
     }
 
     static class FASTA extends DNA {
-	String name;
-	FASTA(BufferedReader r) {
-	    super(r);
-	    name = null;
+        String name;
 
-	    read(r);
-	}
+        FASTA(BufferedReader r) {
+            super(r);
+            name = null;
 
-	FASTA(String fname) {
-	    super(fname);
-	    name = null;
-	    
-	    read(openFile(fname));
-	}
+            read(r);
+        }
 
-	private void read(BufferedReader in) {
-	    System.err.println("Try to read as FASTA");
-	    try {
-		StringBuffer seqBuf   = new StringBuffer();
-		String line;
-		while ( (line=in.readLine()) != null) {
-		    if (name==null && line.startsWith(">")) {
-			name = line.substring(1);
-			continue;
-		    }
+        FASTA(String fname) {
+            super(fname);
+            name = null;
 
-		    if (name==null) throw(new IOException("Bad FASTA format. Name not found"));
+            read(openFile(fname));
+        }
 
-		    for (int i=0; i<line.length(); i++) {
-			char c = line.charAt(i);
-			
-			if (Character.isWhitespace(c) || Character.isDigit(c)) continue;
-			seqBuf.append(c);
-		    }
-		}
-		seq = new char[seqBuf.length()];
-		seqBuf.getChars(0, seqBuf.length(), seq, 0);
-	    } catch (IOException e) {
-		System.err.println("Error reading '"+filename+"' "+e);
-	    }	
-	}
+        private void read(BufferedReader in) {
+            System.err.println("Try to read as FASTA");
+            try {
+                StringBuffer seqBuf = new StringBuffer();
+                String line;
+                while ((line = in.readLine()) != null) {
+                    if (name == null && line.startsWith(">")) {
+                        name = line.substring(1);
+                        continue;
+                    }
+
+                    if (name == null)
+                        throw (new IOException(
+                                "Bad FASTA format. Name not found"));
+
+                    for (int i = 0; i < line.length(); i++) {
+                        char c = line.charAt(i);
+
+                        if (Character.isWhitespace(c) || Character.isDigit(c))
+                            continue;
+                        seqBuf.append(c);
+                    }
+                }
+                seq = new char[seqBuf.length()];
+                seqBuf.getChars(0, seqBuf.length(), seq, 0);
+            } catch (IOException e) {
+                System.err.println("Error reading '" + filename + "' " + e);
+            }
+        }
     }
 
     static class Genbank extends DNA {
-	String name;
-	StringBuffer other;
-	StringBuffer features;
+        String name;
 
-	Genbank(BufferedReader r) {
-	    super(r);
-	    name     = null;
-	    other    = null;
-	    features = null;
+        StringBuffer other;
 
-	    read(r);
-	}
+        StringBuffer features;
 
-	Genbank(String fname) {
-	    super(fname);
-	    name     = null;
-	    other    = null;
-	    features = null;
+        Genbank(BufferedReader r) {
+            super(r);
+            name = null;
+            other = null;
+            features = null;
 
-	    read(openFile(fname));
-	}
+            read(r);
+        }
 
-	private void read(BufferedReader in) {
-	    System.err.println("Try to read as genbank");
-	    try {
-		other    = new StringBuffer();
-		features = new StringBuffer();
-		StringBuffer seqBuf   = new StringBuffer();
-		int state = 0;
-		String line;
-		while ( (line=in.readLine()) != null) {
-		    if (line.startsWith("LOCUS")) {
-			name = line.substring(5);
-			state = 1;
-			continue;
-		    }
+        Genbank(String fname) {
+            super(fname);
+            name = null;
+            other = null;
+            features = null;
 
-		    if (state==0 || line.length()==0) continue;
+            read(openFile(fname));
+        }
 
-		    if (line.startsWith("ORIGIN")) {
-			state = 2;
-			continue;
-		    }
-		    
-		    if (line.startsWith("FEATURES")) {
-			state = 3;
-			continue;
-		    }
+        private void read(BufferedReader in) {
+            System.err.println("Try to read as genbank");
+            try {
+                other = new StringBuffer();
+                features = new StringBuffer();
+                StringBuffer seqBuf = new StringBuffer();
+                int state = 0;
+                String line;
+                while ((line = in.readLine()) != null) {
+                    if (line.startsWith("LOCUS")) {
+                        name = line.substring(5);
+                        state = 1;
+                        continue;
+                    }
 
-		    if (state == 2) {
-			if (line.startsWith("//")) {
-			    state = 1;
-			    continue;
-			}
+                    if (state == 0 || line.length() == 0)
+                        continue;
 
-			for (int i=0; i<line.length(); i++) {
-			    char c = line.charAt(i);
-			    if (Character.isWhitespace(c) || Character.isDigit(c)) continue;
-			    seqBuf.append(c);
-			}
-			continue;
-		    }
+                    if (line.startsWith("ORIGIN")) {
+                        state = 2;
+                        continue;
+                    }
 
-		    if (!Character.isWhitespace(line.charAt(0)))
-			state = 1;
+                    if (line.startsWith("FEATURES")) {
+                        state = 3;
+                        continue;
+                    }
 
-		    if (state == 3) {
-			features.append(line + "\n");
-			continue;
-		    }
+                    if (state == 2) {
+                        if (line.startsWith("//")) {
+                            state = 1;
+                            continue;
+                        }
 
-		    other.append(line + "\n");
-		}
+                        for (int i = 0; i < line.length(); i++) {
+                            char c = line.charAt(i);
+                            if (Character.isWhitespace(c)
+                                    || Character.isDigit(c))
+                                continue;
+                            seqBuf.append(c);
+                        }
+                        continue;
+                    }
 
-		seq = new char[seqBuf.length()];
-		seqBuf.getChars(0, seqBuf.length(), seq, 0);
-	    } catch (IOException e) {
-		System.err.println("Error reading '"+filename+"' "+e);
-	    }
-	}
+                    if (!Character.isWhitespace(line.charAt(0)))
+                        state = 1;
+
+                    if (state == 3) {
+                        features.append(line + "\n");
+                        continue;
+                    }
+
+                    other.append(line + "\n");
+                }
+
+                seq = new char[seqBuf.length()];
+                seqBuf.getChars(0, seqBuf.length(), seq, 0);
+            } catch (IOException e) {
+                System.err.println("Error reading '" + filename + "' " + e);
+            }
+        }
 
     }
 
     public static void main(String[] args) {
-	DNA d = DNA.guess_format(args[0]);
-	System.out.println(d.sequence());
-    }			       
+        DNA d = DNA.guess_format(args[0]);
+        System.out.println(d.sequence());
+    }
 }
 
