@@ -13,17 +13,24 @@
 package fuzzyLZ;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.io.*;
 
 import common.*;
 
 class FuzzyDriver implements Serializable {
+    
+    static final String VERSION = "1.1";
+    
+    private static final double CONVERGE_CUTOFF = 0.0001;
+
     // If any object variables are added here, be use to think about
     // serialisation of them...
     // if the variable is needed after a 'resume', add the variable to the
     // writeObject() and readObject() functions.
 
-    int numIterations;
+    int maxIterations;
 
     char alphabet[];
 
@@ -50,11 +57,16 @@ class FuzzyDriver implements Serializable {
     char[] preStr;
 
     char[] joinedStr; // Simple concatenation of preStr + str
+    
+    String seqModelStr;  // Sequence model for base state.
+    
+    boolean overwrite;  // Overwrite files
 
     public static void main(String args[]) {
         CommandLine cmdLine = new CommandLine();
-        cmdLine.addInt("iterations", 1, "Number of iterations");
+        cmdLine.addInt("maxIterations", 1, "Max number of iterations. (0 means until convergence)");
         cmdLine.addString("preFile", "", "Prepend 'preFile' to sequence.");
+        cmdLine.addString("seqModel", "markov(0)", "Base sequence model.  Use 'markov(n)' for a n-th order markov model, n=-1 for uniform");
         cmdLine.addString("alphabet", "atgc", "Alphabet used by the sequence.");
 
         cmdLine.addString("fwdMach", "1state",
@@ -67,14 +79,15 @@ class FuzzyDriver implements Serializable {
                         + "(Use an empty string '' for no reverse machines.)\n"
                         + "Supported: 1state,3state");
 
+        cmdLine.addBoolean("overwrite", false, "Overwrite msglen file.");
         cmdLine.addInt("debug", 2,
                 "Debug level (higher gives more verbose output)");
         cmdLine.addInt("imageSize", 1024, "Maximum Image size in pixels");
         cmdLine.addInt("imageFreq", 0,
                 "Save an image every <n> seconds.  (0 - to disable)");
-        cmdLine.addInt("checkFreq", 300,
+        cmdLine.addInt("checkFreq", 0,
                 "Save a checkpoint every <n> seconds.  (0 - to disable)");
-        cmdLine.addInt("statsFreq", 300,
+        cmdLine.addInt("statsFreq", 0,
                 "Display some stats every <n> seconds.  (0 - to disable)");
 
         cmdLine.addString("msgFile", "",
@@ -82,13 +95,11 @@ class FuzzyDriver implements Serializable {
                         + "(The default is based on the input file name)");
 
         // These options are for Matches_Sparse
-        cmdLine
-                .addInt("hashSize", 20,
+        cmdLine.addInt("hashSize", 20,
                         "Window size to use for constructing hashtable (0 - for full N^2 algorithm)");
         cmdLine.addInt("computeWin", 10,
                 "Number of cells to activate on a hashtable hit");
-        cmdLine
-                .addInt("cutML", 4,
+        cmdLine.addInt("cutML", 4,
                         "When (cell_value - base_cell > cutML) then cell is killed. (in bits)");
         //cmdLine.addBoolean("plotActive", false, "true: plot only active
         // cells, false: plot cell values");
@@ -97,9 +108,9 @@ class FuzzyDriver implements Serializable {
 
         args = cmdLine.parseLine(args);
 
+        System.err.println(FuzzyDriver.class.getName()+" : VERSION "+VERSION);
         if (args == null || args.length != 1) {
-            System.err
-                    .println("Usage: java fuzzyLZ.FuzzyDriver [options] <seqFile|checkpointFile>\n"
+            System.err.println("Usage: java "+FuzzyDriver.class.getName()+" [options] <seqFile|checkpointFile>\n"
                             + cmdLine.usage());
             System.exit(1);
         }
@@ -123,8 +134,8 @@ class FuzzyDriver implements Serializable {
             // We can re-set some of the parameters here.
             // Only reset ones that are defined on this commandline, ie. don't
             // use defaults.
-            if (cmdLine.optionSet("iterations"))
-                me.numIterations = cmdLine.getIntVal("iterations");
+            if (cmdLine.optionSet("maxIterations"))
+                me.maxIterations = cmdLine.getIntVal("maxIterations");
             if (cmdLine.optionSet("imageFreq"))
                 me.imageFreq = cmdLine.getIntVal("imageFreq");
             if (cmdLine.optionSet("checkFreq"))
@@ -141,8 +152,8 @@ class FuzzyDriver implements Serializable {
 
         } else {
             me = new FuzzyDriver();
-
-            me.numIterations = cmdLine.getIntVal("iterations");
+            
+            me.maxIterations = cmdLine.getIntVal("maxIterations");
             me.alphabet = cmdLine.getStringVal("alphabet").toCharArray();
             me.DEBUG = cmdLine.getIntVal("debug");
             FuzzyLZ.DEBUG = me.DEBUG;
@@ -152,11 +163,14 @@ class FuzzyDriver implements Serializable {
             me.checkpointFreq = cmdLine.getIntVal("checkFreq");
             me.statsFreq = cmdLine.getIntVal("statsFreq");
             me.msgFname = cmdLine.getStringVal("msgFile");
+            me.overwrite = cmdLine.getBooleanVal("overwrite");
             Matches_Sparse.def_winSize = cmdLine.getIntVal("hashSize");
             Matches_Sparse.def_computeWin = cmdLine.getIntVal("computeWin");
             Matches_Sparse.def_cutML = cmdLine.getIntVal("cutML");
             //Matches_Sparse.def_plotActive =
             // cmdLine.getBooleanVal("plotActive");
+
+            me.seqModelStr = cmdLine.getStringVal("seqModel");
 
             Vector machs = new Vector();
             FuzzyLZ.def_numFwd = parseMachineNames(cmdLine
@@ -213,6 +227,8 @@ class FuzzyDriver implements Serializable {
                 if (me.msgFname.equals(""))
                     me.msgFname = me.fprefix + "-msglen.txt";
                 f = new File(me.msgFname);
+                if (me.overwrite)
+                    f.delete();
                 if (f.exists()) {
                     System.err.println("Output file '" + me.msgFname
                             + "' already exists.");
@@ -230,9 +246,6 @@ class FuzzyDriver implements Serializable {
             }
         }
         me.go(resume);
-    }
-
-    FuzzyDriver() {
     }
 
     static int parseMachineNames(String l, Vector res) {
@@ -254,12 +267,13 @@ class FuzzyDriver implements Serializable {
         return num;
     }
 
-    // Note: these object variables must also saved/loaded in the
+    // Note: these object variables must also be saved/loaded in the
     // writeObject/readObject functions.
 
     FuzzyLZ mdl;
 
     double tot_msglen;
+    double last_msglen = -1;
 
     int iteration;
 
@@ -277,10 +291,31 @@ class FuzzyDriver implements Serializable {
             }
         }
 
-        mdl = new FuzzyLZ(p, new Markov0_DNA(4), joinedStr, 4, preStr.length);
-        //mdl = new FuzzyLZ( p, new Uniform(4), str, 4);
+        Seq_Model seqModel = parseSeqModel(seqModelStr);
+        if (seqModel == null) {
+            System.err.println("ERROR: Unable to parse seqModel : '"+seqModelStr+"'");
+            System.exit(1);
+        }
+        
+        mdl = new FuzzyLZ(p, seqModel, joinedStr, 4, preStr.length);
 
         tot_msglen = 0;
+    }
+
+    /**
+     * Parse a string representing a sequence model, and create the model.
+     * @param str
+     * @return The sequence model.  null on error
+     */
+    private Seq_Model parseSeqModel(String str) {
+        Pattern p = Pattern.compile("markov\\((-?\\d+)\\)", Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(str);
+        if (m.matches()) {
+            int n = Integer.parseInt(m.group(1));
+            return new MarkovN(n, alphabet);
+        }
+        
+        return null;
     }
 
     void inner_loop() {
@@ -316,7 +351,7 @@ class FuzzyDriver implements Serializable {
         long last_image = System.currentTimeMillis();
         long last_stats = System.currentTimeMillis();
 
-        for (; iteration < numIterations; iteration++) {
+        for (; maxIterations==0 || iteration < maxIterations; iteration++) {
             if (DEBUG >= 1)
                 Misc.printf("\n\nIteration %d\nParams:\n%s\n", new Object[] {
                         new Integer(iteration), p });
@@ -372,7 +407,7 @@ class FuzzyDriver implements Serializable {
             }
 
             if (DEBUG >= 0)
-                Misc.printf("Total for mdl = %.4f\n", tot_msglen);
+                Misc.printf("Iteration "+iteration+" : Total for mdl = %.4f\n", tot_msglen);
 
             if (DEBUG >= 1 || statsFreq > 0) {
                 System.out.println("Stats as at " + new java.util.Date());
@@ -391,13 +426,23 @@ class FuzzyDriver implements Serializable {
                             new Misc.VarArgs(iteration)), "Seq: " + fname);
             mdl.plotHits.save(Misc.sprintf(fprefix + "-finalHits-iter%02d.ppm",
                     new Misc.VarArgs(iteration)), "Seq: " + fname);
+            
+            if (last_msglen>0) {
+                if (last_msglen < tot_msglen)
+                    System.err.println("WARNING: Problem with convergence");
+                else if (last_msglen - tot_msglen < CONVERGE_CUTOFF) {
+                    System.err.println("Converged to within "+CONVERGE_CUTOFF);
+                    break;
+                }
+            }
+            last_msglen = tot_msglen;
         }
     }
 
     // Write our own serization handler.
     // Just store everything. Must re-open the msglen output file
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.writeInt(numIterations);
+        out.writeInt(maxIterations);
         out.writeObject(alphabet);
         out.writeInt(DEBUG);
         out.writeObject(fname);
@@ -410,6 +455,7 @@ class FuzzyDriver implements Serializable {
         out.writeObject(p);
         out.writeObject(str);
         out.writeObject(preStr);
+        out.writeObject(seqModelStr);
 
         out.writeObject(mdl);
         out.writeDouble(tot_msglen);
@@ -419,7 +465,7 @@ class FuzzyDriver implements Serializable {
 
     private void readObject(java.io.ObjectInputStream in) throws IOException,
             ClassNotFoundException {
-        numIterations = in.readInt();
+        maxIterations = in.readInt();
         alphabet = (char[]) in.readObject();
         DEBUG = in.readInt();
         fname = (String) in.readObject();
@@ -432,6 +478,7 @@ class FuzzyDriver implements Serializable {
         p = (Params) in.readObject();
         str = (char[]) in.readObject();
         preStr = (char[]) in.readObject();
+        seqModelStr = (String) in.readObject();
 
         mdl = (FuzzyLZ) in.readObject();
         tot_msglen = in.readDouble();

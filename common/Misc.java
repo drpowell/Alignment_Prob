@@ -35,8 +35,7 @@ public final class Misc {
     public static void error(String s) {
         System.err.println("ERROR: " + s);
 
-        Misc o = (Misc) (new Object()); // Force a crash. want stack trace.
-        System.exit(1);
+        throw new RuntimeException(s);
     }
 
     static String readString(InputStream in) {
