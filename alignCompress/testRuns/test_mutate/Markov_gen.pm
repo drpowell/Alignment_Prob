@@ -67,14 +67,14 @@ sub new {
   my $s = {
 	   ORDER => $order,
 	   ALPHA => [@$alphabet],
-	   PROBS => undef,
+	   PROBS => $probs,
 
 	   PCHANGE => 0.8,	# Used by the mutate() func
 
 	  };
   bless($s,$p);
 
-  $s->randModel();
+  if (!defined($s->{PROBS})) { $s->randModel(); }
 
   return $s;
 }
