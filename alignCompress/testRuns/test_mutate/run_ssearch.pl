@@ -3,7 +3,7 @@
 # Run the prss program that comes with fasta
 
 my $timeProg = '/usr/bin/time';
-my $prssProg = 'ssearch33 -q';
+my $prssProg = 'ssearch33 -q -z 3';
 
 use strict;
 use IPC::Open3;

@@ -6,6 +6,7 @@ use Markov_gen;
 
 my $timeProg = '/usr/bin/time';
 my $compProg = 'java -Xmx512m -cp ../..:../../hb15.zip alignCompress/AlignCompress';
+my $compProgOpt = ' --markov=0 --verbose=1 --maxIterations=20 --linear=true --local=true';
 my $prssProg = './prss33 -b 200 -n -q';
 
 use IPC::Open3;
@@ -29,32 +30,32 @@ $str .= `uname -a`."\n";
 $str .= `free`."\n";
 $str .= `date`."\n";
 $str .= "pid=$$\n";
-$str .= "\nProgs to use:\n$compProg\n";
+$str .= "\nProgs to use:\n$compProg$compProgOpt\n$prssProg\n";
+$str .= "\nSequences are unrelated both of length exactly 400 characters\n\n";
 $str .= $model->as_string();
 
 $str =~ s/^/#/gm;
 print $str;
 
-my $numRuns = 5;
+my $numRuns = 100;
 
 my @to_delete;
 
-for my $numMutations (0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 300) {
+#for my $numMutations (0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 300) {
   for my $runNum (1..$numRuns) {
-    my $subseq = $model->gen_sequence(100);
-    my $str1 = $model->gen_sequence(200) . $subseq . $model->gen_sequence(100);
-    #  my $str2 = $model->gen_sequence(300);
-    my $str2 = $model->gen_sequence(100) . $model->mutate($subseq, $numMutations) .
-      $model->gen_sequence(200);
+#    my $subseq = $model->gen_sequence(100);
+#    my $str1 = $model->gen_sequence(200) . $subseq . $model->gen_sequence(100);
+#    my $str2 = $model->gen_sequence(100) . $model->mutate($subseq, $numMutations) .
+#     $model->gen_sequence(200);
+    my $str1 = $model->gen_sequence(400);
+    my $str2 = $model->gen_sequence(400);
+    my $numMutations = 200**200; # Infinity
 
     print $log "s1=$str1\ns2=$str2\n";
 
     for my $sum (qw(true false)) {
       my($r, $rTime1, $uTime1, $sTime1, $swaps1) = 
-	runProg($compProg . " --markov=0"
-		          . " --linear=true"
-               	          . " --sum=$sum"
-	                  . " --local=true", $str1, $str2);
+	runProg($compProg . $compProgOpt . " --sum=$sum", $str1, $str2);
 
       printf "AlignCompress (sum=$sum): mutates=$numMutations r=%f uTime=%f\n",$r->[-1],$uTime1;
     }
@@ -65,7 +66,7 @@ for my $numMutations (0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 300)
 
     printf $log "\nDONE\n\n";
   }
-}
+#}
 
 
 sub runProg {
@@ -100,6 +101,7 @@ sub runProg {
       ($fh == $err) && do {
         (!defined($_ = <$err>)) && do {$s->remove($err); next};
 
+	print "STDERR: $_" if (/^NON-CONVERGENCE/);
         printf $log "STDERR: %s",$_;
         if (/^([^\s]*?)user/) { $uTime = $1 };
         if (/\s([^\s]*?)system/) { $sTime = $1 };
