@@ -21,7 +21,7 @@ my $end_region = 50;      # How many characters at each end to catch
 
   my $factory = Bio::Tools::Run::RemoteBlast->new(@params);
 
-#  $Bio::Tools::Run::RemoteBlast::HEADER{FILTER} = '';     # Turn off low-complexity filtering
+  $Bio::Tools::Run::RemoteBlast::HEADER{FILTER} = '';     # Turn off low-complexity filtering
 
   my $results = [];
   
