@@ -74,7 +74,7 @@ sub new {
 	   ALPHA => [@$alphabet],
 	   PROBS => $probs,
 
-	   PCHANGE => 0.8,	# Used by the mutate() func
+	   PCHANGE => 0.6,	# Used by the mutate() func
 
 	  };
   bless($s,$p);
@@ -315,6 +315,7 @@ sub entropy {
   my $probs = $s->{PROBS};
 
   return undef if (length($str)==0);
+  $str = lc $str;
 
   my $order = ($s->{ORDER} < 0 ? 0 : $s->{ORDER});
 
@@ -331,7 +332,7 @@ sub entropy {
   return $sum/length($str);
 }
 
-sub gen_sequence {		# Generate a sequence from 2st order markov
+sub gen_sequence {		# Generate a sequence 
   my($self, $len) = @_;
 
   my $probs = $self->{PROBS};
@@ -389,7 +390,7 @@ sub mutate_entropy_order0 {
 
   if ($op->[0] eq 'c') {
     my($p, $newc) = ($op->[1], $op->[2]);
-    my $cc = substr($$str, $p,   1);
+    my $cc = lc substr($$str, $p,   1);
     my $e1 = -log2($probs->{''}{$cc});
     my $e2 = -log2($probs->{''}{$newc});
     return $entropy - $e1 + $e2;
@@ -397,7 +398,7 @@ sub mutate_entropy_order0 {
 
   if ($op->[0] eq 'd') {
     my($p) = ($op->[1]);
-    my $cc = substr($$str, $p,   1);
+    my $cc = lc substr($$str, $p,   1);
     my $e1 = -log2($probs->{''}{$cc});
     return $entropy - $e1;
   }
