@@ -1,21 +1,9 @@
-
 /*  m-align
- *  Copyright (c) 2002 David Powell
+ *  Copyright (c) 2002 David Powell <david@drp.id.au>
  *
  * 
  *
     This file is part of m-align.
-
-    m-align is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    m-align is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
 */
 
 #include <stdio.h>
@@ -32,7 +20,7 @@
 
 #define DEBUG         0
 
-int markovOrder = 1;
+int markovOrder = 0;
 char *markovFile = NULL;
 char *probsFileA = NULL;
 char *probsFileB = NULL;
@@ -613,7 +601,7 @@ void usage(char *exeName)
 {
   fprintf(stderr, "Usage: %s [-mfiabh] <seqA> <seqB>\n", exeName);
   fprintf(stderr, "  Where <seqA> and <seqB> are files in FASTA format.\n");
-  fprintf(stderr, "       -m <n>     Use a n'th order Markov Model\n");
+  fprintf(stderr, "       -m <n>     Use a n'th order Markov Model (default=0)\n");
   fprintf(stderr, "       -f <file>  Read the Markov Model parameters from <file>\n");
   fprintf(stderr, "       -s <file>  Save the Markov Model parameters to <file> after fitting the sequences\n");
   fprintf(stderr, "       -i <n>     Set max iterations to <n>.  Use -1 for unlimited\n");

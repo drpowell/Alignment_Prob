@@ -1,6 +1,6 @@
 CC = gcc
-#CFLAGS = -Wall -O3 -ffast-math
-CFLAGS = -Wall -g
+CFLAGS = -Wall -O3 -ffast-math
+#CFLAGS = -Wall -g
 
 LIBS = -lm
 
@@ -18,5 +18,5 @@ markov.o: markov.c markov.h common.h Makefile
 common.o: common.c common.h Makefile
 
 clean:
-	rm -f m-align *.o core *.gcov *.bbg *.bb *.da gmon.out bb.out
+	rm -f m-align markov_pred *.o core
 

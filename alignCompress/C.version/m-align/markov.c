@@ -1,20 +1,9 @@
 /*  m-align
- *  Copyright (c) 2002 David Powell
+ *  Copyright (c) 2002 David Powell <david@drp.id.au>
  *
  * 
  *
     This file is part of m-align.
-
-    m-align is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    m-align is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
 */
 
 
@@ -98,6 +87,26 @@ void markov_load(char *fname)
   if (!f) {
     fprintf(stderr, "Unable to read file '%s'\n", fname);
     exit(1);
+  }
+
+  {
+    int o, alpha;
+    int r;
+    fgets(buf, 80, f);
+    r = sscanf(buf, "ALPHASIZE=%d ORDER=%d\n", &alpha, &o);
+    if (r != 2) {
+      fprintf(stderr,"Bad header line in markov counts file: %s\n", buf);
+      exit(1);
+    }
+    if (alpha != alphaSize) {
+      fprintf(stderr,"Bad alphabet size in markov counts file.  Compiled with=%d.  Read=%d\n",
+              alphaSize, alpha);
+      exit(1);
+    }
+    if (o != order) {
+      fprintf(stderr,"Bad markov order in markov counts file.  Read=%d Expected=%d\n", o, order);
+      exit(1);
+    }
   }
 
   while (fgets(buf, 80, f)) {
