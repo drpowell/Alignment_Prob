@@ -37,8 +37,8 @@ my $model2 = new Markov_gen(-1, [qw(a t g c)]);
 #			   {'' => {a=>0.4, t=>0.2, g=>0.1, c=>0.3}});
 $model2->{PCHANGE} = 0.6;
 
-my $numArchetypes = 20;
-my $numEachMutations = 2;
+my $numArchetypes = 10;
+my $numEachMutations = 5;
 my @numMutation = (30, 40, 50, 60, 80);
 my ($l_sub, $l_sub_range) = (120, 30);
 my ($l1_s, $l1_e) = (50, 100);
