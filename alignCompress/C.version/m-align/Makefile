@@ -12,6 +12,11 @@ m-align: m-align.o markov.o common.o
 markov_pred: markov_pred.o markov.o common.o
 	$(CC) $(CFLAGS) markov_pred.o markov.o common.o -o markov_pred $(LIBS)
 
+tarball:
+	$(MAKE) clean
+	(cd .. ; tar --exclude CVS -czf m-align.tar.gz m-align)
+
+
 markov_pred.o: markov_pred.c markov.h common.h Makefile
 m-align.o: m-align.c markov.h common.h Makefile
 markov.o: markov.c markov.h common.h Makefile

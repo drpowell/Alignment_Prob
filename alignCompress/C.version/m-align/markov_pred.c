@@ -1,5 +1,5 @@
 /*  m-align
- *  Copyright (c) 2002 David Powell <david@drp.id.au>
+ *  Copyright (c) David Powell <david@drp.id.au>
  *
  * 
  *
