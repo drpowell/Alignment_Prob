@@ -1,0 +1,229 @@
+
+package fuzzyLZ;
+
+import java.util.*;
+import java.io.*;
+//import com.braju.format.*; // in hb15.zip  provides the Format.printf routines.
+
+/**
+   This class implements a hashing scheme to find matches of a fixed size within a String
+
+   @author David Powell
+   @version 24/5/2001
+*/
+
+public class ExactMatches implements Serializable {
+
+    //    public static class Convert implements Serializable {
+   public static class Convert {
+        public static String conv(String s) { return s; }
+    }
+
+    public static class Reverse_Convert extends Convert {
+        public static String conv(String s) { 
+            //return (new StringBuffer(s)).reverse().toString(); 
+            char c[] = s.toCharArray();
+            for (int i=0; i<c.length/2; i++) {
+                char a = c[i];
+                c[i] = c[c.length-i-1];
+                c[c.length-i-1] = a;
+            }
+            return new String(c);
+        };
+    }
+
+    public static class Reverse_Complement_DNA extends Convert {
+        public static String conv(String s) {
+            //return (new StringBuffer(s)).reverse().toString(); 
+            char c[] = new char [s.length()];
+            for (int i=0; i<s.length(); i++) {
+                char a = s.charAt(i);
+                switch (a) {
+                case 'A': a='T'; break;
+                case 'T': a='A'; break;
+                case 'G': a='C'; break;
+                case 'C': a='G'; break;
+                case 'a': a='t'; break;
+                case 't': a='a'; break;
+                case 'g': a='c'; break;
+                case 'c': a='g'; break;
+                default:
+                    System.err.println("ERROR: unknown DNA character "+a+" in Reverse_Complement_DNA");
+                }
+                c[s.length()-i-1] = a;
+            }
+            return new String(c);
+        };
+    }
+
+    // Internal representation of a linked-list of ints.
+    public static class MyList implements Serializable {
+	public static class L implements Serializable {
+	    L next;
+	    int val;
+	    L(int v) {
+		next = null;
+		val = v;
+	    }
+	}
+
+	L start,end;
+
+	MyList(int v) {
+	    L n = new L(v);
+	    start = end = n;
+	}
+
+	void add(int v) {
+	    L n = new L(v);
+	    end.next = n;
+	    end = n;
+	}
+    }
+
+    private static class MyHash implements Serializable {
+	private static class HashChain implements Serializable {
+	    HashChain next;
+	    MyList intList;
+	}
+
+	int hSize = 1048573;
+	HashChain hTable[];
+	char[] str;
+	int winSize;
+
+	MyHash(char[] str, int winSize) {
+	    this.str     = str;
+	    this.winSize = winSize;
+	    hTable = new HashChain[hSize];
+	}
+
+	private int hash(char[] s, int p) {
+	    int res = 0;
+	    for (int i=0; i<winSize; i++) {
+		res = (res << 1) + res + s[p+i];
+	    }
+	    return Math.abs(res) % hSize;
+	}
+
+	private boolean equal(char[] s1, int p1, char[] s2, int p2) {
+	    for (int i=0; i<winSize; i++)
+		if (s1[p1+i] != s2[p2+i])
+		    return false;
+	    return true;
+	}
+
+	MyList get(String s) {
+	    return get(s.toCharArray(), 0);
+	}
+
+	MyList get(char[] s, int ipos) {
+	    int i = hash(s, ipos);
+	    HashChain c = hTable[i];
+	    // Check if any of the strings at this hash bucket match the string s
+	    while (c != null) {
+		int pos = c.intList.start.val; // Get the string pos of the first.
+		if (equal(s, ipos, str, pos)) {
+		    // A match!
+		    return c.intList;
+		}
+		c = c.next;
+	    }
+	    return null;
+	}
+
+	void put(int pos) {
+	    MyList l = get(str, pos);
+	    if (l == null) {
+		// First occurance of this string
+		HashChain c = new HashChain();
+		c.intList = new MyList(pos);
+
+		int i = hash(str, pos);
+		c.next = hTable[i];
+		hTable[i] = c;
+	    } else {
+		l.add(pos);
+	    }
+
+	}
+    }
+
+    char[] str;
+    int winSize;
+    int strLen;
+    MyHash h;
+
+    ExactMatches(char[] str, int winSize) {
+	this.str = str;
+	this.winSize = winSize;
+
+	strLen = str.length;
+	h = new MyHash(str, winSize);
+
+	System.err.println("Constructing table of repeats...");
+	for (int i=0; i<strLen+1-winSize; i++) {
+	    h.put(i);
+	}
+
+	System.err.println("Done constructing table of repeats.");
+    }
+
+    MyList get(char[] s, int pos) {
+	return h.get(s, pos);
+    }
+
+    MyList get(String s) {
+	return h.get(s);
+    }
+
+    public void dispAll(Convert convert) {
+	for (int i=0; i<strLen+1-winSize; i++) {
+	    String s = new String(str, i, winSize);
+            MyList l = h.get( convert.conv(s) );
+	    if (l!=null) {
+		for (MyList.L l2=l.start; l2!=null && l2.val<i; l2=l2.next) {
+		    System.out.println("String at "+i+" has a match at "+l2.val);
+		}
+	    }
+	}
+    }
+
+
+    public static void main(String args[]) {
+	int len = Integer.valueOf(args[0]).intValue();
+	char[] input = null;
+
+	try {
+	    StringBuffer s = new StringBuffer();
+	    byte[] buf = new byte[1024];
+	    int n;
+	    while( (n=System.in.read(buf))>=0) {
+		s.append( new String(buf,0,n) );
+	    }
+	    input = s.toString().toCharArray();
+	} catch (Exception e) {
+	    System.err.println("Unable to read stdin");
+	    System.exit(1);
+	}
+
+	System.out.println("String length = "+input.length);
+
+	ExactMatches m = new ExactMatches(input, len);
+	//	System.out.println("Number of matches = "+m.count());
+
+	if (true) {
+	    //m.dispAll(new Convert());
+	    m.dispAll(new Reverse_Complement_DNA());
+	} else {
+	    try {
+		File f = new File("ExactMatches.store");
+		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
+		oos.writeObject(m);
+		oos.close();
+	    } catch (Exception e) {
+		System.err.println("Error writing file: "+e);
+	    }
+	}
+    }
+}
