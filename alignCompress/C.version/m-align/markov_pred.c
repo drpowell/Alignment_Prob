@@ -1,3 +1,10 @@
+/*  m-align
+ *  Copyright (c) 2002 David Powell <david@drp.id.au>
+ *
+ * 
+ *
+    This file is part of m-align.
+*/
 
 
 #include <stdio.h>
@@ -15,8 +22,9 @@ void usage(char *exeName)
 {
   fprintf(stderr, "Usage: %s [-mfh] <seq>\n", exeName);
   fprintf(stderr, "  Where <seq> is a sequence file in FASTA format.\n");
-  fprintf(stderr, "       -m <n>     Use a n'th order Markov Model\n");
+  fprintf(stderr, "       -m <n>     Use a n'th order Markov Model (default 0)\n");
   fprintf(stderr, "       -f <file>  Read the Markov Model parameters from <file>\n");
+  fprintf(stderr, "       -s <file>  Save the Markov Model parameters to <file>\n");
   fprintf(stderr, "       -h         This help\n");
   exit(-1);
 }
@@ -29,9 +37,10 @@ int main(int argc, char **argv)
   int lenA;
   int markovOrder = 0;
   char *markovFile = NULL;
+  char *markovSaveFile = NULL;
 
   while (1) {
-    int c = getopt(argc, argv, "m:f:h");
+    int c = getopt(argc, argv, "m:f:s:h");
     if (c==-1)
       break;
     switch (c) {
@@ -40,6 +49,9 @@ int main(int argc, char **argv)
       break;
     case 'f':
       markovFile = optarg;
+      break;
+    case 's':
+      markovSaveFile = optarg;
       break;
     case 'h':
     default:
@@ -89,6 +101,17 @@ int main(int argc, char **argv)
       }
       printf("\n");
     }
+
+    if (markovSaveFile) {
+      FILE *f = fopen(markovSaveFile, "w");
+      if (!f) {
+        fprintf(stderr, "Unable to open file '%s' for writing.\n", markovSaveFile);
+      } else {
+        fprintf(stderr, "Saving Markov Model parameters to file '%s'\n", markovSaveFile);
+        markov_save(f);
+      }
+    }
+
   }
 
   return 0;
