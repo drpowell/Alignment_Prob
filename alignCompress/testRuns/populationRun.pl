@@ -24,6 +24,7 @@ $log->autoflush(1);
 
 my $model = new Markov_gen(-1, [qw(a t g c)]);
 #$model->model_power(2);
+#$model->makeUniModel(2);
 
 my $numArchetypes = 10;
 my $numEachMutations = 4;
@@ -43,6 +44,7 @@ $str .= "\nProgs to use:\n$compProg$compProgOpt\n$prssProg\n\n";
 $str .= "Produce $numArchetypes sequences of the form gen($l1_s) . sub_seq(uni($l_sub_min..$l_sub_max)) . gen($l1_e)\n";
 $str .= "From these children will be produced of the form gen($l2_s). mutate_sub_seq(numMutate).gen($l2_e)\n";
 $str .= "Repeat each mutation rate $numEachMutations. Num mutations = (@numMutation)\n\n";
+#$str .= "Note the model has biased 1st order stats, _but_ uniform 0 order stats\n";
 $str .= $model->as_string();
 
 $str =~ s/^/#/gm;
@@ -79,12 +81,15 @@ for my $i (0 .. $numArchetypes-1) {
 
 my @to_delete;
 
-my $numToRun = 1;
+my $numToRun = 2;
 my $numRunning = 0;
 
 $SIG{CHLD} = sub { my $pid=wait;
-		   #print STDERR "Child $pid finished\n";
-		   $numRunning--; };
+                   if ($pid>0) {
+  		     #print STDERR "Child $pid finished\n";
+		     $numRunning--;
+                   };
+                 };
 
 for my $i (0 .. $numArchetypes-1) {
   my $str1 = $archetypes[$i]{SEQ};
