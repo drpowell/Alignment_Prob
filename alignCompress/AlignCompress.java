@@ -470,9 +470,12 @@ class AlignCompress {
 		// Add a cost for the length of the alignment.
 		// Assume we know the length of the sequences. Need to encode the start and end
 		// of the alignment.  Assume uniform over all positions.  Have 4 cut-points to
-		// encode, then -2 bits cause these can be stated in two different orders.
-		encAlignment += MyMath.log2(seqA.length()) * 2 - 1;
-		encAlignment += MyMath.log2(seqB.length()) * 2 - 1;
+		// encode, but only need to encode 3 (kind of).
+		// So encode 2 from the shorter sequence, and 1 from the longer.
+		double l1 = (seqA.length() < seqB.length() ? seqA.length() : seqB.length());
+		double l2 = (seqA.length() > seqB.length() ? seqA.length() : seqB.length());
+		encAlignment += MyMath.log2(l1) * 2 - 1;
+		encAlignment += MyMath.log2(l2);
 	    }
 
 

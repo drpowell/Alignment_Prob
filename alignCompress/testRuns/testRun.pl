@@ -20,8 +20,8 @@ my $log = new IO::File "> outLog.$$";
 (defined $log) || die "Can't open output log";
 $log->autoflush(1);
 
-my $model = new Markov_gen(0, [qw(a t g c)]);
-$model->model_power(2);
+my $model = new Markov_gen(-1, [qw(a t g c)]);
+#$model->model_power(2);
 
 my $str  = "";
 $str .= `hostname`."\n";
@@ -39,7 +39,7 @@ my $numRuns = 5;
 
 my @to_delete;
 
-for my $numMutations (0, 10, 20, 30, 40, 50, 70, 100, 150, 200, 300) {
+for my $numMutations (0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 300) {
   for my $runNum (1..$numRuns) {
     my $subseq = $model->gen_sequence(100);
     my $str1 = $model->gen_sequence(200) . $subseq . $model->gen_sequence(100);
