@@ -1,5 +1,9 @@
 
-package fuzzyLZ;
+// DNA - read DNA sequence from a file in either raw format
+// or genbank format.  Note, it guesses the format in a
+// pretty stupid manner.
+
+package common;
 
 import java.io.*;
 import java.util.*;
@@ -20,7 +24,7 @@ public class DNA {
 	filename = null;
     }
 
-    char[] sequence() {
+    public char[] sequence() {
 	return seq;
     }
 
