@@ -13,8 +13,6 @@
 %\geometry{top=1.5cm,bottom=1.5cm,left=4cm,right=1.5cm,nohead}
 
 
-
-
 \begin{document}
 
 \title{Aligning Compressible Sequences.}
@@ -32,38 +30,186 @@
 
 \section{ROC Plots}
 
-For the ROC plots, first generated 10 parent sequences of the form $gen(100)
-+ subseq(100) + gen(200)$.  For each parent children were generated having
-only the subsequence in common with differing number of mutations.  Every parent
+For the ROC plots, first generated 10 parent sequences of the form
+$gen(50+-50) + subseq(120+-30) + gen(100+-50)$.  In the case where 2 models
+are used, the first model is used for 5 parent sequences and the second model
+for 5 parent sequences.  For each parent, children were generated having only
+the subsequence in common with differing number of mutations.  Every parent
 had 20 children generated; 4 with 10 mutations, 4 with 30 mutations, 4 with 50
-mutations, 4 with 80 mutations and 4 with 100 mutations.  Each parent was then
-tested against all children.
+mutations, 4 with 60 mutations and 4 with 80 mutations.  Each parent was then
+tested against all children.  Each child was of the form $gen(100+-50) +
+mutated_subseq + gen(50+-50)$.
+
+
+Table for Fig~\ref{fig:1}. Error rate 1\%.
+\begin{tabular}{|l|c|c|c|c|} \hline
+Algorithm & true positives & possible true positives & v1 & v2 \\ \hline
+prss & 191 & 200 & 0.0148499 & 0.0149571 \\
+S-W score & 191 & 200 & 82 & 81 \\
+Optimal alignment & 179 & 200 & -4.78197 & -4.80126 \\
+Summed alignments & 194 & 200 & -0.075325 & -0.086438 \\\hline
+\end{tabular}
+
+Table for Fig~\ref{fig:2}. Error rate 1\%.
+\begin{tabular}{|l|c|c|c|c|} \hline
+Algorithm & true positives & possible true positives & v1 & v2 \\ \hline
+prss & 177 & 200 & 0.0141588 & 0.0148322 \\
+S-W score & 166 & 200 & 186 & 186 \\
+Optimal alignment & 147 & 200 & -5.5386 & -5.58365 \\
+Summed alignments & 180 & 200 & -0.628439 & -0.631091 \\\hline
+\end{tabular}
+
+Table for Fig~\ref{fig:3}. Error rate 1\%.
+\begin{tabular}{|l|c|c|c|c|} \hline
+Algorithm & true positives & possible true positives & v1 & v2 \\ \hline
+prss & 156 & 200 & 9.81967e-08 & 1.06702e-07 \\
+S-W score & 146 & 200 & 207 & 206 \\
+Optimal alignment & 144 & 200 & -5.20987 & -5.2934 \\
+Summed alignments & 177 & 200 & -1.69442 & -1.73031 \\\hline
+\end{tabular}
+
+Table for Fig~\ref{fig:4}. Error rate 1\%.
+\begin{tabular}{|l|c|c|c|c|} \hline
+Algorithm & true positives & possible true positives & v1 & v2 \\ \hline
+prss & 176 & 200 & 0.0153629 & 0.01537 \\
+S-W score & 139 & 200 & 186 & 186 \\
+Optimal alignment & 145 & 200 & -5.4425 & -5.50113 \\
+Summed alignments & 176 & 200 & -0.745922 & -0.951519 \\\hline
+\end{tabular}
+
+Table for Fig~\ref{fig:5}. Error rate 1\%.
+\begin{tabular}{|l|c|c|c|c|} \hline
+Algorithm & true positives & possible true positives & v1 & v2 \\ \hline
+prss & 175 & 200 & 0.0153587 & 0.0156386 \\
+S-W score & 156 & 200 & 189 & 189 \\
+Optimal alignment & 147 & 200 & -4.94089 & -4.96453 \\
+Summed alignments & 180 & 200 & -0.914275 & -1.00804 \\\hline
+\end{tabular}
+
+Table for Fig~\ref{fig:6}. Error rate 1\%.
+\begin{tabular}{|l|c|c|c|c|} \hline
+Algorithm & true positives & possible true positives & v1 & v2 \\ \hline
+prss & 158 & 200 & 2.17295e-05 & 2.20386e-05 \\
+S-W score & 140 & 200 & 246 & 246 \\
+Optimal alignment & 174 & 200 & 3.08782 & 3.05955 \\
+Summed alignments & 184 & 200 & -1.08664 & -1.11433 \\\hline
+\end{tabular}
+
+Table for Fig~\ref{fig:7}. Error rate 1\%.
+\begin{tabular}{|l|c|c|c|c|} \hline
+Algorithm & true positives & possible true positives & v1 & v2 \\ \hline
+prss & 209 & 250 & 1.28192e-07 & 1.66944e-07 \\
+S-W score & 193 & 250 & 218 & 217 \\
+Optimal alignment & 234 & 250 & 10.8823 & 10.7208 \\
+Summed alignments & 245 & 250 & 2.12835 & 2.06153 \\\hline
+\end{tabular}
+
+
+
+
+
+For a given cutoff of 0 for our algorithms, and $10^{-5}$ for prss (raw S-W
+score not shown).  The following tables summarise the number of correct
+positives and incorrect positives.
+
+Table for Fig~\ref{fig:1}.
+\begin{tabular}{|l||c|c|c|c|} \hline
+Algorithm & correct positives & incorrect positives & total related & total unrelated \\ \hline
+prss & 176 & 0 & 200 & 1800 \\ 
+Optimal alignment & 165 & 1 & 200 & 1800 \\ 
+Summed alignments & 193 & 16 & 200 & 1800 \\ 
+\hline \end{tabular}
+
+Table for Fig~\ref{fig:2}.
+\begin{tabular}{|l||c|c|c|c|} \hline
+Algorithm & correct positives & incorrect positives & total related & total unrelated \\ \hline
+prss & 99 & 0 & 200 & 1800 \\ 
+Optimal alignment & 119 & 1 & 200 & 1800 \\ 
+Summed alignments & 179 & 10 & 200 & 1800 \\ 
+\hline \end{tabular}
+
+Table for Fig~\ref{fig:3}.
+\begin{tabular}{|l||c|c|c|c|} \hline
+Algorithm & correct positives & incorrect positives & total related & total unrelated \\ \hline
+prss & 167 & 118 & 200 & 1799 \\ 
+Optimal alignment & 120 & 0 & 200 & 1799 \\ 
+Summed alignments & 174 & 1 & 200 & 1799 \\ 
+\hline \end{tabular}
+
+Table for Fig~\ref{fig:4}.
+\begin{tabular}{|l||c|c|c|c|} \hline
+Algorithm & correct positives & incorrect positives & total related & total unrelated \\ \hline
+prss & 121 & 0 & 200 & 1800 \\ 
+Optimal alignment & 128 & 0 & 200 & 1800 \\ 
+Summed alignments & 172 & 11 & 200 & 1800 \\ 
+\hline \end{tabular}
+
+Table for Fig~\ref{fig:5}.
+\begin{tabular}{|l||c|c|c|c|} \hline
+Algorithm & correct positives & incorrect positives & total related & total unrelated \\ \hline
+prss & 117 & 0 & 200 & 1800 \\ 
+Optimal alignment & 125 & 0 & 200 & 1800 \\ 
+Summed alignments & 173 & 10 & 200 & 1800 \\ 
+\hline \end{tabular}
+
+Table for Fig~\ref{fig:6}.
+\begin{tabular}{|l||c|c|c|c|} \hline
+Algorithm & correct positives & incorrect positives & total related & total unrelated \\ \hline
+prss & 156 & 8 & 200 & 1800 \\ 
+1st MM & 185 & 126 & 200 & 1800 \\ 
+Blend model & 182 & 10 & 200 & 1800 \\ 
+\hline \end{tabular}
+
+Table for Fig~\ref{fig:7}.
+\begin{tabular}{|l||c|c|c|c|} \hline
+Algorithm & correct positives & incorrect positives & total related & total unrelated \\ \hline
+prss & 224 & 135 & 250 & 2250 \\ 
+1st MM  & 248 & 957 & 250 & 2250 \\ 
+Blend model & 246 & 116 & 250 & 2250 \\ 
+\hline \end{tabular}
+
+
+
 
 \begin{figure}[htb]
 \centerline{\epsfig{file=p1.eps,width=0.7\textwidth}}
-%\caption{\label{fig:} The caption}
+\caption{\label{fig:1}}
 \end{figure}
 
 \begin{figure}[htb]
 \centerline{\epsfig{file=p2.eps,width=0.7\textwidth}}
-%\caption{\label{fig:} The caption}
+\caption{\label{fig:2}}
 \end{figure}
 
 \begin{figure}[htb]
 \centerline{\epsfig{file=p3.eps,width=0.7\textwidth}}
-%\caption{\label{fig:} The caption}
+\caption{\label{fig:3}}
 \end{figure}
 
 \begin{figure}[htb]
 \centerline{\epsfig{file=p4.eps,width=0.7\textwidth}}
-%\caption{\label{fig:} The caption}
+\caption{\label{fig:4}}
 \end{figure}
 
 \begin{figure}[htb]
 \centerline{\epsfig{file=p5.eps,width=0.7\textwidth}}
-%\caption{\label{fig:} The caption}
+\caption{\label{fig:5}}
 \end{figure}
 
+\begin{figure}[htb]
+\centerline{\epsfig{file=p6.eps,width=0.7\textwidth}}
+\caption{\label{fig:6}}
+\end{figure}
+
+\begin{figure}[htb]
+\centerline{\epsfig{file=p7.eps,width=0.7\textwidth}}
+\caption{\label{fig:7}}
+\end{figure}
+
+
+
+
+\begin{comment}
 \clearpage
 
 \section{Log-odds plots}
@@ -97,7 +243,7 @@ Each data point on the graph is the average of 10 such comparisons.
 \centerline{\epsfig{file=r4.eps,width=0.7\textwidth}}
 %\caption{\label{fig:} The caption}
 \end{figure}
-
+\end{comment}
 
 
 \end{document} 
