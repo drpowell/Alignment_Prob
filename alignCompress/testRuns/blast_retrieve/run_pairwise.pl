@@ -8,8 +8,10 @@ use IO::Select;
 use IO::File;
 
 my $timeProg = '/usr/bin/time';
-my $compProg = 'java -Xmx512m -cp ../../..:../../../hb15.zip alignCompress/AlignCompress';
-my $compProgOpt = ' --markov=1 --verbose=1 --maxIterations=20 --linear=true --local=true --sum=true';
+#my $compProg = 'java -Xmx512m -cp ../../..:../../../hb15.zip alignCompress/AlignCompress';
+#my $compProgOpt = ' --markov=1 --verbose=1 --maxIterations=5 --linear=true --local=true --sum=true';
+my $compProg = '../../C.version/m-align';
+my $compProgOpt = ' -m 5 -f PfEMP1.unfiltered.10.order5';
 my $prssProg = '../prss33 -b 200 -n -q';
 
 
