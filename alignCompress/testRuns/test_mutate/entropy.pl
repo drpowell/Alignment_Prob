@@ -14,7 +14,7 @@ my @Options = (
   {OPT=>"help",      VAR=>\&usage,      DESC=>"This help"},
   {OPT=>"fade=i",    VAR=>\$fade, DESC=>"Fade value (0 - nofade)", DEFAULT=>0},
   {OPT=>"start=i",   VAR=>\$lowOrder,   DESC=>"Starting order MM", DEFAULT=>0},
-  {OPT=>"end=i",     VAR=>\$highOrder,  DESC=>"Ending order MM",   DEFAULT=>0},
+  {OPT=>"end=i",     VAR=>\$highOrder,  DESC=>"Ending order MM",   DEFAULT=>5},
   {OPT=>"counts!",   VAR=>\$dispCounts, DESC=>"Display MM counts", DEFAULT=>0},
 
 );
