@@ -45,7 +45,7 @@ sub MAIN_TEST {
   my $s2 = $t2->gen_sequence(10);
 
   print "s1=$s1\ns2=$s2\n";
-  
+
   printf "s1 under t  = %f\n",$t->entropy($s1);
   printf "s1 under t2 = %f\n",$t2->entropy($s1);
   printf "s2 under t  = %f\n",$t->entropy($s2);
@@ -305,13 +305,15 @@ sub entropy {
 
   return undef if (length($str)==0);
 
+  my $order = ($s->{ORDER} < 0 ? 0 : $s->{ORDER});
+
   my $sum = 0;
-  for my $i (1 .. $s->{ORDER}) {
+  for my $i (1 .. $order) {
     $sum += log2(scalar @{$s->{ALPHA}}); # Uniform for first chars
   }
 
-  for my $i ($s->{ORDER} .. length($str)-1) {
-    my $hist = substr($str, $i-$s->{ORDER}, $s->{ORDER});
+  for my $i ($order .. length($str)-1) {
+    my $hist = substr($str, $i-$order, $order);
     my $p = $probs->{$hist}{substr($str,$i,1)};
     $sum += -log2($p);
   }
@@ -323,14 +325,15 @@ sub gen_sequence {		# Generate a sequence from 2st order markov
 
   my $probs = $self->{PROBS};
   my $alpha = $self->{ALPHA};
+  my $order = ($self->{ORDER} < 0 ? 0 : $self->{ORDER});
 
   my $str = ""; # Pick any 2 starting chars
-  for (1..$self->{ORDER}) {
+  for (1 .. $order) {
     $str .= $alpha->[rand(@$alpha)];
   }
 
   for (length($str)+1 .. $len) {
-    my $last = substr($str, length($str)-$self->{ORDER});
+    my $last = substr($str, length($str)-$order);
     my $p = rand();
     my $c;
     for my $cc (keys %{$probs->{$last}}) {

@@ -1,13 +1,26 @@
 #!/usr/bin/perl -w
 
-my $p = ($ARGV[0] =~ /^1|0$/ ? shift : 0);
+my $prss;
+
+if (defined($ARGV[0]) && (
+    $ARGV[0] eq 'prss' ||
+    $ARGV[0] eq 'al_all' ||
+    $ARGV[0] eq 'al_one')) {
+    $prss = shift;
+}
+
+(defined($prss)) or die "Usage: $0 <prss|al_all|al_one>";
 
 while (<>) {
-	if (/^PRSS p=(\S+)/ && $p) {
-		print "$1\n";
+	if ($prss eq 'prss' && /^PRSS:\s+mutates=(\d+) p=(\S+)/) {
+		print "$1 $2\n";
 	}
 	
-	if (/^AlignCompress (\S+)/ && !$p) {
-		print "$1\n";
+	if ($prss eq 'al_all' && /^AlignCompress \(sum=true\): mutates=(\d+) r=(\S+)/) {
+		print "$1 $2\n";
+	}
+	
+	if ($prss eq 'al_one' && /^AlignCompress \(sum=false\): mutates=(\d+) r=(\S+)/) {
+		print "$1 $2\n";
 	}
 }
