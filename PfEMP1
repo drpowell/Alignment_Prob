@@ -1,0 +1,10 @@
+
+Gene coding for PfEMP1
+
+on Chr2 (and 3?)
+
+Second exon is varC (apparantly changes a lot).
+Take a sequence +-150 chars from boundary of 1st intron and
+2nd exon.  Use in a BLAST lookup.  Rerank with
+smith-waterman and with our new one.  See which is best (?).
+
