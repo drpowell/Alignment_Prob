@@ -30,6 +30,7 @@ package common;
  * If order == -1 then we are a uniform model over the alphabet
  */
 public class MarkovN implements Seq_Model {
+        
     char[] chars;
 
     int[] charCounts;
@@ -74,6 +75,8 @@ public class MarkovN implements Seq_Model {
     }
 
     public double encodeLen(char a, int i) {
+        Misc.my_assert(past.length() == i, "Bad use of MarkovN.encodeLen i="+i+" past.len="+past.length());
+
         if (past.length() < order || order < 0)
             return -MyMath.log2((double) 1.0 / chars.length);
         int n = charCounts[chars2Num(past.substring(i - order) + a)];
@@ -82,6 +85,8 @@ public class MarkovN implements Seq_Model {
     }
 
     public double update(char a, int i) {
+        Misc.my_assert(past.length() == i, "Bad use of MarkovN.update i="+i+" past.len="+past.length());
+
         if (past.length() < order || order < 0) {
             past.append(a);
             return -MyMath.log2((double) 1.0 / chars.length);
