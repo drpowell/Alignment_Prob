@@ -155,6 +155,11 @@ Options:
 
   --outDir=s        Directory to save output files in.
                     (default='./')
+
+          Output directory.  Note that if '--msgFile' is
+          specified, then this option is not used for the
+          msglen.txt file.
+
                     
   --hashSize=i      Window size to use for constructing hashtable (0 - for full N^2 algorithm)
                     (default='20')
