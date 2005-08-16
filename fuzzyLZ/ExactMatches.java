@@ -82,8 +82,8 @@ public class ExactMatches implements Serializable {
                     a = 'g';
                     break;
                 default:
-                    System.err.println("ERROR: unknown DNA character " + a
-                            + " in Reverse_Complement_DNA");
+                    System.err.println("WARNING: unknown DNA character " + a
+                            + " in Reverse_Complement_DNA (char unchanged)");
                 }
                 c[s.length() - i - 1] = a;
             }

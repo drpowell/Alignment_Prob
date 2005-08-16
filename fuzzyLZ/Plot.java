@@ -37,7 +37,7 @@ class Plot implements Serializable {
 
         numRows = (int) (scale * (rows - startRow));
         numCols = (int) (scale * columns);
-        img = new int[numRows + 1][numCols];
+        img = new int[numRows + 1][numCols+1];
 
     }
 

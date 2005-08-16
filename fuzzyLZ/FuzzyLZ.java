@@ -19,97 +19,6 @@ import java.lang.reflect.*;
 
 import common.*;
 
-/**
- * A model of 2 sequences (for alignments) with counts. Uses two parameters:
- * match_cost, change_cost
- */
-
-class Model_SeqA implements Two_Seq_Model_Counts {
-    int alphaSize;
-
-    double match_cost, change_cost;
-
-    int countIndex;
-
-    final private int matchIndex = 0, changeIndex = 1;
-
-    public Model_SeqA(Params p, int alphaSize, int countIndex) {
-        this.alphaSize = alphaSize;
-        this.countIndex = countIndex;
-
-        if (!p.exists("match_cost")) {
-            set_default_costs();
-        } else {
-            match_cost = p.get("match_cost");
-            change_cost = p.get("change_cost");
-        }
-
-        normalize_costs();
-    }
-
-    void set_default_costs() {
-        match_cost = -MyMath.log2(9.0);
-        change_cost = -MyMath.log2(1.0);
-    }
-
-    void normalize_costs() {
-        double sum = MyMath.exp2(-match_cost) + MyMath.exp2(-change_cost);
-        match_cost = match_cost + MyMath.log2(sum);
-        change_cost = change_cost + MyMath.log2(sum);
-        if (FuzzyLZ.DEBUG >= 2)
-            Misc.printf("match_cost=%.5f change_cost=%.5f\n", match_cost,
-                    change_cost);
-    }
-
-    public double encA(char a, int i) {
-        return MyMath.log2(alphaSize);
-    }
-
-    public double encB(char a, int i) {
-        return 0;
-    }
-
-    public double encBoth(char a, char b, int i, int j) {
-        return ((a == b) ? match_cost : change_cost
-                + MyMath.log2(alphaSize - 1));
-    }
-
-    public static int required_counts() {
-        return 2;
-    }
-
-    public Params counts_to_params(Counts counts) {
-        double sum = counts.counts[countIndex + matchIndex]
-                + counts.counts[countIndex + changeIndex];
-        Params par = new Params();
-        par.put("match_cost", -MyMath.log2(counts.counts[countIndex
-                + matchIndex]
-                / sum));
-        par.put("change_cost", -MyMath.log2(counts.counts[countIndex
-                + changeIndex]
-                / sum));
-        return par;
-    }
-
-    public void update_count_encA(Counts c, double w, char a, int i) {
-    };
-
-    public void update_count_encB(Counts c, double w, char a, int i) {
-    };
-
-    public void update_count_encBoth(Counts c, double w, char a, char b, int i,
-            int j) {
-        if (a == b) {
-            c.inc(countIndex + matchIndex, w);
-        } else {
-            c.inc(countIndex + changeIndex, w);
-        }
-    }
-
-    public double encode_params(double N) {
-        return 0;
-    }
-}
 
 /**
  * A model of 2 DNA sequences (for alignments) with counts. Has a seperate cost
@@ -465,6 +374,8 @@ public class FuzzyLZ implements Seq_Model {
                     p.put(n.substring(9), params.get(n));
             }
             Two_Seq_Model_Counts model = new Model_SeqA(p, alphaSize, countPos);
+            //Two_Seq_Model_Counts model = new Model_SeqA_SubModel(seqModel, p, alphaSize, countPos);
+            
             countPos += mdlCounts;
             Mutation_FSM fsmType = null;
             try {
@@ -536,7 +447,7 @@ public class FuzzyLZ implements Seq_Model {
     public double update(char aChar, int i) {
         // Start base[i+1] as base[i] with noStart and the char (also the
         // counts)
-        base[1] = base[0] + seqModel.update(aChar, i)
+        base[1] = base[0] + seqModel.encodeLen(aChar, i)
                 + (i == 0 ? 0 : encNoStart);
         baseCounts[1].duplicate(baseCounts[0]);
         baseCounts[1].inc(noStartIndex, 1);
@@ -549,7 +460,7 @@ public class FuzzyLZ implements Seq_Model {
             machines[m].beginLinks(i, base[0] + encStartMachines[m]
                     + encStartPos(i), tmpCounts);
         }
-
+        
         // update matches and calc their contribution to base
         double msgLen = base[1];
         for (int m = 0; m < numFwd + numRev; m++) {
@@ -561,6 +472,10 @@ public class FuzzyLZ implements Seq_Model {
 
             msgLen = MyMath.logplus(msgLen, machines[m].msgLen());
         }
+
+        // Update the sequence model with the new character.
+        seqModel.update(aChar, i);
+
 
         double p = MyMath.exp2(msgLen - base[1]);
         p = Math.pow(p, 0.3);

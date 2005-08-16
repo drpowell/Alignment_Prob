@@ -19,7 +19,7 @@ import java.io.*;
 
 import common.*;
 
-class FuzzyDriver implements Serializable {
+public class FuzzyDriver implements Serializable {
     
     static final String VERSION = "1.1";
     
@@ -46,6 +46,8 @@ class FuzzyDriver implements Serializable {
 
     String msgFname;
 
+    String outDir;
+
     String fprefix;
 
     FileWriter msgFile;
@@ -69,12 +71,12 @@ class FuzzyDriver implements Serializable {
         cmdLine.addString("seqModel", "markov(0)", "Base sequence model.  Use 'markov(n)' for a n-th order markov model, n=-1 for uniform");
         cmdLine.addString("alphabet", "atgc", "Alphabet used by the sequence.");
 
-        cmdLine.addString("fwdMach", "1state",
+        cmdLine.addString("fwdMach", "3state",
                 "Comma separated list of machines to use for forward matches.\n"
                         + "(Use an empty string '' for no forward machines.)\n"
                         + "Supported: 1state,3state");
 
-        cmdLine.addString("revMach", "1state",
+        cmdLine.addString("revMach", "3state",
                 "Comma separated list of machines to use for reverse matches.\n"
                         + "(Use an empty string '' for no reverse machines.)\n"
                         + "Supported: 1state,3state");
@@ -87,12 +89,15 @@ class FuzzyDriver implements Serializable {
                 "Save an image every <n> seconds.  (0 - to disable)");
         cmdLine.addInt("checkFreq", 0,
                 "Save a checkpoint every <n> seconds.  (0 - to disable)");
-        cmdLine.addInt("statsFreq", 0,
+        cmdLine.addInt("statsFreq", 300,
                 "Display some stats every <n> seconds.  (0 - to disable)");
 
         cmdLine.addString("msgFile", "",
                 "Output file for encode length of each character.\n"
                         + "(The default is based on the input file name)");
+
+        cmdLine.addString("outDir", "."+File.separatorChar,
+                "Directory to save output files in.");
 
         // These options are for Matches_Sparse
         cmdLine.addInt("hashSize", 20,
@@ -163,6 +168,7 @@ class FuzzyDriver implements Serializable {
             me.checkpointFreq = cmdLine.getIntVal("checkFreq");
             me.statsFreq = cmdLine.getIntVal("statsFreq");
             me.msgFname = cmdLine.getStringVal("msgFile");
+            me.outDir = cmdLine.getStringVal("outDir");
             me.overwrite = cmdLine.getBooleanVal("overwrite");
             Matches_Sparse.def_winSize = cmdLine.getIntVal("hashSize");
             Matches_Sparse.def_computeWin = cmdLine.getIntVal("computeWin");
@@ -218,7 +224,10 @@ class FuzzyDriver implements Serializable {
                     me.str.length);
 
             // Get the file prefix to use for output filenames
-            me.fprefix = (new File(me.fname)).getName();
+            me.fprefix = me.outDir;
+            if (me.fprefix.length() > 0)
+              me.fprefix += File.separatorChar;
+            me.fprefix += (new File(me.fname)).getName();
             me.p = new Params();
 
             // Open the file for msglen output
@@ -278,6 +287,8 @@ class FuzzyDriver implements Serializable {
     int iteration;
 
     int inner_i;
+    
+    long iterationStartTime;   // Start time
 
     void init_iteration() {
         // Ensure Params 'p' has no funky numbers
@@ -296,10 +307,20 @@ class FuzzyDriver implements Serializable {
             System.err.println("ERROR: Unable to parse seqModel : '"+seqModelStr+"'");
             System.exit(1);
         }
+
+        // I don't think the Buffered_Seq_Model actually
+        // saves any computation!
+        //seqModel = new Buffered_Seq_Model(seqModel);   // reduces calls to encodeLen
+
+        // Train the seqModel up on preStr if it has been specified
+        for (int i=0; i<preStr.length; i++) {
+          seqModel.update(preStr[i], i);
+        }
         
-        mdl = new FuzzyLZ(p, seqModel, joinedStr, 4, preStr.length);
+        mdl = new FuzzyLZ(p, seqModel, joinedStr, alphabet.length, preStr.length);
 
         tot_msglen = 0;
+        iterationStartTime = System.currentTimeMillis();
     }
 
     /**
@@ -368,6 +389,13 @@ class FuzzyDriver implements Serializable {
                         && (System.currentTimeMillis() - last_stats) / 1000 >= statsFreq) {
                     last_stats = System.currentTimeMillis();
                     System.out.println("Stats as at " + new java.util.Date());
+                    System.out.println("Current compression: "+(tot_msglen/inner_i)+" bits/char.");
+                    System.out.println("At "+inner_i+" of "+str.length+" ("+(100.0*inner_i/str.length)+"%)");
+                    double eta = 1.0 * (System.currentTimeMillis()-iterationStartTime) * str.length*str.length / (1.0*inner_i*inner_i);
+                    int secs = (int) (eta/1000);
+                    int mins = secs/60;
+                    int hours = mins/60;
+                    System.out.println("iteration ETA: "+hours+" hrs "+(mins%60)+" mins "+(secs%60)+" secs.");
                     mdl.display_stats();
                 }
 
@@ -407,7 +435,7 @@ class FuzzyDriver implements Serializable {
             }
 
             if (DEBUG >= 0)
-                Misc.printf("Iteration "+iteration+" : Total for mdl = %.4f\n", tot_msglen);
+                Misc.printf("Iteration "+iteration+" : Total for mdl = %.4f  (%.4f bits/char)\n", tot_msglen, tot_msglen/str.length);
 
             if (DEBUG >= 1 || statsFreq > 0) {
                 System.out.println("Stats as at " + new java.util.Date());
@@ -450,6 +478,7 @@ class FuzzyDriver implements Serializable {
         out.writeInt(checkpointFreq);
         out.writeInt(statsFreq);
         out.writeObject(msgFname);
+        out.writeObject(outDir);
 
         out.writeObject(fprefix);
         out.writeObject(p);
@@ -473,6 +502,7 @@ class FuzzyDriver implements Serializable {
         checkpointFreq = in.readInt();
         statsFreq = in.readInt();
         msgFname = (String) in.readObject();
+        outDir = (String) in.readObject();
 
         fprefix = (String) in.readObject();
         p = (Params) in.readObject();
