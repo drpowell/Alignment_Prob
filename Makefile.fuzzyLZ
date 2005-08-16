@@ -1,0 +1,27 @@
+
+JAVAC = javac
+#JAVAC_FLAGS = -g
+JAVAC_FLAGS = -O -target 1.2 -source 1.2
+
+PACKAGES = \
+	common \
+	fuzzyLZ
+
+COMMON_DIRS     = common
+COMMON_SRC      := $(foreach dir, $(COMMON_DIRS), $(wildcard $(dir)/*.java))
+COMMON_OBJS     := $(COMMON_SRC:.java=.class)
+
+FUZZYLZ_SRC  := $(wildcard fuzzyLZ/*.java)
+FUZZYLZ_OBJS := $(FUZZYLZ_SRC:.java=.class)
+
+all: fuzzyLZ.jar
+
+fuzzyLZ.jar: $(COMMON_OBJS) $(FUZZYLZ_OBJS)
+	jar cmf fuzzyLZ/myManifest fuzzyLZ.jar common/*.class fuzzyLZ/*.class
+
+%.class : %.java
+	${JAVAC} $(JAVAC_FLAGS) $<
+
+clean:
+	find . \( -name '*~' -o -name '*.class' \) -print | xargs rm
+	rm -f fuzzyLZ.jar

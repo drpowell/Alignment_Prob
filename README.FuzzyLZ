@@ -22,6 +22,9 @@ machines - corresponding to simple of linear gap costs in
 the alignment of the approximate repeats.
 
 
+FuzzyLZ - VERSION 1.1
+
+
 RUNNING
 -------
 
@@ -83,6 +86,9 @@ Options:
         sequence can be compressed in the presence of
         another sequence.
 
+  --seqModel=s      Base sequence model.  Use 'markov(n)' for 
+                    a n-th order markov model, n=-1 for uniform
+                    (default='markov(0)')
 
 
   --alphabet=s      Alphabet used by the sequence.
@@ -125,7 +131,7 @@ Options:
 
 
   --checkFreq=i     Save a checkpoint every <n> seconds.  (0 - to disable)
-                    (default='300')
+                    (default='0')
  
           How often, in seconds, to save a checkpoint of
           the current state of computation.  This can be
@@ -147,7 +153,8 @@ Options:
           Output filename.  The default is the name of the
           input file with '-msglen.txt' appended.
 
-
+  --outDir=s        Directory to save output files in.
+                    (default='./')
                     
   --hashSize=i      Window size to use for constructing hashtable (0 - for full N^2 algorithm)
                     (default='20')
@@ -181,24 +188,17 @@ Options:
           the command line _instead_ of the sequence file.
 
 
+  --overwrite       Overwrite msglen file.
+                    (default='false')
+
+          Overwrite the various output files.
+
 
 
 
 The parameters that can be changed when resuming from a
 checkpoint are:  --iterations --imageFreq --checkFreq
                  --statsFreq  --imageSize --debug
-
-
-The model used for the "base" state cannot currently be set
-from the command-line.  It is currently set to a 0th order
-Markov Model.  This can be changing line 418 of
-fuzzyLZ/FuzzyDriver.java.  Any model that inherets from
-'common.Seq_Model' can be used.  There is class implementing
-an arbitrary order markov model that could be used instead
-(common.MarkovN).  The DNA specific model has been used
-because it is significantly faster than a generic model.
-Making this configurable from the command-line is at the top
-of my TODO list ;)
 
 
 

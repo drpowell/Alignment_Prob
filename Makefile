@@ -1,7 +1,7 @@
 
 JAVAC = javac
 #JAVAC_FLAGS = -g
-JAVAC_FLAGS = -O
+JAVAC_FLAGS = -O -target 1.2 -source 1.2
 
 PACKAGES = \
 	common \
@@ -23,6 +23,9 @@ all: fuzzyLZ.jar alignCompress.jar
 
 fuzzyLZ.jar: $(COMMON_OBJS) $(FUZZYLZ_OBJS)
 	jar cmf fuzzyLZ/myManifest fuzzyLZ.jar common/*.class fuzzyLZ/*.class
+
+fuzzyLZ-src.tar.gz: $(COMMON_OBJS) $(FUZZY_OBJS) fuzzyLZ.jar COPYRIGHT README.FuzzyLZ Makefile.fuzzyLZ fuzzyLZ/myManifest smooth.pl
+	./tar.pl fuzzyLZ-src.tar.gz fuzzyLZ fuzzyLZ.jar $(COMMON_SRC) $(FUZZYLZ_SRC) COPYRIGHT README.FuzzyLZ Makefile.fuzzyLZ=Makefile fuzzyLZ/myManifest smooth.pl
 
 alignCompress.jar: $(COMMON_OBJS) $(ALIGNCOMPRESS_OBJS)
 	jar cmf alignCompress/myManifest alignCompress.jar common/*.class alignCompress/*.class
