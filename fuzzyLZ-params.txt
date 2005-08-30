@@ -1,0 +1,36 @@
+
+# These are equivalent to the default parameters.
+# Note.  Machine 0 is a forward, 3 state mutation machine
+#        Machine 1 is a reverse, 3 state mutation machine
+
+nostart_cost=0.15200
+start0_cost=4.32193
+start1_cost=4.32193
+
+
+MACHINE0_end_cost=3.32193
+MACHINE0_cont_cost=0.15200
+
+MACHINE0_match_cost=0.15200
+MACHINE0_change_cost=3.32193
+
+MACHINE0_diag_fromD=0.161989174157947
+MACHINE0_start_fromD=4.235037
+MACHINE0_diag_fromI=0.831760174157947
+MACHINE0_start_fromI=4.904808
+MACHINE0_cont_fromI=1.304808
+
+
+MACHINE1_end_cost=3.32193
+MACHINE1_cont_cost=0.15200
+
+MACHINE1_match_cost=0.15200
+MACHINE1_change_cost=3.32193
+
+MACHINE1_diag_fromD=0.161989174157947
+MACHINE1_start_fromD=4.235037
+MACHINE1_diag_fromI=0.831760174157947
+MACHINE1_start_fromI=4.904808
+MACHINE1_cont_fromI=1.304808
+
+

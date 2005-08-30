@@ -234,7 +234,7 @@ public class FuzzyLZ implements Seq_Model {
             encEnd = encEnd + MyMath.log2(sum);
             encContinue = encContinue + MyMath.log2(sum);
             if (DEBUG >= 2)
-                Misc.printf("encEnd=%.5f encContinue=%.5f\n", encEnd,
+                Misc.printf("end_cost=%.5f cont_cost=%.5f\n", encEnd,
                         encContinue);
         }
 
@@ -431,9 +431,9 @@ public class FuzzyLZ implements Seq_Model {
             encStartMachines[i] += MyMath.log2(sum);
 
         if (DEBUG >= 2) {
-            Misc.printf("encNoStart=%.5f ", encNoStart);
+            Misc.printf("nostart_cost=%.5f ", encNoStart);
             for (int i = 0; i < numFwd + numRev; i++)
-                Misc.printf("encMachine" + i + "=%.5f ", encStartMachines[i]);
+                Misc.printf("start" + i + "_cost=%.5f ", encStartMachines[i]);
             Misc.printf("\n");
         }
     }

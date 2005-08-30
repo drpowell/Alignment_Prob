@@ -22,7 +22,7 @@ machines - corresponding to simple of linear gap costs in
 the alignment of the approximate repeats.
 
 
-FuzzyLZ - VERSION 1.1
+FuzzyLZ - VERSION 1.2
 
 
 RUNNING
@@ -185,6 +185,24 @@ Options:
           doing compared to the base states before the cells
           are de-activated. (In bits)
 
+  --paramFile=s     Parameter file to read for various model parameters (see docs)
+                    (default='')
+
+          This option is not for the faint-of-heart.  The
+          parameter file has name=value pairs on separate
+          lines.  The possible parameters depend on the
+          various models being used.  The file
+          'fuzzyLZ-params.txt' in the source package gives
+          parameters that are equivalent to the defaults.
+          To discover what parameters may be set, first run
+          fuzzyLZ without setting --paramFile, then look
+          after the printed line 'Final costs:'.  It is
+          possible to save these lines to a file and use
+          them on a different run as the --paramFile.  Note
+          the parameters will always be normalized before
+          being used.
+
+
   --resume          Resume from a checkpoint
                     (default='false')
 
@@ -204,12 +222,6 @@ Options:
 The parameters that can be changed when resuming from a
 checkpoint are:  --iterations --imageFreq --checkFreq
                  --statsFreq  --imageSize --debug
-
-
-
-It is possible to define the starting parameters for the
-machines and for the base state model.  But this is not
-documented at this time :(
 
 
 
