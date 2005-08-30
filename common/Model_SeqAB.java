@@ -70,6 +70,7 @@ public class Model_SeqAB implements Two_Seq_Model_Counts {
         double sum = MyMath.exp2(-match_cost) + MyMath.exp2(-change_cost);
         match_cost = match_cost + MyMath.log2(sum);
         change_cost = change_cost + MyMath.log2(sum);
+        //System.err.println(this.toString() + "\n");
     }
 
     public double encA(char a, int i) {

@@ -88,11 +88,13 @@ public abstract class Mutation_3State extends Mutation_FSM {
             start_fromI = 4.904808;
             cont_fromI = 1.304808;
 
+            /*  This code should not be here!
             if (s instanceof Model_SeqAB) {
                 ((Model_SeqAB) s).match_cost = 0.709616;
                 ((Model_SeqAB) s).change_cost = 1.824653;
                 ((Model_SeqAB) s).normalize_costs();
             }
+            */
 
             normalize_costs();
         }
@@ -109,6 +111,7 @@ public abstract class Mutation_3State extends Mutation_FSM {
             diag_fromI = diag_fromI + MyMath.log2(sum);
             start_fromI = start_fromI + MyMath.log2(sum);
             cont_fromI = cont_fromI + MyMath.log2(sum);
+            //System.err.println(this.toString()+"\n");
         }
 
         public String toString() {
