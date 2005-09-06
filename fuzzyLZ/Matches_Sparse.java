@@ -77,10 +77,8 @@ class Matches_Sparse extends FuzzyLZ.Matches {
                 System.out.println("fwd: total hash hits="
                         + hash.count_hits(new ExactMatches.Convert()));
                 if (!fwd)
-                    System.out
-                            .println("rev: total hash hits="
-                                    + hash
-                                            .count_hits(new ExactMatches.Reverse_Complement_DNA()));
+                    System.out.println("rev: total hash hits=" + 
+                            hash.count_hits(new ExactMatches.Reverse_Complement_DNA()));
             }
         }
     }
@@ -190,21 +188,23 @@ class Matches_Sparse extends FuzzyLZ.Matches {
                 Mutation_FSM cell, hcell, vcell, dcell;
 
                 cell = (Mutation_FSM) (bIter.o);
-                hcell = (Mutation_FSM) (fwd ? b.getNext(bIter) : b
-                        .getPrev(bIter));
+                hcell = (Mutation_FSM) (fwd ? b.getNext(bIter) : 
+                                              b.getPrev(bIter));
 
-                eIter = fwd ? e.moveFwd(bIter.i, eIter, true) : e.moveRev(
-                        bIter.i, eIter, true);
+                eIter = fwd ? e.moveFwd(bIter.i, eIter, true) : 
+                              e.moveRev(bIter.i, eIter, true);
                 vcell = (Mutation_FSM) eIter.o;
-                dcell = (Mutation_FSM) (fwd ? e.getNext(eIter) : e
-                        .getPrev(eIter));
+                dcell = (Mutation_FSM) (fwd ? e.getNext(eIter) : 
+                                              e.getPrev(eIter));
 
                 int j = bIter.i;
                 char bChar;
                 if (fwd)
                     bChar = sequence[j];
-                else
-                    bChar = (j > 0 ? sequence[j - 1] : '-');
+                else {
+                    bChar = (j > 0 ? converter.conv(sequence[j - 1]) : '-');
+                }
+                
                 cell.calc(hcell, vcell, dcell, aChar, bChar, i, j);
 
                 bIter = fwd ? b.moveFwd(bIter) : b.moveRev(bIter);
