@@ -60,8 +60,8 @@ class Plot implements Serializable {
         byte b1 = (byte) MyMath.max2(blu[row][col], b * 255);
 
         red[row][col] = r1;
-        grn[row][col] = r1;
-        blu[row][col] = r1;
+        grn[row][col] = g1;
+        blu[row][col] = b1;
     }
 
     void save(String fname, String comments) {
