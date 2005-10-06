@@ -17,7 +17,7 @@ import java.io.*;
 import common.*;
 
 class Plot implements Serializable {
-    int img[][];
+    byte red[][], grn[][], blu[][];
 
     double scale;
 
@@ -37,26 +37,31 @@ class Plot implements Serializable {
 
         numRows = (int) (scale * (rows - startRow));
         numCols = (int) (scale * columns);
-        img = new int[numRows + 1][numCols+1];
+        red = new byte[numRows + 1][numCols+1];
+        grn = new byte[numRows + 1][numCols+1];
+        blu = new byte[numRows + 1][numCols+1];
 
     }
 
     void put(int row, int col, double r, double g, double b) {
         row = (int) (scale * (row - startRow));
         col = (int) (scale * col);
-        img[row][col] = ((byte) (r * 255)) << 16 | ((byte) (g * 255)) << 8
-                | ((byte) (b * 255));
+        red[row][col] = (byte) (r * 255);
+        grn[row][col] = (byte) (g * 255);
+        blu[row][col] = (byte) (b * 255);
     }
 
     void putMax(int row, int col, double r, double g, double b) {
         row = (int) (scale * (row - startRow));
         col = (int) (scale * col);
 
-        byte r1 = (byte) MyMath.max2((img[row][col] >> 16) & 255, r * 255);
-        byte g1 = (byte) MyMath.max2((img[row][col] >> 8) & 255, g * 255);
-        byte b1 = (byte) MyMath.max2((img[row][col]) & 255, b * 255);
+        byte r1 = (byte) MyMath.max2(red[row][col], r * 255);
+        byte g1 = (byte) MyMath.max2(grn[row][col], g * 255);
+        byte b1 = (byte) MyMath.max2(blu[row][col], b * 255);
 
-        img[row][col] = (r1) << 16 | (g1) << 8 | (b1);
+        red[row][col] = r1;
+        grn[row][col] = r1;
+        blu[row][col] = r1;
     }
 
     void save(String fname, String comments) {
@@ -76,9 +81,9 @@ class Plot implements Serializable {
 
             for (int r = 0; r < numRows; r++) {
                 for (int c = 0; c < numCols; c++) {
-                    out.writeByte((img[r][c] >> 16) & 255);
-                    out.writeByte((img[r][c] >> 8) & 255);
-                    out.writeByte((img[r][c]) & 255);
+                    out.writeByte(red[r][c]);
+                    out.writeByte(grn[r][c]);
+                    out.writeByte(blu[r][c]);
                 }
             }
 
@@ -93,10 +98,10 @@ class Plot implements Serializable {
     public static void main(String args[]) {
         Plot p = new Plot(100, 100, 50, 50);
         for (int i = 0; i < 100; i++) {
-            p.put(i, i, 0, 255, 0);
-            p.put(i, 99 - i, 0, 0, 255);
-            p.put(50, i, 255, 0, 0);
-            p.put(i, 50, 255, 0, 0);
+            p.put(i, i, 0, 1, 0);
+            p.put(i, 99 - i, 0, 0, 1);
+            p.put(50, i, 1, 0, 0);
+            p.put(i, 50, 1, 0, 0);
         }
         p.save("out.ppm", "");
     }
