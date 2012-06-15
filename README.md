@@ -10,9 +10,9 @@ AlignCompress aligns two sequences using the M-alignment algorithm.  The key
 contribution of this alignment method is that it takes into account the
 information content of the sequences to be aligned.
 
-  L. Allison, D. R. Powell and T. I. Dix
-  "Compression and Approximate Matching"
-  The Computer Journal, 1999 42:1 pp1-10
+    L. Allison, D. R. Powell and T. I. Dix
+    "Compression and Approximate Matching"
+    The Computer Journal, 1999 42:1 pp1-10
 
 Run using:
 java -Xmx512m alignCompress/AlignCompress
