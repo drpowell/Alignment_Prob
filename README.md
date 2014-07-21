@@ -14,8 +14,10 @@ information content of the sequences to be aligned.
     "Compression and Approximate Matching"
     The Computer Journal, 1999 42:1 pp1-10
 
-Run using:
-java -Xmx512m alignCompress/AlignCompress
+
+There are 2 implementations of this
+  * [alignCompress](README.alignCompress) written in java
+  * [m-align](alignCompress/C.version/m-align/README) written in C
 
 
 FuzzyLZ
@@ -23,6 +25,4 @@ FuzzyLZ
 
 Compress a sequence (of DNA) using an inexact repeats model.
 
-Run using:
-java -Xmx512m fuzzyLZ/FuzzyDriver
-
+Please read [README.FuzzyLZ](README.FuzzyLZ).
