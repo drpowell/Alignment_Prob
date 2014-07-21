@@ -16,7 +16,7 @@ information content of the sequences to be aligned.
 
 
 There are 2 implementations of this
-  * [alignCompress](README.alignCompress) written in java
+  * [alignCompress](README.alignCompress) written in java.  (Download the compiled java : [alignCompress.jar](binaries/alignCompress.jar?raw=true))
   * [m-align](alignCompress/C.version/m-align/README) written in C
 
 
@@ -26,3 +26,5 @@ FuzzyLZ
 Compress a sequence (of DNA) using an inexact repeats model.
 
 Please read [README.FuzzyLZ](README.FuzzyLZ).
+
+You may download the compiled java : [fuzzyLZ-1.3.jar](binaries/fuzzyLZ-1.3.jar?raw=true)
